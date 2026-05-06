@@ -1,0 +1,2544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MH Meats — Daily Order System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #181818;
+    --surface2: #222222;
+    --border: #2a2a2a;
+    --border2: #333;
+    --text: #e8e8e8;
+    --muted: #888;
+    --accent: #c8a84b;
+    --accent2: #e8c96b;
+    --danger: #e05555;
+    --success: #4caf7d;
+    --poultry: #2d6a4f;
+    --beef: #7b2020;
+    --flavoured: #5a3d7a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--accent);
+  }
+  .logo span { color: var(--text); font-weight: 400; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .date-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── NAV TABS ── */
+  .nav {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    gap: 0;
+    padding: 0 24px;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── MAIN LAYOUT ── */
+  .main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+  /* ── PANELS ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── ORDER INPUT PANEL ── */
+  .order-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 10px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-body { padding: 12px; }
+
+  /* Day selector */
+  .day-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .day-btn {
+    padding: 8px 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .day-btn:hover { border-color: var(--accent); color: var(--text); }
+  .day-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+  /* Customer selector */
+  .customer-list { display: flex; flex-direction: column; gap: 4px; }
+  .customer-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .customer-btn:hover { border-color: #444; background: #2a2a2a; }
+  .customer-btn.active { border-color: var(--accent); background: rgba(200,168,75,0.08); }
+  .customer-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .customer-name {
+    font-weight: 600; font-size: 13px; flex: 1;
+  }
+  .customer-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(200,168,75,0.12);
+    padding: 2px 6px;
+    border-radius: 3px;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  /* Product panel */
+  .product-area { display: flex; flex-direction: column; gap: 16px; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }
+  .section-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .badge-poultry { background: rgba(45,106,79,0.25); color: #6dbf99; border: 1px solid rgba(45,106,79,0.4); }
+  .badge-flavoured { background: rgba(90,61,122,0.25); color: #b89fcc; border: 1px solid rgba(90,61,122,0.4); }
+  .badge-beef { background: rgba(123,32,32,0.25); color: #e08888; border: 1px solid rgba(123,32,32,0.4); }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 6px;
+  }
+
+  .product-row {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    transition: border-color 0.15s;
+  }
+  .product-row:hover { border-color: #3a3a3a; }
+  .product-row.has-qty { border-color: var(--accent); background: rgba(200,168,75,0.05); }
+
+  .plu-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 2px 5px;
+    border-radius: 3px;
+    min-width: 36px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .product-name {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .qty-input {
+    width: 52px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    padding: 4px;
+    outline: none;
+    flex-shrink: 0;
+  }
+  .qty-input:focus { border-color: var(--accent); }
+  .qty-input[value]:not([value=""]) { color: var(--accent); }
+
+  /* ── PLACEHOLDER STATE ── */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 300px; gap: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .empty-icon { font-size: 48px; opacity: 0.3; }
+  .empty-text { font-size: 16px; }
+  .empty-sub { font-size: 13px; opacity: 0.7; }
+
+  /* ── OUTPUT PANELS (sheets) ── */
+  .sheet-controls {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .sheet-day-btns { display: flex; gap: 6px; }
+  .sheet-day-btn {
+    padding: 6px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sheet-day-btn:hover { color: var(--text); border-color: #444; }
+  .sheet-day-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px;
+    border-radius: 5px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: #444; }
+  .btn-danger { background: var(--danger); color: #fff; }
+
+  /* Sheet table */
+  .sheet-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .sheet-title-bar {
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sheet-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-plu {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 60px;
+  }
+  .td-qty {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--accent);
+    text-align: right;
+    width: 70px;
+  }
+  .td-check { width: 30px; text-align: center; color: var(--muted); }
+  .row-highlight td { background: rgba(200,168,75,0.06); }
+
+  /* Summary totals */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 14px 16px;
+  }
+  .summary-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .summary-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .summary-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Print styles */
+  @media print {
+    /* Reset colours — no dark theme on paper */
+    *, *::before, *::after {
+      color: #000 !important;
+      background: #fff !important;
+      border-color: #ccc !important;
+      box-shadow: none !important;
+    }
+
+    /* Hide all chrome */
+    .header, .nav, .sheet-controls, .sidebar,
+    .no-print, .summary-grid, .toast { display: none !important; }
+
+    /* Show only the active panel, hide all others */
+    .panel { display: none !important; }
+    .panel.active { display: block !important; }
+
+    body { background: #fff; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    .main { padding: 10px; max-width: 100%; }
+
+    /* Print header — shows business name + date at top of page */
+    .panel.active::before {
+      content: "MH MEATS — " attr(data-print-title);
+      display: block;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+
+    /* Sheet tables */
+    .sheet-table {
+      border: 1px solid #999 !important;
+      margin-bottom: 20px;
+      page-break-inside: avoid;
+    }
+    .sheet-title-bar {
+      background: #eee !important;
+      padding: 6px 12px;
+      border-bottom: 1px solid #999 !important;
+    }
+    .sheet-title { font-size: 13px; font-weight: bold; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #ddd !important;
+      color: #000 !important;
+      font-size: 10px;
+      padding: 5px 8px;
+      border: 1px solid #999 !important;
+      text-align: left;
+    }
+    td {
+      font-size: 12px;
+      padding: 5px 8px;
+      border: 1px solid #ccc !important;
+      color: #000 !important;
+    }
+    .td-plu { color: #444 !important; font-size: 10px; }
+    .td-qty { font-size: 14px; font-weight: bold; text-align: right; }
+    .td-check { font-size: 14px; text-align: center; }
+    .row-highlight td { background: #f5f5f5 !important; }
+
+    /* Cat tags (source labels) */
+    .cat-tag { border: 1px solid #999 !important; color: #333 !important; font-size: 8px; }
+
+    /* Summary cards — hide on print (too colourful, not useful on paper) */
+    .summary-grid { display: none !important; }
+
+    /* Page breaks */
+    .sheet-table { page-break-inside: avoid; }
+    tr { page-break-inside: avoid; }
+    @page { margin: 1.5cm; size: A4 portrait; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--success);
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    z-index: 999;
+    transform: translateY(80px);
+    transition: transform 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* Flex utilities */
+  .flex { display: flex; }
+  .gap8 { gap: 8px; }
+  .ml-auto { margin-left: auto; }
+
+  /* Badges on sheet rows */
+  .cat-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .cat-ks { background: rgba(45,106,79,0.3); color: #6dbf99; }
+  .cat-hal { background: rgba(123,32,123,0.3); color: #c090c0; }
+  .cat-kay { background: rgba(181,69,27,0.3); color: #e09070; }
+  .cat-deli { background: rgba(139,94,0,0.3); color: #d0a040; }
+  .cat-cat { background: rgba(26,92,74,0.3); color: #60c0a0; }
+  .cat-mh { background: rgba(26,58,92,0.3); color: #7090c0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">MH<span> MEATS</span> — DAILY ORDERS</div>
+  <div class="header-right">
+    <div class="date-badge" id="liveDateBadge"></div>
+    <button class="btn btn-ghost no-print" onclick="clearDay()">🗑 Clear Day</button>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="nav-tab active" onclick="switchPanel('order')">📋 Order Input</div>
+  <div class="nav-tab" onclick="switchPanel('chef')">👨‍🍳 Chef Sheet</div>
+  <div class="nav-tab" onclick="switchPanel('butcher')">🔪 Butcher Lists</div>
+  <div class="nav-tab" onclick="switchPanel('packer')">📦 Packer Lists</div>
+  <div class="nav-tab" onclick="switchPanel('dispatch')">🚚 Dispatch</div>
+  <div class="nav-tab" onclick="switchPanel('remote')">📱 Remote Orders</div>
+  <div class="nav-tab" onclick="switchPanel('admin')">⚙️ Admin</div>
+</div>
+
+<div class="main">
+
+  <!-- ════════════════════════════════ ORDER INPUT PANEL ════════════════════════════════ -->
+  <div class="panel active" id="panel-order">
+    <div class="order-grid">
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="card">
+          <div class="card-header">📅 Day of Week</div>
+          <div class="card-body">
+            <div class="day-btns">
+              <div class="day-btn active" onclick="selectDay('Monday',this)">MON</div>
+              <div class="day-btn" onclick="selectDay('Tuesday',this)">TUE</div>
+              <div class="day-btn" onclick="selectDay('Wednesday',this)">WED</div>
+              <div class="day-btn" onclick="selectDay('Thursday',this)">THU</div>
+              <div class="day-btn" onclick="selectDay('Friday',this)">FRI</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">🏪 Customer / Site</div>
+          <div class="card-body">
+            <div class="customer-list" id="customerList"></div>
+          </div>
+        </div>
+
+        <div class="card no-print">
+          <div class="card-header">📊 Day Summary</div>
+          <div class="card-body">
+            <div id="daySummary" style="font-size:12px;color:var(--muted)">Select a customer to begin entering orders.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Entry Area -->
+      <div class="product-area" id="productArea">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-text">Select a customer to start entering orders</div>
+          <div class="empty-sub">Choose a day and site from the left panel</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ CHEF SHEET PANEL ════════════════════════════════ -->
+  <div class="panel" id="panel-chef" data-print-title="CHEF PRODUCTION SHEET">
+    <div class="sheet-controls no-print">
+      <div class="sheet-day-btns" id="chefDayBtns"></div>
+      <div class="ml-auto flex gap8">
+        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+      </div>
+    </div>
+    <div id="chefSheetContent"></div>
+  </div>
+
+  <!-- ════════════════════════════════ BUTCHER LISTS PANEL ════════════════════════════════ -->
+  <div class="panel" id="panel-butcher" data-print-title="BUTCHER LISTS">
+    <div class="sheet-controls no-print">
+      <div class="sheet-day-btns" id="butcherDayBtns"></div>
+      <div class="ml-auto flex gap8">
+        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+      </div>
+    </div>
+    <div id="butcherSheetContent"></div>
+  </div>
+
+  <!-- ════════════════════════════════ PACKER LISTS PANEL ════════════════════════════════ -->
+  <div class="panel" id="panel-packer" data-print-title="PACKER LISTS">
+    <div class="sheet-controls no-print">
+      <div class="sheet-day-btns" id="packerDayBtns"></div>
+      <div class="ml-auto flex gap8">
+        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+      </div>
+    </div>
+    <div id="packerSheetContent"></div>
+  </div>
+
+  <!-- ════════════════════════════════ DISPATCH PANEL ════════════════════════════════ -->
+  <div class="panel" id="panel-dispatch" data-print-title="DISPATCH SHEETS">
+    <div class="sheet-controls no-print">
+      <div class="sheet-day-btns" id="dispatchDayBtns"></div>
+      <div class="ml-auto flex gap8">
+        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+      </div>
+    </div>
+    <div id="dispatchSheetContent"></div>
+  </div>
+
+</div><!-- /main -->
+
+
+  <!-- ════════════════════════════════ REMOTE ORDERS PANEL ════════════════════════════════ -->
+  <div class="panel" id="panel-remote" data-print-title="REMOTE ORDERS">
+    <div style="max-width:820px;margin:0 auto">
+
+      <!-- Customer links table -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">🔗 Customer Order Links — Send These via WhatsApp</div>
+        <div class="card-body" style="padding:0">
+          <div style="font-size:11px;color:var(--muted);padding:10px 14px 6px;line-height:1.6">
+            Each customer gets their own link. They open it on any device, fill in their order and press Submit — the order comes straight into your system.
+          </div>
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr>
+              <th style="padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);text-align:left">Customer</th>
+              <th style="padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);text-align:left">Link to Send</th>
+              <th style="padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);width:80px"></th>
+            </tr></thead>
+            <tbody id="customerLinksTable"></tbody>
+          </table>
+          <div style="padding:10px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)">
+            ⚠️ Links only work after you upload the portal file to Google Drive and configure the Apps Script URL below.
+          </div>
+        </div>
+      </div>
+
+      <!-- Pull orders -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">📥 Pull Remote Orders Into System</div>
+        <div class="card-body">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+            When customers submit orders via their link they go straight to your Google Sheet. Click below to pull them into the order system — no codes, no manual re-entry.
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <select id="pullDay" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:5px;font-size:13px">
+              <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option>
+            </select>
+            <button class="btn btn-primary" onclick="pullRemoteOrders()">⬇️ Pull Orders for Selected Day</button>
+            <div id="pullStatus" style="font-size:12px;color:var(--muted)"></div>
+          </div>
+          <div id="pullResults" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <!-- Apps Script URL config -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">⚙️ Google Apps Script URL</div>
+        <div class="card-body">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Paste your deployment URL here once — saved automatically.</div>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="appsScriptUrl"
+              placeholder="https://script.google.com/macros/s/YOUR_ID/exec"
+              style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:5px;font-size:12px;font-family:'DM Mono',monospace">
+            <button class="btn btn-primary" onclick="saveScriptUrl()">Save</button>
+            <button class="btn btn-ghost" onclick="testScriptUrl()">Test</button>
+          </div>
+          <div id="urlSaveMsg" style="font-size:11px;margin-top:6px;color:var(--muted)"></div>
+        </div>
+      </div>
+
+      <!-- Setup guide -->
+      <div class="card">
+        <div class="card-header" style="cursor:pointer" onclick="toggleGuide(this)">
+          📖 One-Time Setup Guide &nbsp;<span style="color:var(--muted);font-size:11px">▼ click to expand</span>
+        </div>
+        <div class="guide-body" style="display:none">
+          <div class="card-body" style="font-size:12px;line-height:1.9;color:var(--muted)">
+            <p style="color:var(--text);font-weight:600;margin-bottom:4px">Takes about 10 minutes. Do this once only.</p>
+
+            <p style="color:var(--accent);font-weight:700;margin-top:14px;font-size:13px">STEP 1 — Create the Google Sheet</p>
+            <p>Go to <a href="https://sheets.google.com" target="_blank" style="color:var(--accent)">sheets.google.com</a> → New spreadsheet → name it <strong style="color:var(--text)">MH Meats Orders</strong>.</p>
+            <p>In Row 1, type these column headers exactly:<br>
+            <code style="background:var(--surface2);padding:3px 8px;border-radius:3px;display:inline-block;margin-top:4px;font-size:11px">Timestamp &nbsp;|&nbsp; Customer &nbsp;|&nbsp; CustomerName &nbsp;|&nbsp; Day &nbsp;|&nbsp; ProductKey &nbsp;|&nbsp; ProductName &nbsp;|&nbsp; Quantity &nbsp;|&nbsp; Status</code></p>
+
+            <p style="color:var(--accent);font-weight:700;margin-top:14px;font-size:13px">STEP 2 — Add the Apps Script</p>
+            <p>In your Google Sheet: click <strong style="color:var(--text)">Extensions → Apps Script</strong>. Delete all existing code. Open the file <strong style="color:var(--text)">MH_MEATS_APPS_SCRIPT.gs</strong> (included in your download), copy all of it, paste it in. Click Save (💾).</p>
+
+            <p style="color:var(--accent);font-weight:700;margin-top:14px;font-size:13px">STEP 3 — Deploy as Web App</p>
+            <p>Click <strong style="color:var(--text)">Deploy → New Deployment → Web App</strong>.<br>
+            Set: Execute as → <strong style="color:var(--text)">Me</strong> &nbsp;|&nbsp; Who has access → <strong style="color:var(--text)">Anyone</strong>.<br>
+            Click Deploy → Authorise → copy the URL it gives you.</p>
+
+            <p style="color:var(--accent);font-weight:700;margin-top:14px;font-size:13px">STEP 4 — Paste URL in two places</p>
+            <p>1. Paste it into the field above and click Save.<br>
+            2. Open <strong style="color:var(--text)">mhmeats_customer_portal.html</strong> in Notepad. Find <code style="background:var(--surface2);padding:2px 6px;border-radius:3px">YOUR_APPS_SCRIPT_URL_HERE</code> and replace it with your URL. Save the file.</p>
+
+            <p style="color:var(--accent);font-weight:700;margin-top:14px;font-size:13px">STEP 5 — Upload to Google Drive</p>
+            <p>Upload <strong style="color:var(--text)">mhmeats_customer_portal.html</strong> to Google Drive. Right-click → Share → Anyone with the link → Viewer.<br>
+            Copy the sharing link. The customer links in the table above will update automatically once you save your Apps Script URL.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ ADMIN PANEL ════════════════════════════════ -->
+  <div class="panel" id="panel-admin">
+    <div style="max-width:700px;margin:0 auto">
+
+      <!-- PIN gate -->
+      <div id="adminGate" class="card">
+        <div class="card-header">🔒 Manager Access Required</div>
+        <div class="card-body" style="text-align:center;padding:32px">
+          <div style="font-size:14px;color:var(--muted);margin-bottom:16px">Enter manager PIN to access admin settings</div>
+          <input type="password" id="adminPin" placeholder="Enter PIN" maxlength="6"
+            style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:5px;font-size:18px;text-align:center;letter-spacing:4px;width:160px;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto"
+            onkeydown="if(event.key==='Enter')checkPin()">
+          <button class="btn btn-primary" onclick="checkPin()">Unlock</button>
+          <div id="pinError" style="color:var(--danger);font-size:12px;margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- Admin content (hidden until PIN correct) -->
+      <div id="adminContent" style="display:none">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            ⚙️ Admin Settings
+            <span style="margin-left:auto;cursor:pointer;color:var(--muted)" onclick="lockAdmin()">🔒 Lock</span>
+          </div>
+          <div class="card-body">
+
+            <div style="margin-bottom:20px">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Change Manager PIN</div>
+              <div style="display:flex;gap:8px">
+                <input type="password" id="newPin1" placeholder="New PIN" maxlength="6"
+                  style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:5px;width:120px;font-size:14px;letter-spacing:2px">
+                <input type="password" id="newPin2" placeholder="Confirm" maxlength="6"
+                  style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:5px;width:120px;font-size:14px;letter-spacing:2px">
+                <button class="btn btn-ghost" onclick="changePin()">Save PIN</button>
+              </div>
+              <div id="pinMsg" style="font-size:12px;margin-top:6px"></div>
+            </div>
+
+            <div style="margin-bottom:20px">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Add Product to Customer List</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:end">
+                <div>
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Customer</label>
+                  <select id="addCustSelect" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                    <option value="">— select —</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Product Name</label>
+                  <input type="text" id="addProductName" placeholder="e.g. NEW SHNITZEL PACK"
+                    style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                </div>
+                <div>
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">PLU</label>
+                  <input type="number" id="addProductPlu" placeholder="PLU"
+                    style="width:80px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                </div>
+                <button class="btn btn-primary" onclick="addProduct()" style="align-self:end">Add</button>
+              </div>
+              <div id="addMsg" style="font-size:12px;margin-top:6px"></div>
+            </div>
+
+            <div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Remove Product</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end">
+                <div>
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Customer</label>
+                  <select id="removeCustSelect" onchange="populateRemoveList()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                    <option value="">— select —</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Product</label>
+                  <select id="removeProductSelect" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                    <option value="">— select customer first —</option>
+                  </select>
+                </div>
+                <button class="btn btn-danger" onclick="removeProduct()">Remove</button>
+              </div>
+              <div id="removeMsg" style="font-size:12px;margin-top:6px"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">🗄️ Data Management</div>
+          <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-ghost" onclick="exportAllData()">📤 Export All Orders (JSON)</button>
+            <button class="btn btn-ghost" onclick="importData()">📥 Import Orders (JSON)</button>
+            <button class="btn btn-danger" onclick="clearAllData()">🗑 Clear ALL Data</button>
+          </div>
+          <div id="dataMsg" style="font-size:12px;padding:0 12px 12px;color:var(--muted)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<div class="toast" id="toast">✓ Saved</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// DATA — extracted directly from April 2026 order form
+// ══════════════════════════════════════════════════════════════════
+const CUSTOMERS = [
+  { id:"mhmeats",  name:"MH Meats",       color:"#4a7eb5", products:[
+    {plu:251,name:"WHOLE ROASTER"},{plu:264,name:"ROASTER IN 1/4"},{plu:265,name:"ROASTER IN 1/8"},
+    {plu:267,name:"ROASTER IN 1/4 SHNITZELED"},{plu:268,name:"ROASTER IN 1/8 SHNIZELED"},
+    {plu:269,name:"ROASTER IN 1/8 TOP MINCED"},{plu:280,name:"CARCASS-1-PACK"},
+    {plu:281,name:"CARCASS-2-PACK"},{plu:2801,name:"CARCASS-5-PACK"},{plu:282,name:"SOUP PACK"},
+    {plu:283,name:"DOUBLE SOUP PACK"},{plu:284,name:"FAMILY SOUP PARCEL"},
+    {plu:285,name:"BREAST QUARTERS"},{plu:288,name:"LEG QUARTERS- 1-PACK"},
+    {plu:288,name:"LEG QUARTERS- 2-PACK"},{plu:288,name:"LEG QUARTERS- 4-PACK"},
+    {plu:288,name:"LEG QUARTERS- 6-PACK"},{plu:289,name:"LEG QUARTERS IN 1/8"},
+    {plu:290,name:"LEG QUARTERS IN 1/8 VALUE PACK"},{plu:298,name:"POLKIES"},
+    {plu:307,name:"THIGH - 2-PACK"},{plu:307,name:"THIGH - 4-PACK"},
+    {plu:309,name:"CAPONS (BONED THIGHS)"},{plu:310,name:"WINGS -6-PACK"},
+    {plu:311,name:"WINGS -12-PACK"},{plu:318,name:"NECKS 8-PACK"},
+    {plu:319,name:"FILLETS"},{plu:320,name:"CUBED CHICKEN"},
+    {plu:321,name:"GOUJONS"},{plu:329,name:"SHNITZELS - 2-PACK"},
+    {plu:330,name:"SHNITZELS - 6-PACK"},{plu:331,name:"SHNITZELS - 10-PACK"},
+    {plu:332,name:"PARGIOT"},{plu:348,name:"MINCED CHICKEN"},{plu:3411,name:"CHICKEN STIRFRY"}
+  ]},
+  { id:"ksmeats",  name:"KS Meats",        color:"#2d6a4f", products:[
+    {plu:508,name:"10-PACK CHICKEN SHNITZELS"},{plu:604,name:"5-PACK CARCASSES"},
+    {plu:507,name:"6-PACK CHICKEN SHNITZELS"},{plu:651,name:"12-PACK CHICKEN WINGS"},
+    {plu:500,name:"BREAST QUARTER ROASTER"},{plu:465,name:"CHICKEN DRUMSTICKS"},
+    {plu:503,name:"CHICKEN FILLETS"},{plu:524,name:"CHICKEN GOUJONS"},
+    {plu:450,name:"CHICKEN LEGS - 2 PACK"},{plu:449,name:"CHICKEN LEGS - VALUE PACK"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8 - 2 PACK"},{plu:451,name:"CHICKEN LEGS IN 1/8 - VALUE PACK"},
+    {plu:721,name:"CHICKEN LIVER"},{plu:476,name:"CHICKEN THIGHS"},
+    {plu:607,name:"DOUBLE SOUP PACK"},{plu:710,name:"MINCED CHICKEN"},
+    {plu:605,name:"CHICKEN NECK (8-PACK)"},{plu:611,name:"PUPICKS"},
+    {plu:456,name:"PARGIOT"},{plu:416,name:"ROASTER IN 1/4"},
+    {plu:419,name:"ROASTER IN 1/4 SHNIZELED"},{plu:417,name:"ROASTER IN 1/8"},
+    {plu:420,name:"ROASTER IN 1/8 SHNIZELED"},{plu:400,name:"WHOLE ROASTER"},
+    // Flavoured
+    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},{plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},{plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
+    {plu:null,name:"BEEF STIR-FRY",flavoured:true},{plu:null,name:"TERIYAKI GRILLING STEAK",flavoured:true},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]},
+  { id:"halperns", name:"Halpern's",        color:"#7b2d8b", products:[
+    {plu:508,name:"10-PACK CHICKEN SHNITZELS"},{plu:604,name:"5-PACK CARCASSES"},
+    {plu:507,name:"6-PACK CHICKEN SHNITZELS"},{plu:651,name:"12-PACK CHICKEN WINGS"},
+    {plu:465,name:"CHICKEN DRUMSTICKS"},{plu:524,name:"CHICKEN GOUJONS"},
+    {plu:450,name:"CHICKEN LEGS - 2 PACK"},{plu:449,name:"CHICKEN LEGS - VALUE PACK"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8 - 2 PACK"},{plu:451,name:"CHICKEN LEGS IN 1/8 - VALUE PACK"},
+    {plu:721,name:"CHICKEN LIVER"},{plu:476,name:"CHICKEN THIGHS"},
+    {plu:607,name:"DOUBLE SOUP PACK"},{plu:710,name:"MINCED CHICKEN"},
+    {plu:605,name:"CHICKEN NECK (8-PACK)"},{plu:456,name:"PARGIOT"},
+    {plu:611,name:"PUPICKS"},{plu:416,name:"ROASTER IN 1/4"},
+    {plu:419,name:"ROASTER IN 1/4 SHNIZELED"},{plu:417,name:"ROASTER IN 1/8"},
+    {plu:420,name:"ROASTER IN 1/8 SHNIZELED"},{plu:400,name:"WHOLE ROASTER"},
+    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},{plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},{plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
+    {plu:null,name:"BEEF STIR-FRY",flavoured:true},{plu:null,name:"TERIYAKI GRILLING STEAK",flavoured:true},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]},
+  { id:"kayes",    name:"Kaye's Kosher",    color:"#b5451b", products:[
+    {plu:508,name:"10-PACK CHICKEN SHNITZELS"},{plu:604,name:"5-PACK CARCASSES"},
+    {plu:507,name:"6-PACK CHICKEN SHNITZELS"},{plu:651,name:"12-PACK CHICKEN WINGS"},
+    {plu:465,name:"CHICKEN DRUMSTICKS"},{plu:524,name:"CHICKEN GOUJONS"},
+    {plu:450,name:"CHICKEN LEGS - 2 PACK"},{plu:449,name:"CHICKEN LEGS - VALUE PACK"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8 - 2 PACK"},{plu:451,name:"CHICKEN LEGS IN 1/8 - VALUE PACK"},
+    {plu:721,name:"CHICKEN LIVER"},{plu:476,name:"CHICKEN THIGHS"},
+    {plu:607,name:"DOUBLE SOUP PACK"},{plu:710,name:"MINCED CHICKEN"},
+    {plu:605,name:"CHICKEN NECK (8-PACK)"},{plu:456,name:"PARGIOT"},
+    {plu:611,name:"PUPICKS"},{plu:416,name:"ROASTER IN 1/4"},
+    {plu:419,name:"ROASTER IN 1/4 SHNIZELED"},{plu:417,name:"ROASTER IN 1/8"},
+    {plu:420,name:"ROASTER IN 1/8 SHNIZELED"},{plu:400,name:"WHOLE ROASTER"},
+    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},{plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},{plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
+    {plu:null,name:"BEEF STIR-FRY",flavoured:true},{plu:null,name:"TERIYAKI GRILLING STEAK",flavoured:true},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]},
+  { id:"deli",     name:"Deli@MH Meats",    color:"#8b5e00", products:[
+    {plu:651,name:"CHICKEN WINGS"},{plu:503,name:"CHICKEN FILLETS"},
+    {plu:721,name:"CHICKEN LIVER"},{plu:456,name:"CHICKEN PARGIOT"},
+    {plu:null,name:"BONELESS TURKEY THIGHS"},{plu:null,name:"TURKEY DRUMSTICKS"},
+    {plu:null,name:"TURKEY WINGS"},{plu:null,name:"TURKEY FILLETS"}
+  ]},
+  { id:"mhshop",   name:"MH Meats",          color:"#1a3a5c", products:[
+    // POULTRY DAILY ORDER FORMS
+    {plu:251, name:"WHOLE ROASTER"},
+    {plu:264, name:"ROASTER IN 1/4"},
+    {plu:265, name:"ROASTER IN 1/8"},
+    {plu:267, name:"ROASTER IN 1/4 SHNITZELED"},
+    {plu:268, name:"ROASTER IN 1/8 SHNIZELED"},
+    {plu:269, name:"ROASTER IN 1/8 TOP MINCED"},
+    {plu:280, name:"CARCASS-1-PACK"},
+    {plu:281, name:"CARCASS-2-PACK"},
+    {plu:2801,name:"CARCASS-5-PACK"},
+    {plu:282, name:"SOUP PACK"},
+    {plu:283, name:"DOUBLE SOUP PACK"},
+    {plu:284, name:"FAMILY SOUP PARCEL"},
+    {plu:285, name:"BREAST QUARTERS"},
+    {plu:288, name:"LEG QUARTERS- 1-PACK"},
+    {plu:288, name:"LEG QUARTERS- 2-PACK"},
+    {plu:288, name:"LEG QUARTERS- 4-PACK"},
+    {plu:288, name:"LEG QUARTERS- 6-PACK"},
+    {plu:289, name:"LEG QUARTERS IN 1/8 2 PACK"},
+    {plu:290, name:"LEG QUARTERS IN 4-PACK"},
+    {plu:298, name:"POLKIES"},
+    {plu:307, name:"THIGH - 2-PACK"},
+    {plu:307, name:"THIGH - 4-PACK"},
+    {plu:309, name:"CAPONS (BONED THIGHS)"},
+    {plu:310, name:"WINGS -6-PACK"},
+    {plu:311, name:"WINGS -12-PACK"},
+    {plu:318, name:"NECKS 10-PACK"},
+    {plu:318, name:"NECKS 5-PACK"},
+    {plu:319, name:"FILLETS"},
+    {plu:320, name:"CUBED CHICKEN"},
+    {plu:321, name:"GOUJONS"},
+    {plu:329, name:"SHNITZELS -  2-PACK"},
+    {plu:330, name:"SHNITZELS -  6-PACK"},
+    {plu:331, name:"SHNITZELS - 10-PACK"},
+    {plu:332, name:"PARGIOT"},
+    {plu:348, name:"MINCED CHICKEN"},
+    {plu:3411,name:"CHICKEN STIRFRY"},
+    // BUTCHER COUNTER — BEEF
+    {plu:65,  name:"BRAISING STEAK",           section:"BUTCHER"},
+    {plu:null,name:"3-BONE SHORT RIB",          section:"BUTCHER"},
+    {plu:51,  name:"BEEF SPARE RIBS",           section:"BUTCHER"},
+    {plu:107, name:"BEEF STIRFRY",              section:"BUTCHER"},
+    {plu:108, name:"BLADE JOINT",               section:"BUTCHER"},
+    {plu:107, name:"BLADE STEAKS",              section:"BUTCHER"},
+    {plu:14,  name:"BOLA STEAKS",               section:"BUTCHER"},
+    {plu:15,  name:"CHUCK EYE STEAKS",          section:"BUTCHER"},
+    {plu:42,  name:"COTE DE BOUEF",             section:"BUTCHER"},
+    {plu:63,  name:"DENVER STEAKS",             section:"BUTCHER"},
+    {plu:63,  name:"DOUBLE TOP RIB",            section:"BUTCHER"},
+    {plu:42,  name:"FAIRY STEAKS",              section:"BUTCHER"},
+    {plu:75,  name:"FRENCH ROAST",              section:"BUTCHER"},
+    {plu:14,  name:"LEAN SANDWICH STEAKS",      section:"BUTCHER"},
+    {plu:61,  name:"LONDON BROIL",              section:"BUTCHER"},
+    {plu:63,  name:"MINUTE STEAKS",             section:"BUTCHER"},
+    {plu:null,name:"OYSTER STEAK",              section:"BUTCHER"},
+    {plu:null,name:"PHILADELPHIA STEAKS",       section:"BUTCHER"},
+    {plu:null,name:"RIB STRIPS",                section:"BUTCHER"},
+    {plu:null,name:"RIBEYE JOINT",              section:"BUTCHER"},
+    {plu:61,  name:"RIB-EYE STEAKS",            section:"BUTCHER"},
+    {plu:null,name:"ROLLED TOP RIB JOINT",      section:"BUTCHER"},
+    {plu:null,name:"ROUND BOLA",                section:"BUTCHER"},
+    {plu:null,name:"TOP RIB ON BONE",           section:"BUTCHER"},
+    // BUTCHER COUNTER — CHICKEN
+    {plu:285, name:"BREAST QUARTERS (COUNTER)", section:"BUTCHER"},
+    {plu:309, name:"CAPONS (COUNTER)",          section:"BUTCHER"},
+    {plu:319, name:"FILLETS (COUNTER)",         section:"BUTCHER"},
+    {plu:320, name:"CUBED CHICKEN (COUNTER)",   section:"BUTCHER"},
+    {plu:3411,name:"CHICKEN STIRFRY (COUNTER)", section:"BUTCHER"},
+  ]},
+  { id:"mhchef",   name:"MH Meats Chef",     color:"#c0392b", products:[
+    // BEEF PREPARED
+    {plu:2,   name:"MEAT BALLS:12 PACK",                    section:"BEEF"},
+    {plu:3,   name:"MEAT BALLS:24 PACK",                    section:"BEEF"},
+    {plu:72,  name:"4 OUNCE BEEFBURGERS",                   section:"BEEF"},
+    {plu:81,  name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6", section:"BEEF"},
+    {plu:78,  name:"DELUXE 4 OUNCE STEAK BURGERS:4 PACK",   section:"BEEF"},
+    {plu:145, name:"4OZ CHORIZO BURGER: 4 PACK",            section:"BEEF"},
+    {plu:146, name:"GLUTEN FREE 2OZ STEAK BURGERS:6 PACK",  section:"BEEF"},
+    {plu:117, name:"CARAMELIZED ONION BURGERS:4 PACK",      section:"BEEF"},
+    {plu:504, name:"4OZ AMERICAN STYLE BURGERS: 4 PACK",    section:"BEEF"},
+    {plu:82,  name:"TASTY BEEF SKEWERS",                    section:"BEEF"},
+    {plu:83,  name:"MIXED SKEWERS PACK",                    section:"BEEF"},
+    {plu:174, name:"STUFFED PEPPERS",                       section:"BEEF"},
+    {plu:4,   name:"STUFFED MINCEMEAT ROLL:CHICKEN",        section:"BEEF"},
+    {plu:4,   name:"BREADCRUMBS STUFFED M/MEAT ROLL:CHICKEN",section:"BEEF"},
+    {plu:5,   name:"CHINESE STUFFED MINCEMEAT ROLL:CHICKEN",section:"BEEF"},
+    {plu:5,   name:"SESAME STUFFED MINCEMEAT ROLL:CHICKEN", section:"BEEF"},
+    {plu:404, name:"BEEF STIR-FRY",                         section:"BEEF"},
+    {plu:405, name:"BEEF STRUDEL",                          section:"BEEF"},
+    {plu:45,  name:"TERIYAKI GRILLING STEAK",               section:"BEEF"},
+    {plu:46,  name:"CHINESE GRILLING STEAK",                section:"BEEF"},
+    {plu:65,  name:"CRUSHED PEPPER GRILLING STEAK",         section:"BEEF"},
+    {plu:75,  name:"CRUSHED GARLIC RIBEYE",                 section:"BEEF"},
+    {plu:48,  name:"ALFRESCO STEAK",                        section:"BEEF"},
+    {plu:651, name:"PEPPER COATED RIB-EYE JOINT",           section:"BEEF"},
+    {plu:28,  name:"GOURMET SAUSAGE ROLLS",                 section:"BEEF"},
+    {plu:392, name:"SAUSAGE ROLLS",                         section:"BEEF"},
+    {plu:395, name:"CUMBERLAND SAUSAGES",                   section:"BEEF"},
+    {plu:389, name:"BEEF TOMATO SAUSAGES",                  section:"BEEF"},
+    {plu:501, name:"MH SCOTCH EGGS",                        section:"BEEF"},
+    {plu:880, name:"BEEF PINWHEELS",                        section:"BEEF"},
+    // CHICKEN PREPARED
+    {plu:3871,name:"JUMBO CHICKEN SAUSAGES",                section:"CHICKEN"},
+    {plu:125, name:"GRILLING CHICKEN AND SAUSAGE KEBAB",    section:"CHICKEN"},
+    {plu:346, name:"CHICKEN BURGERS",                       section:"CHICKEN"},
+    {plu:248, name:"CHICKEN LOLLIPOPS",                     section:"CHICKEN"},
+    {plu:247, name:"DELI-STYLE WHOLE ROASTER",              section:"CHICKEN"},
+    {plu:256, name:"ROSEMARY WHOLE CHICKEN",                section:"CHICKEN"},
+    {plu:258, name:"SWEET AND SOUR WHOLE ROASTER",          section:"CHICKEN"},
+    {plu:259, name:"CHINESE WHOLE ROASTER",                 section:"CHICKEN"},
+    {plu:260, name:"BBQ WHOLE ROASTER",                     section:"CHICKEN"},
+    {plu:261, name:"TERIYAKI WHOLE ROASTER",                section:"CHICKEN"},
+    {plu:2603,name:"LEMON HERB WHOLE ROASTER",              section:"CHICKEN"},
+    {plu:426, name:"MANGO CHILLI WHOLE ROASTER",            section:"CHICKEN"},
+    {plu:297, name:"PARTY CHICKEN ROLL",                    section:"CHICKEN"},
+    {plu:3213,name:"CHICKEN CUSHIONS",                      section:"CHICKEN"},
+    {plu:277, name:"CARIBBEAN DRUMSTICKS",                  section:"CHICKEN",flavoured:true},
+    {plu:303, name:"TERIYAKI DRUMSTICKS",                   section:"CHICKEN",flavoured:true},
+    {plu:304, name:"BBQ DRUMSTICKS",                        section:"CHICKEN",flavoured:true},
+    {plu:305, name:"SWEET AND SOUR DRUMSTICKS",             section:"CHICKEN",flavoured:true},
+    {plu:312, name:"CHINESE CHICKEN WINGS",                 section:"CHICKEN",flavoured:true},
+    {plu:313, name:"SWEET AND SOUR CHICKEN WINGS",          section:"CHICKEN",flavoured:true},
+    {plu:315, name:"BBQ CHICKEN WINGS",                     section:"CHICKEN",flavoured:true},
+    {plu:317, name:"TERIYAKI CHICKEN WINGS",                section:"CHICKEN",flavoured:true},
+    {plu:324, name:"SWEET AND SOUR GOUJON SKEWERS",         section:"CHICKEN",flavoured:true},
+    {plu:328, name:"MANGO & CHILLI GOUJON SKEWERS",         section:"CHICKEN",flavoured:true},
+    {plu:541, name:"PINEAPPLE & HONEY GOUJON SKEWERS",      section:"CHICKEN",flavoured:true},
+    {plu:3212,name:"SWEET AND SOUR GOUJONS",                section:"CHICKEN",flavoured:true},
+    {plu:3214,name:"CHINESE GOUJONS",                       section:"CHICKEN",flavoured:true},
+    {plu:3211,name:"TERIYAKI GOUJONS",                      section:"CHICKEN",flavoured:true},
+    {plu:334, name:"CHINESE SHNITZEL",                      section:"CHICKEN",flavoured:true},
+    {plu:433, name:"SWEET AND SOUR SHNITZELS",              section:"CHICKEN",flavoured:true},
+    {plu:335, name:"BBQ SHNITZELS",                         section:"CHICKEN",flavoured:true},
+    {plu:336, name:"TERIYAKI CHICKEN SHNITZELS",            section:"CHICKEN",flavoured:true},
+    {plu:337, name:"CRUMB COATED SHNITZELS",                section:"CHICKEN",flavoured:true},
+    {plu:338, name:"CRUMB COATED DARK SHNITZEL",            section:"CHICKEN",flavoured:true},
+    {plu:4331,name:"SWEET AND SOUR DARK SHNITZELS",         section:"CHICKEN",flavoured:true},
+    {plu:3321,name:"DELI STYLE DARK SHNITZELS",             section:"CHICKEN",flavoured:true},
+    {plu:339, name:"CHINESE DARK SHNITZEL",                 section:"CHICKEN",flavoured:true},
+    {plu:3361,name:"TERIYAKI DARK SHNITZELS",               section:"CHICKEN",flavoured:true},
+    {plu:3351,name:"BBQ DARK SHNITZELS",                    section:"CHICKEN",flavoured:true},
+    {plu:340, name:"CHICKEN DIPPERS",                       section:"CHICKEN",flavoured:true},
+    {plu:341, name:"CHICKEN STIR FRY",                      section:"CHICKEN",flavoured:true},
+    {plu:359, name:"CHICKEN SHWARMA",                       section:"CHICKEN",flavoured:true},
+    {plu:360, name:"CHICKEN SHISHLIK",                      section:"CHICKEN",flavoured:true},
+    {plu:1342,name:"CHICKEN FAJITA",                        section:"CHICKEN",flavoured:true},
+    // LAMB
+    {plu:191, name:"LAMB SHWARMA",                          section:"LAMB"},
+    {plu:192, name:"LAMB SHISHLIK",                         section:"LAMB"},
+    {plu:198, name:"LAMB BURGERS:2 PACK",                   section:"LAMB"},
+    {plu:204, name:"LAMB BURGERS 4-PACK",                   section:"LAMB"},
+    {plu:3981,name:"MINTY LAMB BURGERS:2 PACK",             section:"LAMB"},
+    {plu:3982,name:"MINTY LAMB BURGER 4 PACK",              section:"LAMB"},
+    {plu:207, name:"MINTY LAMB SKEWERS",                    section:"LAMB"},
+  ]},
+  { id:"yoels",    name:"Yoel's Kitchen",   color:"#d4522a", products:[
+    {plu:508,name:"SHNITZELS"},{plu:604,name:"CARCASSES"},
+    {plu:651,name:"WINGS"},{plu:503,name:"CHICKEN FILLETS"},
+    {plu:524,name:"CHICKEN GOUJONS"},{plu:449,name:"CHICKEN LEGS"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8"},{plu:721,name:"CHICKEN LIVER"},
+    {plu:476,name:"CHICKEN THIGHS"},{plu:456,name:"PARGIOT"},
+    {plu:516,name:"BREADED SHNITZELS"},{plu:178,name:"BEEF GRILLSTICKS"},
+    {plu:166,name:"24-PACK MEAT BALLS"},{plu:192,name:"CUMBERLAND SAUSAGES"},
+    {plu:521,name:"CHICKEN SHWARMA"},{plu:150,name:"4-PACK 4OZ BURGERS"},
+    {plu:151,name:"6-PACK 2OZ BURGERS"},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]},
+  { id:"craft",    name:"Craft Caterer",     color:"#2a7da8", products:[
+    {plu:508,name:"SHNITZELS"},{plu:604,name:"CARCASSES"},
+    {plu:651,name:"WINGS"},{plu:503,name:"CHICKEN FILLETS"},
+    {plu:524,name:"CHICKEN GOUJONS"},{plu:449,name:"CHICKEN LEGS"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8"},{plu:721,name:"CHICKEN LIVER"},
+    {plu:476,name:"CHICKEN THIGHS"},{plu:456,name:"PARGIOT"},
+    {plu:516,name:"BREADED SHNITZELS"},{plu:178,name:"BEEF GRILLSTICKS"},
+    {plu:166,name:"24-PACK MEAT BALLS"},{plu:192,name:"CUMBERLAND SAUSAGES"},
+    {plu:521,name:"CHICKEN SHWARMA"},{plu:150,name:"4-PACK 4OZ BURGERS"},
+    {plu:151,name:"6-PACK 2OZ BURGERS"},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]},
+  { id:"mottis",   name:"Motti's Kitchen",   color:"#6a3d9a", products:[
+    {plu:508,name:"SHNITZELS"},{plu:604,name:"CARCASSES"},
+    {plu:651,name:"WINGS"},{plu:503,name:"CHICKEN FILLETS"},
+    {plu:524,name:"CHICKEN GOUJONS"},{plu:449,name:"CHICKEN LEGS"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8"},{plu:721,name:"CHICKEN LIVER"},
+    {plu:476,name:"CHICKEN THIGHS"},{plu:456,name:"PARGIOT"},
+    {plu:516,name:"BREADED SHNITZELS"},{plu:178,name:"BEEF GRILLSTICKS"},
+    {plu:166,name:"24-PACK MEAT BALLS"},{plu:192,name:"CUMBERLAND SAUSAGES"},
+    {plu:521,name:"CHICKEN SHWARMA"},{plu:150,name:"4-PACK 4OZ BURGERS"},
+    {plu:151,name:"6-PACK 2OZ BURGERS"},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]},
+  { id:"freilich", name:"Freilich",           color:"#2e8b57", products:[
+    {plu:508,name:"SHNITZELS"},{plu:604,name:"CARCASSES"},
+    {plu:651,name:"WINGS"},{plu:503,name:"CHICKEN FILLETS"},
+    {plu:524,name:"CHICKEN GOUJONS"},{plu:449,name:"CHICKEN LEGS"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8"},{plu:721,name:"CHICKEN LIVER"},
+    {plu:476,name:"CHICKEN THIGHS"},{plu:456,name:"PARGIOT"},
+    {plu:516,name:"BREADED SHNITZELS"},{plu:178,name:"BEEF GRILLSTICKS"},
+    {plu:166,name:"24-PACK MEAT BALLS"},{plu:192,name:"CUMBERLAND SAUSAGES"},
+    {plu:521,name:"CHICKEN SHWARMA"},{plu:150,name:"4-PACK 4OZ BURGERS"},
+    {plu:151,name:"6-PACK 2OZ BURGERS"},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]},
+  { id:"bsssem",   name:"BSS Sem",            color:"#b8860b", products:[
+    {plu:508,name:"SHNITZELS"},{plu:604,name:"CARCASSES"},
+    {plu:651,name:"WINGS"},{plu:503,name:"CHICKEN FILLETS"},
+    {plu:524,name:"CHICKEN GOUJONS"},{plu:449,name:"CHICKEN LEGS"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8"},{plu:721,name:"CHICKEN LIVER"},
+    {plu:476,name:"CHICKEN THIGHS"},{plu:456,name:"PARGIOT"},
+    {plu:516,name:"BREADED SHNITZELS"},{plu:178,name:"BEEF GRILLSTICKS"},
+    {plu:166,name:"24-PACK MEAT BALLS"},{plu:192,name:"CUMBERLAND SAUSAGES"},
+    {plu:521,name:"CHICKEN SHWARMA"},{plu:150,name:"4-PACK 4OZ BURGERS"},
+    {plu:151,name:"6-PACK 2OZ BURGERS"},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]},
+  { id:"ushis",    name:"Best of Ushi's",     color:"#8b2252", products:[
+    {plu:508,name:"SHNITZELS"},{plu:604,name:"CARCASSES"},
+    {plu:651,name:"WINGS"},{plu:503,name:"CHICKEN FILLETS"},
+    {plu:524,name:"CHICKEN GOUJONS"},{plu:449,name:"CHICKEN LEGS"},
+    {plu:451,name:"CHICKEN LEGS IN 1/8"},{plu:721,name:"CHICKEN LIVER"},
+    {plu:476,name:"CHICKEN THIGHS"},{plu:456,name:"PARGIOT"},
+    {plu:516,name:"BREADED SHNITZELS"},{plu:178,name:"BEEF GRILLSTICKS"},
+    {plu:166,name:"24-PACK MEAT BALLS"},{plu:192,name:"CUMBERLAND SAUSAGES"},
+    {plu:521,name:"CHICKEN SHWARMA"},{plu:150,name:"4-PACK 4OZ BURGERS"},
+    {plu:151,name:"6-PACK 2OZ BURGERS"},
+    {plu:null,name:"CARIBBEAN DRUMSTICKS",flavoured:true},{plu:null,name:"TERIYAKI DRUMSTICKS",flavoured:true},
+    {plu:null,name:"BBQ DRUMSTICKS",flavoured:true},{plu:null,name:"SWEET AND SOUR DRUMSTICKS",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR CHICKEN WINGS",flavoured:true},{plu:null,name:"BBQ CHICKEN WINGS",flavoured:true},
+    {plu:null,name:"TERIYAKI CHICKEN WINGS",flavoured:true},{plu:null,name:"SWEET AND SOUR GOUJONS",flavoured:true},
+    {plu:null,name:"TERIYAKI GOUJONS",flavoured:true},{plu:null,name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ SHNITZELS",flavoured:true},{plu:null,name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {plu:null,name:"CRUMB COATED SHNITZELS",flavoured:true},{plu:null,name:"CRUMB COATED DARK SHNITZEL",flavoured:true},
+    {plu:null,name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},{plu:null,name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {plu:null,name:"BBQ DARK SHNITZELS",flavoured:true},{plu:null,name:"CHICKEN DIPPERS",flavoured:true},
+    {plu:null,name:"CHICKEN STIR FRY",flavoured:true},{plu:null,name:"CHICKEN SHWARMA",flavoured:true},
+    {plu:null,name:"CHICKEN SHISHLIK",flavoured:true}
+  ]}
+];
+
+// Per-customer beef lists (from DAILY BEEF ORDER FORMS sheet)
+const BEEF_BY_CUSTOMER = {
+  mhmeats: [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BEEF STIRFRY"},
+    {plu:51,name:"BEEF SPARE RIBS"},{plu:51,name:"BLADE STEAKS"},
+    {plu:108,name:"BLADE JOINT"},{plu:109,name:"BOLA JOINT SMALL"},
+    {plu:16,name:"BOLA JOINT LARGE"},{plu:null,name:"BONELESS SHORT RIB"},
+    {plu:15,name:"CHUCK EYE STEAKS"},{plu:16,name:"CHOLENT PACK"},
+    {plu:14,name:"BOLA STEAKS"},{plu:42,name:"COTE DE BOUEF"},
+    {plu:34,name:"CUBED CHOLENT BEEF"},{plu:34,name:"CUBED TOP RIB"},
+    {plu:7,name:"CUBED SHIN"},{plu:63,name:"DENVER STEAKS"},
+    {plu:63,name:"DOUBLE TOP RIB"},{plu:65,name:"FAIRY STEAKS"},
+    {plu:65,name:"BRAISING STEAK"},{plu:9,name:"FALSHE FILLET MIGNON"},
+    {plu:29,name:"FAMILY BRAISING STEAK"},{plu:50,name:"FLANK"},
+    {plu:1,name:"FLAT BRISKET JOINT SMALL"},{plu:2,name:"FLAT BRISKET JOINT LARGE"},
+    {plu:3,name:"FLAT PICKLED JOINT SMALL"},{plu:75,name:"FLAT PICKLED JOINT LARGE"},
+    {plu:null,name:"FLAT IRON STEAK"},{plu:75,name:"FRENCH ROAST"},
+    {plu:61,name:"GALLA BONES"},{plu:61,name:"GOULASH BEEF CUBES"},
+    {plu:14,name:"LEAN SANDWICH STEAKS"},{plu:61,name:"LONDON BROIL 500G"},
+    {plu:62,name:"LONDON BROIL 1KG"},{plu:62,name:"MARROW BONES"},
+    {plu:66,name:"MEAT BONES"},{plu:66,name:"MINCED BEEF"},
+    {plu:19,name:"MINCED STEAK"},{plu:63,name:"MINUTE STEAKS"},
+    {plu:null,name:"PHILADELPHIA STEAKS"},{plu:null,name:"OYSTER STEAK"},
+    {plu:null,name:"PICKLED BEEF ROLL SMALL"},{plu:null,name:"PICKLED BEEF ROLL LARGE"},
+    {plu:null,name:"PICKLED TONGUES"},{plu:null,name:"3-BONE SHORT RIB"},
+    {plu:null,name:"FRESH TONGUES"},{plu:null,name:"POT ROAST SMALL"},
+    {plu:null,name:"POT ROAST LARGE"},{plu:null,name:"PULLED BEEF JOINT"},
+    {plu:null,name:"WHOLE TOP RIB"},{plu:null,name:"TOP RIB ON BONE"},
+    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"RIB STRIPS"},
+    {plu:null,name:"RIB ON BONE"},{plu:null,name:"RIBEYE JOINT"},
+    {plu:null,name:"ROLLED BRISKET JOINT SMALL"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
+    {plu:null,name:"ROLLED PICKLED BRISKET SMALL"},{plu:null,name:"ROLLED PICKLED BRISKET LARGE"},
+    {plu:null,name:"ROLLED TOP RIB JOINT"},{plu:null,name:"ROUND BOLA"},
+    {plu:null,name:"WHOLE SHIN"},{plu:null,name:"SLICED SHIN"}
+  ],
+  mhshop: [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BEEF STIRFRY"},
+    {plu:51,name:"BEEF SPARE RIBS"},{plu:51,name:"BLADE STEAKS"},
+    {plu:108,name:"BLADE JOINT"},{plu:109,name:"BOLA JOINT SMALL"},
+    {plu:16,name:"BOLA JOINT LARGE"},{plu:null,name:"BONELESS SHORT RIB"},
+    {plu:15,name:"CHUCK EYE STEAKS"},{plu:16,name:"CHOLENT PACK"},
+    {plu:14,name:"BOLA STEAKS"},{plu:42,name:"COTE DE BOUEF"},
+    {plu:34,name:"CUBED CHOLENT BEEF"},{plu:34,name:"CUBED TOP RIB"},
+    {plu:7,name:"CUBED SHIN"},{plu:63,name:"DENVER STEAKS"},
+    {plu:63,name:"DOUBLE TOP RIB"},{plu:65,name:"FAIRY STEAKS"},
+    {plu:65,name:"BRAISING STEAK"},{plu:9,name:"FALSHE FILLET MIGNON"},
+    {plu:29,name:"FAMILY BRAISING STEAK"},{plu:50,name:"FLANK"},
+    {plu:1,name:"FLAT BRISKET JOINT SMALL"},{plu:2,name:"FLAT BRISKET JOINT LARGE"},
+    {plu:3,name:"FLAT PICKLED JOINT SMALL"},{plu:75,name:"FLAT PICKLED JOINT LARGE"},
+    {plu:null,name:"FLAT IRON STEAK"},{plu:75,name:"FRENCH ROAST"},
+    {plu:61,name:"GALLA BONES"},{plu:61,name:"GOULASH BEEF CUBES"},
+    {plu:14,name:"LEAN SANDWICH STEAKS"},{plu:61,name:"LONDON BROIL 500G"},
+    {plu:62,name:"LONDON BROIL 1KG"},{plu:62,name:"MARROW BONES"},
+    {plu:66,name:"MEAT BONES"},{plu:66,name:"MINCED BEEF"},
+    {plu:19,name:"MINCED STEAK"},{plu:63,name:"MINUTE STEAKS"},
+    {plu:null,name:"PHILADELPHIA STEAKS"},{plu:null,name:"OYSTER STEAK"},
+    {plu:null,name:"PICKLED BEEF ROLL SMALL"},{plu:null,name:"PICKLED BEEF ROLL LARGE"},
+    {plu:null,name:"PICKLED TONGUES"},{plu:null,name:"3-BONE SHORT RIB"},
+    {plu:null,name:"FRESH TONGUES"},{plu:null,name:"POT ROAST SMALL"},
+    {plu:null,name:"POT ROAST LARGE"},{plu:null,name:"PULLED BEEF JOINT"},
+    {plu:null,name:"WHOLE TOP RIB"},{plu:null,name:"TOP RIB ON BONE"},
+    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"RIB STRIPS"},
+    {plu:null,name:"RIB ON BONE"},{plu:null,name:"RIBEYE JOINT"},
+    {plu:null,name:"ROLLED BRISKET JOINT SMALL"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
+    {plu:null,name:"ROLLED PICKLED BRISKET SMALL"},{plu:null,name:"ROLLED PICKLED BRISKET LARGE"},
+    {plu:null,name:"ROLLED TOP RIB JOINT"},{plu:null,name:"ROUND BOLA"},
+    {plu:null,name:"WHOLE SHIN"},{plu:null,name:"SLICED SHIN"},
+    {plu:null,name:"RIB STRIPS"},{plu:null,name:"RIB ON BONE"},
+    {plu:null,name:"RIBEYE JOINT"}
+  ],
+  ksmeats: [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:16,name:"BOLA JOINT"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CUBED CHOLENT BEEF"},{plu:15,name:"CUBED TOP RIB"},
+    {plu:42,name:"FAIRY STEAKS"},{plu:7,name:"FLANK"},
+    {plu:2,name:"FLAT BRISKET JOINT"},{plu:75,name:"FLAT PICKLED JOINT"},
+    {plu:9,name:"GOULASH BEEF CUBES"},{plu:29,name:"MARROW BONES"},
+    {plu:50,name:"MEAT BONES"},{plu:2,name:"MINCED STEAK"},
+    {plu:75,name:"PICKLED BEEF ROLL"},{plu:null,name:"POT ROAST"},
+    {plu:14,name:"PRIME CHOLENT MEAT"},{plu:61,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"RIB ON BONE"},{plu:null,name:"ROLLED BRISKET JOINT"},
+    {plu:null,name:"ROLLED PICKLED BRISKET"},{plu:19,name:"WHOLE SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ],
+  halperns: [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:16,name:"BOLA JOINT LARGE"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CHOLENT PACK"},{plu:16,name:"CUBED CHOLENT BEEF"},
+    {plu:15,name:"CUBED TOP RIB"},{plu:42,name:"FAIRY STEAKS"},
+    {plu:34,name:"BRAISING STEAK"},{plu:7,name:"FLANK"},
+    {plu:2,name:"FLAT BRISKET JOINT LARGE"},{plu:75,name:"FLAT PICKLED JOINT LARGE"},
+    {plu:65,name:"FLAT PICKLED BRISKET"},{plu:9,name:"GOULASH BEEF CUBES"},
+    {plu:29,name:"MARROW BONES"},{plu:50,name:"MEAT BONES"},
+    {plu:1,name:"MINCED BEEF"},{plu:2,name:"MINCED STEAK"},
+    {plu:null,name:"PICKLED BEEF ROLL LARGE"},{plu:75,name:"PICKLED BEEF ROLL"},
+    {plu:null,name:"POT ROAST LARGE"},{plu:14,name:"PRIME CHOLENT MEAT"},
+    {plu:61,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
+    {plu:null,name:"ROLLED PICKLED BRISKET LARGE"},{plu:19,name:"WHOLE SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ],
+  kayes: [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:16,name:"BOLA JOINT LARGE"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CHOLENT PACK"},{plu:16,name:"CUBED CHOLENT BEEF"},
+    {plu:15,name:"CUBED TOP RIB"},{plu:42,name:"FAIRY STEAKS"},
+    {plu:34,name:"BRAISING STEAK"},{plu:7,name:"FLANK"},
+    {plu:2,name:"FLAT BRISKET JOINT LARGE"},{plu:75,name:"FLAT PICKLED JOINT LARGE"},
+    {plu:65,name:"FLAT PICKLED BRISKET"},{plu:9,name:"GOULASH BEEF CUBES"},
+    {plu:29,name:"MARROW BONES"},{plu:50,name:"MEAT BONES"},
+    {plu:1,name:"MINCED BEEF"},{plu:2,name:"MINCED STEAK"},
+    {plu:null,name:"PICKLED BEEF ROLL LARGE"},{plu:75,name:"PICKLED BEEF ROLL"},
+    {plu:null,name:"POT ROAST LARGE"},{plu:14,name:"PRIME CHOLENT MEAT"},
+    {plu:61,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
+    {plu:null,name:"ROLLED PICKLED BRISKET LARGE"},{plu:19,name:"WHOLE SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ],
+  deli: [
+    {plu:null,name:"BACK OF RIB"},{plu:null,name:"BEEF LIVER"},
+    {plu:null,name:"BOLA"},{plu:null,name:"CHUCK"},
+    {plu:null,name:"FLANK"},{plu:null,name:"FLAT BRISKET FAT ON"},
+    {plu:null,name:"FLAT BRISKET"},{plu:null,name:"BRISKET FLAP FAT ON"},
+    {plu:null,name:"LONDON BROIL"},{plu:null,name:"MINCED STEAK 90/10"},
+    {plu:null,name:"MINCED BEEF 70/30"},{plu:null,name:"ECONOMY MINCE 60/40"},
+    {plu:null,name:"RIBEYE"}
+  ],
+  yoels:    [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:51,name:"BOLA JOINT"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CUBED CHOLENT BEEF"},{plu:15,name:"CUBED TOP RIB"},
+    {plu:42,name:"FAIRY STEAKS"},{plu:34,name:"BRAISING STEAK"},
+    {plu:7,name:"FLANK"},{plu:63,name:"FLAT BRISKET JOINT"},
+    {plu:65,name:"FLAT PICKLED JOINT"},{plu:9,name:"GOULASH BEEF CUBES"},
+    {plu:29,name:"MARROW BONES"},{plu:50,name:"MEAT BONES"},
+    {plu:1,name:"MINCED BEEF"},{plu:2,name:"MINCED STEAK"},
+    {plu:75,name:"PICKLED BEEF ROLL"},{plu:61,name:"POT ROAST"},
+    {plu:61,name:"RIB-EYE STEAKS"},{plu:62,name:"ROLLED BRISKET JOINT"},
+    {plu:66,name:"ROLLED PICKLED BRISKET"},{plu:19,name:"SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ],
+  craft:    [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:51,name:"BOLA JOINT"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CUBED CHOLENT BEEF"},{plu:15,name:"CUBED TOP RIB"},
+    {plu:42,name:"FAIRY STEAKS"},{plu:34,name:"BRAISING STEAK"},
+    {plu:7,name:"FLANK"},{plu:63,name:"FLAT BRISKET JOINT"},
+    {plu:65,name:"FLAT PICKLED JOINT"},{plu:9,name:"GOULASH BEEF CUBES"},
+    {plu:29,name:"MARROW BONES"},{plu:50,name:"MEAT BONES"},
+    {plu:1,name:"MINCED BEEF"},{plu:2,name:"MINCED STEAK"},
+    {plu:75,name:"PICKLED BEEF ROLL"},{plu:61,name:"POT ROAST"},
+    {plu:61,name:"RIB-EYE STEAKS"},{plu:62,name:"ROLLED BRISKET JOINT"},
+    {plu:66,name:"ROLLED PICKLED BRISKET"},{plu:19,name:"SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ],
+  mottis:   [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:51,name:"BOLA JOINT"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CUBED CHOLENT BEEF"},{plu:15,name:"CUBED TOP RIB"},
+    {plu:42,name:"FAIRY STEAKS"},{plu:34,name:"BRAISING STEAK"},
+    {plu:7,name:"FLANK"},{plu:63,name:"FLAT BRISKET JOINT"},
+    {plu:65,name:"FLAT PICKLED JOINT"},{plu:9,name:"GOULASH BEEF CUBES"},
+    {plu:29,name:"MARROW BONES"},{plu:50,name:"MEAT BONES"},
+    {plu:1,name:"MINCED BEEF"},{plu:2,name:"MINCED STEAK"},
+    {plu:75,name:"PICKLED BEEF ROLL"},{plu:61,name:"POT ROAST"},
+    {plu:61,name:"RIB-EYE STEAKS"},{plu:62,name:"ROLLED BRISKET JOINT"},
+    {plu:66,name:"ROLLED PICKLED BRISKET"},{plu:19,name:"SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ],
+  freilich: [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:51,name:"BOLA JOINT"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CUBED CHOLENT BEEF"},{plu:15,name:"CUBED TOP RIB"},
+    {plu:42,name:"FAIRY STEAKS"},{plu:34,name:"BRAISING STEAK"},
+    {plu:7,name:"FLANK"},{plu:63,name:"FLAT BRISKET JOINT"},
+    {plu:65,name:"FLAT PICKLED JOINT"},{plu:9,name:"GOULASH BEEF CUBES"},
+    {plu:29,name:"MARROW BONES"},{plu:50,name:"MEAT BONES"},
+    {plu:1,name:"MINCED BEEF"},{plu:2,name:"MINCED STEAK"},
+    {plu:75,name:"PICKLED BEEF ROLL"},{plu:61,name:"POT ROAST"},
+    {plu:61,name:"RIB-EYE STEAKS"},{plu:62,name:"ROLLED BRISKET JOINT"},
+    {plu:66,name:"ROLLED PICKLED BRISKET"},{plu:19,name:"SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ],
+  bsssem:   [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:51,name:"BOLA JOINT"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CUBED CHOLENT BEEF"},{plu:15,name:"CUBED TOP RIB"},
+    {plu:42,name:"FAIRY STEAKS"},{plu:34,name:"BRAISING STEAK"},
+    {plu:7,name:"FLANK"},{plu:63,name:"FLAT BRISKET JOINT"},
+    {plu:65,name:"FLAT PICKLED JOINT"},{plu:9,name:"GOULASH BEEF CUBES"},
+    {plu:29,name:"MARROW BONES"},{plu:50,name:"MEAT BONES"},
+    {plu:1,name:"MINCED BEEF"},{plu:2,name:"MINCED STEAK"},
+    {plu:75,name:"PICKLED BEEF ROLL"},{plu:61,name:"POT ROAST"},
+    {plu:61,name:"RIB-EYE STEAKS"},{plu:62,name:"ROLLED BRISKET JOINT"},
+    {plu:66,name:"ROLLED PICKLED BRISKET"},{plu:19,name:"SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ],
+  ushis:    [
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:107,name:"BLADE STEAKS"},
+    {plu:51,name:"BOLA JOINT"},{plu:108,name:"BOLA STEAKS"},
+    {plu:16,name:"CUBED CHOLENT BEEF"},{plu:15,name:"CUBED TOP RIB"},
+    {plu:42,name:"FAIRY STEAKS"},{plu:34,name:"BRAISING STEAK"},
+    {plu:7,name:"FLANK"},{plu:63,name:"FLAT BRISKET JOINT"},
+    {plu:65,name:"FLAT PICKLED JOINT"},{plu:9,name:"GOULASH BEEF CUBES"},
+    {plu:29,name:"MARROW BONES"},{plu:50,name:"MEAT BONES"},
+    {plu:1,name:"MINCED BEEF"},{plu:2,name:"MINCED STEAK"},
+    {plu:75,name:"PICKLED BEEF ROLL"},{plu:61,name:"POT ROAST"},
+    {plu:61,name:"RIB-EYE STEAKS"},{plu:62,name:"ROLLED BRISKET JOINT"},
+    {plu:66,name:"ROLLED PICKLED BRISKET"},{plu:19,name:"SHIN BEEF"},
+    {plu:63,name:"THIN SLICED GRILLING STEAK"}
+  ]
+};
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const CUSTOMER_SHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhshop:'MHS',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+
+// ══════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════
+let currentDay = 'Monday';
+let currentCustomer = null;
+
+// orders[day][customerId][productKey] = qty
+let orders = {};
+DAYS.forEach(d => { orders[d] = {}; });
+
+function orderKey(prod) {
+  return (prod.plu ? prod.plu : '') + '|' + prod.name;
+}
+
+function getQty(day, custId, prod) {
+  return (orders[day][custId] && orders[day][custId][orderKey(prod)]) || 0;
+}
+
+function setQty(day, custId, prod, val) {
+  if (!orders[day][custId]) orders[day][custId] = {};
+  const v = parseInt(val) || 0;
+  if (v === 0) delete orders[day][custId][orderKey(prod)];
+  else orders[day][custId][orderKey(prod)] = v;
+  updateSummary();
+  saveToStorage();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════════════════════════
+function saveToStorage() {
+  try { localStorage.setItem('mhmeats_orders', JSON.stringify(orders)); } catch(e) {}
+}
+function loadFromStorage() {
+  try {
+    const d = localStorage.getItem('mhmeats_orders');
+    if (d) orders = JSON.parse(d);
+    DAYS.forEach(day => { if (!orders[day]) orders[day] = {}; });
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+function init() {
+  loadFromStorage();
+  loadCustomProducts();
+  setDateBadge();
+  buildCustomerList();
+  buildDayButtonSets();
+  // Pre-load Apps Script URL if not already saved
+  try {
+    if (!localStorage.getItem('mhmeats_script_url')) {
+      localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbzTP99JfUBEHGTF0av8WCeDEvN_qAnoq1Bcq3jECZMtaQNeJJc85e-toJuBohSpKWdl/exec');
+    }
+  } catch(e) {}
+}
+
+function setDateBadge() {
+  const d = new Date();
+  document.getElementById('liveDateBadge').textContent =
+    d.toLocaleDateString('en-GB', {weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+}
+
+function buildCustomerList() {
+  const el = document.getElementById('customerList');
+  el.innerHTML = CUSTOMERS.map(c => `
+    <div class="customer-btn" id="cbtn-${c.id}" onclick="selectCustomer('${c.id}')">
+      <div class="customer-dot" style="background:${c.color}"></div>
+      <div class="customer-name">${c.name}</div>
+      <div class="customer-count" id="ccount-${c.id}">0</div>
+    </div>
+  `).join('');
+  updateCustomerCounts();
+}
+
+function buildDayButtonSets() {
+  ['chef','butcher','packer','dispatch'].forEach(panel => {
+    const el = document.getElementById(`${panel}DayBtns`);
+    el.innerHTML = DAYS.map((d,i) => `
+      <div class="sheet-day-btn ${i===0?'active':''}" onclick="selectSheetDay('${panel}','${d}',this)">${d.slice(0,3).toUpperCase()}</div>
+    `).join('');
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ORDER INPUT — day/customer selection and product rendering
+// ══════════════════════════════════════════════════════════════════
+function selectDay(day, btn) {
+  currentDay = day;
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateCustomerCounts();
+  if (currentCustomer) renderProducts(currentCustomer);
+}
+
+function selectCustomer(id) {
+  currentCustomer = id;
+  document.querySelectorAll('.customer-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('cbtn-' + id);
+  if (btn) btn.classList.add('active');
+  renderProducts(id);
+}
+
+function renderProducts(custId) {
+  const area = document.getElementById('productArea');
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  if (!cust) return;
+
+  let html = '';
+
+  if (custId === 'mhchef') {
+    const sections = ['BEEF','CHICKEN','LAMB'];
+    const icons = {BEEF:'🥩',CHICKEN:'🐔',LAMB:'🐑'};
+    sections.forEach(sec => {
+      const prods = cust.products.filter(p => p.section === sec);
+      if (prods.length) html += buildProductSection(`${icons[sec]} ${sec} — MH Meats Chef`, prods, custId, sec.toLowerCase(), sec === 'CHICKEN');
+    });
+  } else {
+    const standard = cust.products.filter(p => !p.flavoured);
+    const flavoured = cust.products.filter(p => p.flavoured);
+    const beef = BEEF_BY_CUSTOMER[custId] || [];
+    html = buildProductSection(`🐔 ${cust.name} — Poultry`, standard, custId, 'poultry', false);
+    if (flavoured.length) html += buildProductSection('🌶 Flavoured Products', flavoured, custId, 'flavoured', true);
+    if (beef.length) html += buildProductSection(`🥩 ${cust.name} — Beef`, beef, custId, 'beef', false);
+  }
+
+  area.innerHTML = html;
+  const first = document.querySelector('.qty-input');
+  if (first) first.focus();
+  updateSectionCount(custId, 'poultry');
+  updateSectionCount(custId, 'flavoured');
+  updateSectionCount(custId, 'beef');
+}
+
+function buildProductSection(title, products, custId, type, isFlavoured) {
+  const badgeClass = type === 'beef' ? 'badge-beef' : (type === 'flavoured' || isFlavoured) ? 'badge-flavoured' : 'badge-poultry';
+  const badgeLabel = type === 'beef' ? 'BEEF' : (type === 'flavoured' || isFlavoured) ? 'FLAVOURED' : 'POULTRY';
+
+  const rows = products.map((p, i) => {
+    const qty = getQty(currentDay, custId, p);
+    return `
+      <div class="product-row ${qty > 0 ? 'has-qty' : ''}" id="prow-${custId}-${type}-${i}">
+        <div class="plu-tag">${p.plu || '—'}</div>
+        <div class="product-name">${p.name}</div>
+        <input type="number" class="qty-input" min="0"
+          value="${qty > 0 ? qty : ''}"
+          placeholder="0"
+          onchange="handleQtyChange(this,'${custId}','${type}',${i})"
+          onkeydown="handleArrow(event,this)"
+        >
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        ${title}
+        <span class="section-badge ${badgeClass}">${badgeLabel}</span>
+        <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)" id="sec-count-${custId}-${type}"></span>
+      </div>
+      <div class="card-body" style="padding:8px">
+        <div class="product-grid">${rows}</div>
+      </div>
+    </div>`;
+}
+
+function getProductList(custId, type) {
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  if (!cust) return [];
+  if (type === 'beef') return BEEF_BY_CUSTOMER[custId] || [];
+  if (type === 'flavoured') return cust.products.filter(p => p.flavoured);
+  if (type === 'chicken') return cust.products.filter(p => p.section === 'CHICKEN');
+  if (type === 'lamb') return cust.products.filter(p => p.section === 'LAMB');
+  if (type === 'beef_chef') return cust.products.filter(p => p.section === 'BEEF');
+  return cust.products.filter(p => !p.flavoured && !p.section);
+}
+
+function handleQtyChange(input, custId, type, idx) {
+  let list;
+  if (custId === 'mhchef') {
+    const sectionMap = {beef:'BEEF', chicken:'CHICKEN', lamb:'LAMB'};
+    const sec = sectionMap[type] || type.toUpperCase();
+    const cust = CUSTOMERS.find(c => c.id === custId);
+    list = cust ? cust.products.filter(p => p.section === sec) : [];
+  } else {
+    list = getProductList(custId, type);
+  }
+  const prod = list[idx];
+  if (!prod) return;
+
+  const qty = parseInt(input.value) || 0;
+  setQty(currentDay, custId, prod, qty);
+
+  const rowId = `prow-${custId}-${type}-${idx}`;
+  const row = document.getElementById(rowId);
+  if (row) row.classList.toggle('has-qty', qty > 0);
+
+  updateCustomerCounts();
+  updateSectionCount(custId, type);
+}
+
+function handleArrow(e, input) {
+  const all = Array.from(document.querySelectorAll('.qty-input'));
+  const idx = all.indexOf(input);
+  if ((e.key === 'ArrowDown' || e.key === 'Enter') && idx < all.length - 1) {
+    e.preventDefault(); all[idx+1].focus(); all[idx+1].select();
+  }
+  if (e.key === 'ArrowUp' && idx > 0) {
+    e.preventDefault(); all[idx-1].focus(); all[idx-1].select();
+  }
+}
+
+function updateSectionCount(custId, type) {
+  const el = document.getElementById(`sec-count-${custId}-${type}`);
+  if (!el) return;
+  let list;
+  if (custId === 'mhchef') {
+    const sectionMap = {beef:'BEEF', chicken:'CHICKEN', lamb:'LAMB'};
+    const sec = sectionMap[type] || type.toUpperCase();
+    const cust = CUSTOMERS.find(c => c.id === custId);
+    list = cust ? cust.products.filter(p => p.section === sec) : [];
+  } else {
+    list = getProductList(custId, type);
+  }
+  const count = list.filter(p => getQty(currentDay, custId, p) > 0).length;
+  el.textContent = count > 0 ? `${count} items` : '';
+}
+
+function updateCustomerCounts() {
+  CUSTOMERS.forEach(c => {
+    const el = document.getElementById('ccount-' + c.id);
+    if (!el) return;
+    const dayOrders = orders[currentDay][c.id] || {};
+    el.textContent = Object.keys(dayOrders).length;
+  });
+}
+
+function updateSummary() {
+  const el = document.getElementById('daySummary');
+  if (!el) return;
+  let total = 0;
+  let custLines = [];
+  CUSTOMERS.forEach(c => {
+    const dayOrders = orders[currentDay][c.id] || {};
+    const count = Object.keys(dayOrders).length;
+    if (count > 0) {
+      custLines.push(`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text)">${c.name}</span>
+        <span style="color:var(--accent);font-family:'DM Mono',monospace">${count} items</span>
+      </div>`);
+      total += count;
+    }
+  });
+  el.innerHTML = total === 0
+    ? '<span style="color:var(--muted)">No orders entered yet for ' + currentDay + '.</span>'
+    : custLines.join('') + `<div style="padding-top:6px;font-weight:600;color:var(--accent)">Total: ${total} line items</div>`;
+}
+
+function clearDay() {
+  if (!confirm(`Clear ALL orders for ${currentDay}?`)) return;
+  orders[currentDay] = {};
+  saveToStorage();
+  updateCustomerCounts();
+  updateSummary();
+  if (currentCustomer) renderProducts(currentCustomer);
+  showToast('Day cleared');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SHEET OUTPUTS — chef, butcher, packer, dispatch
+// ══════════════════════════════════════════════════════════════════
+function selectSheetDay(panel, day, btn) {
+  btn.closest('.sheet-day-btns').querySelectorAll('.sheet-day-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (panel === 'chef') renderChefSheet(day);
+  if (panel === 'butcher') renderButcherSheet(day);
+  if (panel === 'packer') renderPackerSheet(day);
+  if (panel === 'dispatch') renderDispatchSheet(day);
+}
+
+function getTotalsForDay(day) {
+  const totals = {};
+  CUSTOMERS.forEach(cust => {
+    const dayOrders = orders[day][cust.id] || {};
+    cust.products.forEach(p => {
+      const qty = dayOrders[orderKey(p)] || 0;
+      if (qty === 0) return;
+      const k = orderKey(p);
+      if (!totals[k]) totals[k] = { name: p.name, plu: p.plu, qty: 0, flavoured: !!p.flavoured, sources: [], beef: false };
+      totals[k].qty += qty;
+      totals[k].sources.push({ name: cust.name, qty });
+    });
+    const beefList = BEEF_BY_CUSTOMER[cust.id] || [];
+    beefList.forEach(p => {
+      const qty = dayOrders[orderKey(p)] || 0;
+      if (qty === 0) return;
+      const k = 'beef|' + orderKey(p);
+      if (!totals[k]) totals[k] = { name: p.name, plu: p.plu, qty: 0, flavoured: false, sources: [], beef: true };
+      totals[k].qty += qty;
+      totals[k].sources.push({ name: cust.name, qty });
+    });
+  });
+  return totals;
+}
+
+function renderChefSheet(day) {
+  const totals = getTotalsForDay(day);
+  const flavoured = Object.values(totals).filter(i => i.flavoured);
+  const totalQty = flavoured.reduce((a,b) => a + b.qty, 0);
+  let html = `<div class="summary-grid">
+    <div class="summary-card"><div class="summary-label">Flavoured Lines</div><div class="summary-value">${flavoured.length}</div><div class="summary-sub">for ${day}</div></div>
+    <div class="summary-card"><div class="summary-label">Total Units</div><div class="summary-value">${totalQty}</div><div class="summary-sub">flavoured products</div></div>
+  </div>`;
+  if (!flavoured.length) {
+    html += `<div class="empty-state"><div class="empty-icon">🌶</div><div class="empty-text">No flavoured product orders for ${day}</div></div>`;
+  } else {
+    html += buildSheetTable(`🌶 FLAVOURED PRODUCTS — ${day.toUpperCase()}`, flavoured, true);
+  }
+  document.getElementById('chefSheetContent').innerHTML = html;
+}
+
+function buildSheetTable(title, items, showSources) {
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const rows = items.sort((a,b) => (a.plu||9999)-(b.plu||9999)).map(item => {
+    const sourceTags = (showSources && item.sources && item.sources.length > 1)
+      ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
+      : '';
+    return `<tr class="${item.qty > 10 ? 'row-highlight' : ''}">
+      <td class="td-plu">${item.plu || '—'}</td>
+      <td>${item.name}${sourceTags ? ' '+sourceTags : ''}</td>
+      <td class="td-qty">${item.qty}</td>
+      <td class="td-check">☐</td>
+    </tr>`;
+  }).join('');
+  return `<div class="sheet-table">
+    <div class="sheet-title-bar">
+      <div class="sheet-title">${title}</div>
+      <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${items.length} lines</div>
+    </div>
+    <table><thead><tr><th>PLU</th><th>PRODUCT</th><th style="text-align:right">QTY</th><th>✓</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+function buildCategoryTable(category, items, day, extraTotal) {
+  const totalQty = items.reduce((a,b) => a+b.qty, 0);
+  const rows = items.map(item => `<tr>
+    <td class="td-qty">${item.qty}</td>
+    <td style="width:60px;color:var(--muted);font-size:11px">${item.unit||'UNITS'}</td>
+    <td>${item.name}${item.desc ? `<span style="font-size:10px;color:var(--muted);margin-left:6px">${item.desc}</span>` : ''}</td>
+    <td class="td-check">☐</td>
+  </tr>`).join('');
+  const totalRow = extraTotal !== undefined
+    ? `<tr style="background:rgba(200,168,75,0.1)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">TOTAL ${category} = ${totalQty} &nbsp;|&nbsp; TOTAL ROASTERS NEEDED = ${extraTotal}</td></tr>`
+    : `<tr style="background:rgba(255,255,255,0.03)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">TOTAL = ${totalQty}</td></tr>`;
+  return `<div class="sheet-table" style="margin-bottom:16px">
+    <div class="sheet-title-bar">
+      <div class="sheet-title">${category}</div>
+      <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${day.toUpperCase()}</div>
+    </div>
+    <table><thead><tr><th style="width:70px;text-align:right">AMT</th><th style="width:60px">UNIT</th><th>PRODUCT</th><th style="width:30px">✓</th></tr></thead>
+    <tbody>${rows}${totalRow}</tbody></table>
+  </div>`;
+}
+
+function renderButcherSheet(day) {
+  function poultryQty(name) {
+    let total = 0;
+    CUSTOMERS.forEach(cust => {
+      const custOrders = orders[day][cust.id] || {};
+      const match = cust.products.find(p => !p.flavoured && p.name.trim() === name.trim());
+      if (match) total += custOrders[orderKey(match)] || 0;
+    });
+    return total;
+  }
+
+  const fullBirds = [
+    {name:'WHOLE ROASTER', qty:poultryQty('WHOLE ROASTER')},
+    {name:'ROASTER IN 1/4', qty:poultryQty('ROASTER IN 1/4')},
+    {name:'ROASTER IN 1/8', qty:poultryQty('ROASTER IN 1/8')},
+    {name:'ROASTER IN 1/4 SHNITZELED', qty:poultryQty('ROASTER IN 1/4 SHNITZELED')},
+    {name:'ROASTER IN 1/8 SHNIZELED', qty:poultryQty('ROASTER IN 1/8 SHNIZELED')},
+    {name:'ROASTER IN 1/8 TOP MINCED', qty:poultryQty('ROASTER IN 1/8 TOP MINCED')},
+  ].filter(i=>i.qty>0);
+
+  const bottomQuarters = [
+    {name:'LEG QUARTERS (ALL PACKS)', qty:['LEG QUARTERS- 1-PACK','LEG QUARTERS- 2-PACK','LEG QUARTERS- 4-PACK','LEG QUARTERS- 6-PACK','CHICKEN LEGS - 2 PACK','CHICKEN LEGS - VALUE PACK'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'LEG QUARTERS IN 1/8 (ALL PACKS)', qty:['LEG QUARTERS IN 1/8 - 2 PACK','LEG QUARTERS IN 1/8 VALUE PACK','CHICKEN LEGS IN 1/8 - 2 PACK','CHICKEN LEGS IN 1/8 - VALUE PACK'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'CAPONS (BONED THIGHS)', qty:poultryQty('CAPONS (BONED THIGHS)')},
+    {name:'PARGIOT', qty:poultryQty('PARGIOT')+poultryQty('CHICKEN PARGIOT')},
+    {name:'CHICKEN DRUMSTICKS', qty:poultryQty('CHICKEN DRUMSTICKS')},
+    {name:'POLKIES', qty:poultryQty('POLKIES')},
+    {name:'THIGH - 2-PACK', qty:poultryQty('THIGH - 2-PACK')},
+    {name:'THIGH - 4-PACK', qty:poultryQty('THIGH - 4-PACK')},
+    {name:'CHICKEN THIGHS', qty:poultryQty('CHICKEN THIGHS')},
+  ].filter(i=>i.qty>0);
+
+  const crowns = [
+    {name:'BREAST QUARTERS', qty:poultryQty('BREAST QUARTERS')+poultryQty('BREAST QUARTER ROASTER')},
+    {name:'CUBED CHICKEN', qty:poultryQty('CUBED CHICKEN'), unit:'KG'},
+    {name:'CHICKEN STIRFRY', qty:poultryQty('CHICKEN STIRFRY')+poultryQty('CHICKEN STIR FRY'), unit:'KG'},
+    {name:'MINCED CHICKEN', qty:poultryQty('MINCED CHICKEN'), unit:'KG'},
+    {name:'GOUJONS / CHICKEN GOUJONS', qty:poultryQty('GOUJONS')+poultryQty('CHICKEN GOUJONS')},
+    {name:'FILLETS / CHICKEN FILLETS', qty:poultryQty('FILLETS')+poultryQty('CHICKEN FILLETS')},
+    {name:'CARCASS (ALL PACKS)', qty:['CARCASS-1-PACK','CARCASS-2-PACK','CARCASS-5-PACK','5-PACK CARCASSES','CARCASSES'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'SOUP PACKS (ALL)', qty:['SOUP PACK','DOUBLE SOUP PACK','FAMILY SOUP PARCEL'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'SHNITZELS (ALL PACKS)', qty:['SHNITZELS - 2-PACK','SHNITZELS - 6-PACK','SHNITZELS - 10-PACK','10-PACK CHICKEN SHNITZELS','6-PACK CHICKEN SHNITZELS','SHNITZELS','BREADED SHNITZELS'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'WINGS (ALL PACKS)', qty:['WINGS -6-PACK','WINGS -12-PACK','12-PACK CHICKEN WINGS','WINGS'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'NECKS 8-PACK', qty:poultryQty('NECKS 8-PACK')+poultryQty('CHICKEN NECK (8-PACK)')},
+    {name:'CHICKEN LIVER', qty:poultryQty('CHICKEN LIVER')},
+    {name:'PUPICKS', qty:poultryQty('PUPICKS')},
+  ].filter(i=>i.qty>0);
+
+  const turkey = [
+    {name:'BONELESS TURKEY THIGHS', qty:poultryQty('BONELESS TURKEY THIGHS'), unit:'KG'},
+    {name:'TURKEY DRUMSTICKS', qty:poultryQty('TURKEY DRUMSTICKS'), unit:'KG'},
+    {name:'TURKEY WINGS', qty:poultryQty('TURKEY WINGS'), unit:'KG'},
+    {name:'TURKEY FILLETS', qty:poultryQty('TURKEY FILLETS')+poultryQty('TURKEY  FILLETS'), unit:'KG'},
+  ].filter(i=>i.qty>0);
+
+  function beefQty(name) {
+    let total = 0;
+    CUSTOMERS.forEach(cust => {
+      const custOrders = orders[day][cust.id] || {};
+      const match = (BEEF_BY_CUSTOMER[cust.id]||[]).find(p=>p.name.trim()===name.trim());
+      if (match) total += custOrders[orderKey(match)] || 0;
+    });
+    return total;
+  }
+
+  // Full categorised beef butcher list — exact match to DAILY BUTCHER BEEF LISTS sheet
+  // unit: KG or UNITS per actual butcher sheet
+  const BEEF_BUTCHER_CATEGORIES = [
+    { cat:'MINCE', items:[
+      {name:'MINCED BEEF',                unit:'KG'},
+      {name:'MINCED STEAK',               unit:'KG'},
+    ]},
+    { cat:'CHUCK', items:[
+      {name:'GOULASH BEEF CUBES',         unit:'KG',  desc:'70/30 fat content'},
+      {name:'POT ROAST SMALL',            unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
+      {name:'POT ROAST LARGE',            unit:'UNITS',desc:'2-2.5KG, netted, max diameter 12cm'},
+      {name:'ROLLED TOP RIB JOINT',       unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
+      {name:'DOUBLE TOP RIB',             unit:'UNITS'},
+      {name:'WHOLE TOP RIB',              unit:'UNITS',desc:'400-500G'},
+      {name:'CUBED TOP RIB',             unit:'KG'},
+      {name:'TOP RIB ON BONE',            unit:'KG'},
+      {name:'FALSHE FILLET MIGNON',       unit:'UNITS'},
+      {name:'DENVER STEAKS',              unit:'UNITS',desc:'Marbled, 2cm thick'},
+      {name:'BRAISING STEAK',             unit:'UNITS',desc:'1.5cm thick'},
+      {name:'CHUCK EYE STEAKS',           unit:'UNITS',desc:'1.5cm thick'},
+      {name:'OYSTER STEAK',               unit:'UNITS'},
+      {name:'FRENCH ROAST',               unit:'UNITS',desc:'Marbled, 1.2-1.6KG'},
+      {name:'PULLED BEEF JOINT',          unit:'UNITS'},
+    ]},
+    { cat:'BRISKET', items:[
+      {name:'ROLLED BRISKET JOINT SMALL', unit:'UNITS',desc:'1.5-1.8KG, max diameter 12cm, netted'},
+      {name:'ROLLED BRISKET JOINT LARGE', unit:'UNITS',desc:'2-2.5KG, netted, max diameter 12cm'},
+      {name:'FLAT BRISKET JOINT SMALL',   unit:'UNITS',desc:'1.5-1.8KG'},
+      {name:'FLAT BRISKET JOINT LARGE',   unit:'UNITS',desc:'2-2.5KG'},
+      {name:'FLAT PICKLED JOINT SMALL',   unit:'UNITS',desc:'1.5-1.8KG'},
+      {name:'FLAT PICKLED JOINT LARGE',   unit:'UNITS',desc:'2-2.5KG'},
+      {name:'ROLLED PICKLED BRISKET SMALL',unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
+      {name:'ROLLED PICKLED BRISKET LARGE',unit:'UNITS',desc:'2-2.5KG, netted, max diameter 12cm'},
+      {name:'PICKLED BEEF ROLL SMALL',    unit:'UNITS',desc:'1.5-1.8KG'},
+      {name:'PICKLED BEEF ROLL LARGE',    unit:'UNITS',desc:'2-2.5KG'},
+    ]},
+    { cat:'RIBEYE', items:[
+      {name:'MINUTE STEAKS',              unit:'UNITS',desc:'Thin, pre-freeze 2-3 hours'},
+      {name:'RIB-EYE STEAKS',             unit:'UNITS',desc:'2cm thick'},
+      {name:'COTE DE BOUEF',              unit:'UNITS',desc:'Marbled, chine each steak'},
+      {name:'LONDON BROIL 500G',          unit:'UNITS'},
+      {name:'LONDON BROIL 1KG',           unit:'UNITS'},
+      {name:'RIBEYE JOINT',               unit:'UNITS',desc:'Tied with string only'},
+      {name:'RIB STRIPS',                 unit:'UNITS'},
+    ]},
+    { cat:'BLADE', items:[
+      {name:'BLADE STEAKS',               unit:'UNITS',desc:'1.5cm thick'},
+      {name:'BLADE JOINT',                unit:'UNITS'},
+      {name:'FLAT IRON STEAK',            unit:'UNITS'},
+    ]},
+    { cat:'BOLA', items:[
+      {name:'BOLA STEAKS',                unit:'UNITS',desc:'Remove gristle'},
+      {name:'BOLA JOINT SMALL',           unit:'UNITS',desc:'No silver skin 1.5-1.8KG'},
+      {name:'BOLA JOINT LARGE',           unit:'UNITS',desc:'No silver skin 1.5-1.8KG'},
+      {name:'BEEF STIRFRY',               unit:'KG'},
+      {name:'FAIRY STEAKS',               unit:'UNITS',desc:'1.5cm thick'},
+      {name:'LEAN SANDWICH STEAKS',       unit:'UNITS',desc:'No gristle'},
+    ]},
+    { cat:'RIB PLATE', items:[
+      {name:'BEEF RIBLETS (FLANKEN)',      unit:'UNITS',desc:'2cm thick'},
+      {name:'RIB ON BONE',                unit:'UNITS',desc:'12cm long, 3cm thick'},
+      {name:'3-BONE SHORT RIB',           unit:'UNITS',desc:'12cm long, 3cm thick'},
+      {name:'BONELESS SHORT RIB',         unit:'UNITS'},
+      {name:'BEEF SPARE RIBS',            unit:'UNITS',desc:'12cm long, 3cm thick'},
+    ]},
+    { cat:'SHIN', items:[
+      {name:'WHOLE SHIN',                 unit:'UNITS',desc:'600-700G'},
+      {name:'SLICED SHIN',                unit:'KG',   desc:'2-3cm thick'},
+      {name:'CUBED SHIN',                 unit:'KG'},
+    ]},
+    { cat:'FLANK', items:[
+      {name:'FLANK',                      unit:'UNITS',desc:'400-500G'},
+      {name:'CUBED CHOLENT BEEF',         unit:'KG',   desc:'70/30 fat content'},
+      {name:'CHOLENT PACK',               unit:'KG'},
+      {name:'GALLA BONES',                unit:'UNITS'},
+      {name:'MARROW BONES',               unit:'UNITS'},
+      {name:'MEAT BONES',                 unit:'KG'},
+    ]},
+    { cat:'DELI', items:[
+      {name:'BACK OF RIB',                unit:'KG'},
+      {name:'CHUCK',                      unit:'KG'},
+      {name:'DELI FLANK',                 unit:'KG'},
+      {name:'FLAT BRISKET FAT ON',        unit:'KG'},
+      {name:'FLAT BRISKET',               unit:'KG'},
+      {name:'BRISKET FLAP FAT ON',        unit:'KG'},
+      {name:'BOLA',                       unit:'KG',   desc:'No silver skin 1.5-1.8KG'},
+      {name:'RIBEYE',                     unit:'UNITS'},
+      {name:'MINCED STEAK 90/10',         unit:'KG'},
+      {name:'MINCED BEEF 70/30',          unit:'KG'},
+      {name:'ECONOMY MINCE 60/40',        unit:'KG'},
+      {name:'PICKLED TONGUES',            unit:'UNITS'},
+      {name:'FRESH TONGUES',              unit:'UNITS'},
+    ]},
+  ];
+
+  // Build beef items per category
+  const beefCategoryItems = BEEF_BUTCHER_CATEGORIES.map(cat => ({
+    cat: cat.cat,
+    items: cat.items.map(item => ({
+      ...item,
+      qty: beefQty(item.name)
+    })).filter(i => i.qty > 0)
+  })).filter(cat => cat.items.length > 0);
+
+  const beefItems = beefCategoryItems; // used below
+
+  const any = fullBirds.length||bottomQuarters.length||crowns.length||turkey.length||beefItems.length;
+  if (!any) {
+    document.getElementById('butcherSheetContent').innerHTML = `<div class="empty-state"><div class="empty-icon">🔪</div><div class="empty-text">No orders for ${day}</div></div>`;
+    return;
+  }
+  let html = '';
+  const totalRoasters = fullBirds.reduce((a,b)=>a+b.qty,0);
+  if (fullBirds.length) html += buildCategoryTable('FULL BIRDS', fullBirds, day, totalRoasters);
+  if (bottomQuarters.length) html += buildCategoryTable('BOTTOM QUARTERS', bottomQuarters, day);
+  if (crowns.length) html += buildCategoryTable('CROWNS', crowns, day);
+  if (turkey.length) html += buildCategoryTable('TURKEY', turkey, day);
+  if (beefItems.length) {
+    beefItems.forEach(cat => {
+      html += buildCategoryTable(cat.cat, cat.items, day);
+    });
+  }
+  document.getElementById('butcherSheetContent').innerHTML = html;
+}
+
+function renderPackerSheet(day) {
+  const packerTotals = {};
+  CUSTOMERS.forEach(cust => {
+    const custOrders = orders[day][cust.id] || {};
+    cust.products.forEach(p => {
+      const qty = custOrders[orderKey(p)] || 0;
+      if (qty === 0) return;
+      const k = orderKey(p);
+      if (!packerTotals[k]) packerTotals[k] = { plu: p.plu, name: p.name, qty: 0, flavoured: !!p.flavoured };
+      packerTotals[k].qty += qty;
+    });
+  });
+  const standard = Object.values(packerTotals).filter(i => !i.flavoured);
+  const flavoured = Object.values(packerTotals).filter(i => i.flavoured);
+  const any = standard.length || flavoured.length;
+  if (!any) {
+    document.getElementById('packerSheetContent').innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No orders for ${day}</div></div>`;
+    return;
+  }
+  let html = '';
+  if (standard.length) html += buildSheetTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, standard, false);
+  if (flavoured.length) html += buildSheetTable(`🌶 FLAVOURED PACKER LIST — ${day.toUpperCase()}`, flavoured, false);
+  document.getElementById('packerSheetContent').innerHTML = html;
+}
+
+function renderDispatchSheet(day) {
+  let html = '';
+  let any = false;
+  CUSTOMERS.forEach(cust => {
+    const custOrders = orders[day][cust.id] || {};
+    const poultryItems = cust.products.map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const beefItems = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const all = [...poultryItems, ...beefItems];
+    if (!all.length) return;
+    any = true;
+    html += buildSheetTable(`🚚 ${cust.name.toUpperCase()} — DISPATCH`, all, false);
+  });
+  if (!any) html = `<div class="empty-state"><div class="empty-icon">🚚</div><div class="empty-text">No orders for ${day}</div></div>`;
+  document.getElementById('dispatchSheetContent').innerHTML = html;
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════════════════
+// switchPanel — handles all panel transitions
+function switchPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'chef') renderChefSheet(currentDay);
+  if (name === 'butcher') renderButcherSheet(currentDay);
+  if (name === 'packer') renderPackerSheet(currentDay);
+  if (name === 'dispatch') renderDispatchSheet(currentDay);
+  if (name === 'remote') initRemotePanel();
+  if (name === 'admin') lockAdmin();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// REMOTE ORDERS — Google Sheets integration
+// ══════════════════════════════════════════════════════════════════
+function getScriptUrl() {
+  try { return localStorage.getItem('mhmeats_script_url') || ''; } catch(e) { return ''; }
+}
+
+function saveScriptUrl() {
+  const url = document.getElementById('appsScriptUrl').value.trim();
+  try { localStorage.setItem('mhmeats_script_url', url); } catch(e) {}
+  const msg = document.getElementById('urlSaveMsg');
+  msg.style.color = 'var(--success)';
+  msg.textContent = '✓ URL saved. Update the same URL in mhmeats_customer_portal.html.';
+  buildCustomerLinksTable();
+}
+
+function testScriptUrl() {
+  const url = document.getElementById('appsScriptUrl').value.trim();
+  const msg = document.getElementById('urlSaveMsg');
+  if (!url) { msg.style.color='var(--danger)'; msg.textContent='Enter a URL first.'; return; }
+  msg.style.color='var(--muted)'; msg.textContent='Testing...';
+  fetch(url + '?action=ping')
+    .then(r => r.text())
+    .then(t => { msg.style.color='var(--success)'; msg.textContent='✓ Connected successfully.'; })
+    .catch(() => { msg.style.color='var(--danger)'; msg.textContent='✗ Could not connect. Check your URL and deployment settings.'; });
+}
+
+function toggleGuide(header) {
+  const body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+
+function initRemotePanel() {
+  // Load saved script URL
+  const saved = getScriptUrl();
+  if (saved) document.getElementById('appsScriptUrl').value = saved;
+  buildCustomerLinksTable();
+}
+
+function buildCustomerLinksTable() {
+  const scriptUrl = getScriptUrl();
+  const portalBase = scriptUrl
+    ? 'mhmeats_customer_portal.html'
+    : 'mhmeats_customer_portal.html';
+
+  const tbody = document.getElementById('customerLinksTable');
+  if (!tbody) return;
+
+  // All customers except mhmeats (internal) and mhchef (internal)
+  const remoteCustomers = CUSTOMERS.filter(c => !['mhmeats'].includes(c.id));
+
+  tbody.innerHTML = remoteCustomers.map(c => {
+    const link = `${portalBase}?customer=${c.id}`;
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 12px;font-weight:600;font-size:13px">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>
+        ${c.name}
+      </td>
+      <td style="padding:9px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${link}</td>
+      <td style="padding:9px 12px">
+        <button onclick="copyLink('${link}')" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700">COPY</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function copyLink(link) {
+  navigator.clipboard.writeText(link).then(() => showToast('Link copied!')).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = link; document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    showToast('Link copied!');
+  });
+}
+
+function pullRemoteOrders() {
+  const scriptUrl = getScriptUrl();
+  const day = document.getElementById('pullDay').value;
+  const status = document.getElementById('pullStatus');
+  const results = document.getElementById('pullResults');
+
+  if (!scriptUrl) {
+    status.style.color = 'var(--danger)';
+    status.textContent = '✗ No Apps Script URL configured.';
+    return;
+  }
+
+  status.style.color = 'var(--muted)';
+  status.textContent = 'Pulling orders...';
+  results.innerHTML = '';
+
+  fetch(`${scriptUrl}?action=getOrders&day=${encodeURIComponent(day)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.orders || !data.orders.length) {
+        status.style.color = 'var(--muted)';
+        status.textContent = `No remote orders found for ${day}.`;
+        return;
+      }
+
+      // Merge into local orders
+      let loaded = 0;
+      let custsSeen = new Set();
+
+      data.orders.forEach(row => {
+        const { customer, productKey, quantity } = row;
+        if (!orders[day]) orders[day] = {};
+        if (!orders[day][customer]) orders[day][customer] = {};
+        orders[day][customer][productKey] = parseInt(quantity) || 0;
+        loaded++;
+        custsSeen.add(customer);
+      });
+
+      saveToStorage();
+      updateCustomerCounts();
+      updateSummary();
+
+      status.style.color = 'var(--success)';
+      status.textContent = `✓ Loaded ${loaded} lines from ${custsSeen.size} customer(s).`;
+
+      results.innerHTML = Array.from(custsSeen).map(cid => {
+        const cust = CUSTOMERS.find(c => c.id === cid);
+        const count = orders[day][cid] ? Object.keys(orders[day][cid]).length : 0;
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:var(--success)">✓</span>
+          <strong>${cust ? cust.name : cid}</strong>
+          <span style="color:var(--muted);margin-left:auto;font-family:'DM Mono',monospace;font-size:11px">${count} items</span>
+        </div>`;
+      }).join('');
+
+      showToast(`${loaded} remote orders loaded`);
+    })
+    .catch(err => {
+      status.style.color = 'var(--danger)';
+      status.textContent = '✗ Failed to connect. Check your Apps Script URL.';
+    });
+}
+
+// Legacy code-based loading still works as fallback
+function loadOrderCode() {
+  const code = document.getElementById('incomingCode')?.value?.trim();
+  if (!code) return;
+  try {
+    const payload = JSON.parse(atob(code));
+    const { c: custId, d: day, o: custOrders } = payload;
+    if (!orders[day]) orders[day] = {};
+    orders[day][custId] = custOrders;
+    saveToStorage();
+    updateCustomerCounts();
+    updateSummary();
+    const cust = CUSTOMERS.find(c => c.id === custId);
+    const count = Object.keys(custOrders).length;
+    showToast(`${cust?.name || custId} order loaded (${count} items)`);
+  } catch(e) { alert('Invalid order code.'); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PRINT — opens a clean white popup with just the sheet content
+// ══════════════════════════════════════════════════════════════════
+function printActivePanel() {
+  const activePanel = document.querySelector('.panel.active');
+  if (!activePanel) return;
+
+  const title = activePanel.getAttribute('data-print-title') || 'MH MEATS';
+  const contentEl = activePanel.querySelector('[id$="SheetContent"]');
+  if (!contentEl || !contentEl.innerHTML.trim()) {
+    alert('No data to print — enter some orders first.');
+    return;
+  }
+
+  const today = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+  });
+
+  const printHTML = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>MH Meats — ${title}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Arial,sans-serif; font-size:12px; color:#000; background:#fff; padding:20px; }
+  .print-header { text-align:center; border-bottom:3px solid #000; padding-bottom:10px; margin-bottom:20px; }
+  .print-header h1 { font-size:22px; font-weight:bold; letter-spacing:2px; }
+  .print-header h2 { font-size:15px; font-weight:normal; margin-top:4px; color:#444; }
+  .print-header .date { font-size:12px; color:#666; margin-top:4px; }
+  .sheet-table { border:1px solid #999; margin-bottom:20px; page-break-inside:avoid; }
+  .sheet-title-bar { background:#ddd; padding:6px 12px; border-bottom:1px solid #999; display:flex; align-items:center; justify-content:space-between; }
+  .sheet-title { font-size:13px; font-weight:bold; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:#eee; text-align:left; padding:6px 10px; font-size:10px; font-weight:bold; text-transform:uppercase; border:1px solid #aaa; }
+  td { padding:6px 10px; border:1px solid #ccc; font-size:12px; }
+  .td-plu { color:#555; font-size:10px; width:55px; font-family:monospace; }
+  .td-qty { font-size:14px; font-weight:bold; text-align:right; width:60px; }
+  .td-check { text-align:center; width:30px; }
+  .row-highlight td { background:#f5f5f5; }
+  .summary-grid { display:none; }
+  .cat-tag { display:inline-block; font-size:8px; font-family:monospace; padding:1px 4px; border:1px solid #aaa; border-radius:2px; margin-left:4px; color:#333; }
+  tr:nth-child(even) td { background:#fafafa; }
+  @page { margin:1.5cm; size:A4 portrait; }
+</style></head>
+<body>
+  <div class="print-header">
+    <h1>MH MEATS</h1>
+    <h2>${title}</h2>
+    <div class="date">${today}</div>
+  </div>
+  ${contentEl.innerHTML}
+  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+</body></html>`;
+
+  const pw = window.open('', '_blank', 'width=900,height=700');
+  pw.document.write(printHTML);
+  pw.document.close();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ADMIN — PIN protection + product management
+// ══════════════════════════════════════════════════════════════════
+const DEFAULT_PIN = '1234';
+
+function getPin() { try { return localStorage.getItem('mhmeats_pin') || DEFAULT_PIN; } catch(e) { return DEFAULT_PIN; } }
+function setPin(p) { try { localStorage.setItem('mhmeats_pin', p); } catch(e) {} }
+
+function checkPin() {
+  const entered = document.getElementById('adminPin').value;
+  if (entered === getPin()) {
+    document.getElementById('adminGate').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    populateAdminSelects();
+  } else {
+    document.getElementById('pinError').textContent = 'Incorrect PIN. Try again.';
+    document.getElementById('adminPin').value = '';
+  }
+}
+
+function lockAdmin() {
+  document.getElementById('adminGate').style.display = 'block';
+  document.getElementById('adminContent').style.display = 'none';
+  document.getElementById('adminPin').value = '';
+  document.getElementById('pinError').textContent = '';
+}
+
+function changePin() {
+  const p1 = document.getElementById('newPin1').value;
+  const p2 = document.getElementById('newPin2').value;
+  const msg = document.getElementById('pinMsg');
+  if (!p1 || p1.length < 4) { msg.style.color='var(--danger)'; msg.textContent='PIN must be at least 4 digits.'; return; }
+  if (p1 !== p2) { msg.style.color='var(--danger)'; msg.textContent='PINs do not match.'; return; }
+  setPin(p1);
+  msg.style.color='var(--success)'; msg.textContent='✓ PIN updated successfully.';
+  document.getElementById('newPin1').value = '';
+  document.getElementById('newPin2').value = '';
+}
+
+function populateAdminSelects() {
+  ['addCustSelect','removeCustSelect'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">— select —</option>';
+    CUSTOMERS.forEach(c => {
+      sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+    });
+  });
+}
+
+function populateRemoveList() {
+  const custId = document.getElementById('removeCustSelect').value;
+  const sel = document.getElementById('removeProductSelect');
+  if (!custId) { sel.innerHTML = '<option>— select customer first —</option>'; return; }
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  sel.innerHTML = cust.products.map((p,i) =>
+    `<option value="${i}">${p.plu ? '['+p.plu+'] ' : ''}${p.name}</option>`
+  ).join('');
+}
+
+function addProduct() {
+  const custId = document.getElementById('addCustSelect').value;
+  const name = document.getElementById('addProductName').value.trim().toUpperCase();
+  const plu = parseInt(document.getElementById('addProductPlu').value) || null;
+  const msg = document.getElementById('addMsg');
+
+  if (!custId) { msg.style.color='var(--danger)'; msg.textContent='Select a customer.'; return; }
+  if (!name) { msg.style.color='var(--danger)'; msg.textContent='Enter a product name.'; return; }
+
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  cust.products.push({ plu, name });
+  saveCustomProducts();
+  msg.style.color='var(--success)'; msg.textContent=`✓ "${name}" added to ${cust.name}.`;
+  document.getElementById('addProductName').value = '';
+  document.getElementById('addProductPlu').value = '';
+  showToast('Product added');
+}
+
+function removeProduct() {
+  const custId = document.getElementById('removeCustSelect').value;
+  const idx = parseInt(document.getElementById('removeProductSelect').value);
+  const msg = document.getElementById('removeMsg');
+
+  if (!custId) { msg.style.color='var(--danger)'; msg.textContent='Select a customer.'; return; }
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  const removed = cust.products.splice(idx, 1)[0];
+  saveCustomProducts();
+  populateRemoveList();
+  msg.style.color='var(--success)'; msg.textContent=`✓ "${removed.name}" removed.`;
+  showToast('Product removed');
+}
+
+function saveCustomProducts() {
+  try {
+    const data = CUSTOMERS.map(c => ({ id: c.id, products: c.products }));
+    localStorage.setItem('mhmeats_products', JSON.stringify(data));
+  } catch(e) {}
+}
+
+function loadCustomProducts() {
+  try {
+    const saved = localStorage.getItem('mhmeats_products');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    data.forEach(d => {
+      const cust = CUSTOMERS.find(c => c.id === d.id);
+      if (cust) cust.products = d.products;
+    });
+  } catch(e) {}
+}
+
+function exportAllData() {
+  const blob = new Blob([JSON.stringify({orders, timestamp: new Date().toISOString()}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `mhmeats_orders_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  document.getElementById('dataMsg').textContent = '✓ Export downloaded.';
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        if (d.orders) {
+          orders = d.orders;
+          DAYS.forEach(day => { if (!orders[day]) orders[day] = {}; });
+          saveToStorage();
+          updateCustomerCounts();
+          updateSummary();
+          document.getElementById('dataMsg').textContent = `✓ Orders imported from ${file.name}.`;
+          showToast('Orders imported');
+        }
+      } catch(err) { document.getElementById('dataMsg').textContent = '✗ Invalid file.'; }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function clearAllData() {
+  if (!confirm('Clear ALL orders for ALL days? This cannot be undone.')) return;
+  DAYS.forEach(d => { orders[d] = {}; });
+  saveToStorage();
+  updateCustomerCounts();
+  updateSummary();
+  document.getElementById('dataMsg').textContent = '✓ All data cleared.';
+  showToast('All data cleared');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// REMOTE ORDERING — order code generation and loading
+// ══════════════════════════════════════════════════════════════════
+function switchPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+
+  if (name === 'chef') renderChefSheet(currentDay);
+  if (name === 'butcher') renderButcherSheet(currentDay);
+  if (name === 'packer') renderPackerSheet(currentDay);
+  if (name === 'dispatch') renderDispatchSheet(currentDay);
+  if (name === 'remote') renderRemoteOrderForm();
+  if (name === 'admin') lockAdmin();
+}
+
+function renderRemoteOrderForm() {
+  const custId = document.getElementById('remoteCustomer').value;
+  const day = document.getElementById('remoteDay').value;
+  const area = document.getElementById('remoteProductArea');
+  document.getElementById('remoteCodeOutput').style.display = 'none';
+
+  if (!custId) { area.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Select your site above to see your product list.</div>'; return; }
+
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  if (!cust) return;
+
+  const rows = cust.products.map((p,i) => {
+    const qty = getQty(day, custId, p);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);width:40px;flex-shrink:0">${p.plu||'—'}</span>
+      <span style="flex:1;font-size:12px;font-weight:500">${p.name}</span>
+      <input type="number" min="0" value="${qty||''}" placeholder="0"
+        style="width:56px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:5px;border-radius:4px;font-size:13px;text-align:center;font-family:'DM Mono',monospace"
+        onchange="setQty('${day}','${custId}',${JSON.stringify(p).replace(/"/g,'&quot;')},this.value)"
+        onkeydown="handleArrow(event,this)">
+    </div>`;
+  }).join('');
+
+  area.innerHTML = rows || '<div style="color:var(--muted)">No products for this customer.</div>';
+}
+
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'remoteCustomer' || e.target.id === 'remoteDay') {
+    renderRemoteOrderForm();
+    document.getElementById('remoteCodeOutput').style.display = 'none';
+  }
+});
+
+function generateOrderCode() {
+  const custId = document.getElementById('remoteCustomer').value;
+  const day = document.getElementById('remoteDay').value;
+  if (!custId) { alert('Please select your site first.'); return; }
+
+  const custOrders = orders[day][custId] || {};
+  if (!Object.keys(custOrders).length) { alert('No quantities entered yet.'); return; }
+
+  const payload = { c: custId, d: day, o: custOrders, t: Date.now() };
+  const code = btoa(JSON.stringify(payload));
+  document.getElementById('remoteCodeText').value = code;
+  document.getElementById('remoteCodeOutput').style.display = 'block';
+}
+
+function copyCode() {
+  const text = document.getElementById('remoteCodeText').value;
+  navigator.clipboard.writeText(text).then(() => showToast('Code copied!')).catch(() => {
+    document.getElementById('remoteCodeText').select();
+    document.execCommand('copy');
+    showToast('Code copied!');
+  });
+}
+
+function loadOrderCode() {
+  const code = document.getElementById('incomingCode').value.trim();
+  const resultEl = document.getElementById('loadResult');
+  if (!code) { resultEl.style.color='var(--danger)'; resultEl.textContent='Paste an order code first.'; return; }
+
+  try {
+    const payload = JSON.parse(atob(code));
+    const { c: custId, d: day, o: custOrders } = payload;
+    const cust = CUSTOMERS.find(c => c.id === custId);
+    if (!cust) throw new Error('Unknown customer');
+
+    if (!orders[day]) orders[day] = {};
+    orders[day][custId] = custOrders;
+    saveToStorage();
+    updateCustomerCounts();
+    updateSummary();
+
+    const count = Object.keys(custOrders).length;
+    resultEl.style.color='var(--success)';
+    resultEl.textContent = `✓ Loaded ${count} line items for ${cust.name} — ${day}. Order is now in the system.`;
+    document.getElementById('incomingCode').value = '';
+    showToast(`${cust.name} order loaded`);
+  } catch(e) {
+    resultEl.style.color='var(--danger)';
+    resultEl.textContent = '✗ Invalid order code. Ask the customer to resend.';
+  }
+}
+
+// ── BOOT ──
+init();
+updateSummary();
+</script>
+</body>
+</html>
