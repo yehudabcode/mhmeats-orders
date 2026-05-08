@@ -2685,11 +2685,8 @@ function buildCustomerLinksTable() {
 function copyAllLinks() {
   const remoteCustomers = CUSTOMERS.filter(c => c.id !== 'mhmeats');
   const text = remoteCustomers.map(c =>
-    `${c.name}:
-${PORTAL_BASE}?customer=${c.id}`
-  ).join('
-
-');
+    c.name + ':\n' + PORTAL_BASE + '?customer=' + c.id
+  ).join('\n\n');
   navigator.clipboard.writeText(text)
     .then(() => showToast('All links copied!'))
     .catch(() => {
@@ -2835,7 +2832,7 @@ function printActivePanel() {
     <div class="date">${today}</div>
   </div>
   ${contentEl.innerHTML}
-  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+  window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body></html>`;
 
   const pw = window.open('', '_blank', 'width=900,height=700');
