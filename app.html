@@ -639,22 +639,22 @@
 
       <!-- Customer links table -->
       <div class="card" style="margin-bottom:16px">
-        <div class="card-header">🔗 Customer Order Links — Send These via WhatsApp</div>
+        <div class="card-header">
+          🔗 Customer Order Links
+          <button onclick="copyAllLinks()" class="btn btn-ghost" style="margin-left:auto;font-size:11px;padding:4px 12px">📋 Copy All</button>
+        </div>
         <div class="card-body" style="padding:0">
-          <div style="font-size:11px;color:var(--muted);padding:10px 14px 6px;line-height:1.6">
-            Each customer gets their own link. They open it on any device, fill in their order and press Submit — the order comes straight into your system.
+          <div style="font-size:11px;color:var(--muted);padding:10px 14px 8px;line-height:1.6;border-bottom:1px solid var(--border)">
+            Send each customer their unique link via WhatsApp — once only. They use it every day to place orders.
           </div>
-          <table style="width:100%;border-collapse:collapse">
+          <table style="width:100%;border-collapse:collapse" id="customerLinksTable">
             <thead><tr>
               <th style="padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);text-align:left">Customer</th>
-              <th style="padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);text-align:left">Link to Send</th>
-              <th style="padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);width:80px"></th>
+              <th style="padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);text-align:left">Order Link</th>
+              <th style="padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);width:100px;text-align:center">Actions</th>
             </tr></thead>
-            <tbody id="customerLinksTable"></tbody>
+            <tbody id="customerLinksBody"></tbody>
           </table>
-          <div style="padding:10px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)">
-            ⚠️ Links only work after you upload the portal file to Google Drive and configure the Apps Script URL below.
-          </div>
         </div>
       </div>
 
@@ -2613,19 +2613,6 @@ function renderDispatchSheet(day) {
 // NAV
 // ══════════════════════════════════════════════════════════════════
 // switchPanel — handles all panel transitions
-function switchPanel(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if (name === 'chef') renderChefSheet(currentDay);
-  if (name === 'butcher') renderButcherSheet(currentDay);
-  if (name === 'packer') renderPackerSheet(currentDay);
-  if (name === 'dispatch') renderDispatchSheet(currentDay);
-  if (name === 'remote') initRemotePanel();
-  if (name === 'admin') lockAdmin();
-}
-
 // ══════════════════════════════════════════════════════════════════
 // REMOTE ORDERS — Google Sheets integration
 // ══════════════════════════════════════════════════════════════════
@@ -2665,31 +2652,53 @@ function initRemotePanel() {
   buildCustomerLinksTable();
 }
 
-function buildCustomerLinksTable() {
-  const scriptUrl = getScriptUrl();
-  const portalBase = scriptUrl
-    ? 'mhmeats_customer_portal.html'
-    : 'mhmeats_customer_portal.html';
+const PORTAL_BASE = 'https://yehudabcode.github.io/mhmeats-orders/portal.html';
 
-  const tbody = document.getElementById('customerLinksTable');
+function buildCustomerLinksTable() {
+  const tbody = document.getElementById('customerLinksBody');
   if (!tbody) return;
 
-  // All customers except mhmeats (internal) and mhchef (internal)
-  const remoteCustomers = CUSTOMERS.filter(c => !['mhmeats'].includes(c.id));
+  const remoteCustomers = CUSTOMERS.filter(c => c.id !== 'mhmeats');
 
   tbody.innerHTML = remoteCustomers.map(c => {
-    const link = `${portalBase}?customer=${c.id}`;
+    const link = `${PORTAL_BASE}?customer=${c.id}`;
+    const whatsappText = encodeURIComponent(`Hi, here is your MH Meats order link for ${c.name}: ${link}`);
+    const whatsappUrl = `https://wa.me/?text=${whatsappText}`;
     return `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:9px 12px;font-weight:600;font-size:13px">
         <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>
         ${c.name}
       </td>
-      <td style="padding:9px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${link}</td>
-      <td style="padding:9px 12px">
-        <button onclick="copyLink('${link}')" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700">COPY</button>
+      <td style="padding:9px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);word-break:break-all">${link}</td>
+      <td style="padding:9px 12px;text-align:center;white-space:nowrap">
+        <button onclick="copyLink('${link}')"
+          style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-right:4px"
+          title="Copy link">📋 COPY</button>
+        <a href="${whatsappUrl}" target="_blank"
+          style="background:#25D366;border:none;color:#fff;padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-decoration:none;display:inline-block"
+          title="Send via WhatsApp">💬 WHATSAPP</a>
       </td>
     </tr>`;
   }).join('');
+}
+
+function copyAllLinks() {
+  const remoteCustomers = CUSTOMERS.filter(c => c.id !== 'mhmeats');
+  const text = remoteCustomers.map(c =>
+    `${c.name}:
+${PORTAL_BASE}?customer=${c.id}`
+  ).join('
+
+');
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('All links copied!'))
+    .catch(() => {
+      const el = document.createElement('textarea');
+      el.value = text; document.body.appendChild(el);
+      el.select(); document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast('All links copied!');
+    });
 }
 
 function copyLink(link) {
@@ -2776,23 +2785,6 @@ function pullRemoteOrders() {
 }
 
 // Legacy code-based loading still works as fallback
-function loadOrderCode() {
-  const code = document.getElementById('incomingCode')?.value?.trim();
-  if (!code) return;
-  try {
-    const payload = JSON.parse(atob(code));
-    const { c: custId, d: day, o: custOrders } = payload;
-    if (!orders[day]) orders[day] = {};
-    orders[day][custId] = custOrders;
-    saveToStorage();
-    updateCustomerCounts();
-    updateSummary();
-    const cust = CUSTOMERS.find(c => c.id === custId);
-    const count = Object.keys(custOrders).length;
-    showToast(`${cust?.name || custId} order loaded (${count} items)`);
-  } catch(e) { alert('Invalid order code.'); }
-}
-
 // ══════════════════════════════════════════════════════════════════
 // PRINT — opens a clean white popup with just the sheet content
 // ══════════════════════════════════════════════════════════════════
