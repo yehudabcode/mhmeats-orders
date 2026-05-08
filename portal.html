@@ -166,6 +166,12 @@
   <div class="footer-summary">
     <strong id="itemCount">0</strong> items selected for <span id="footerDay">—</span>
   </div>
+  <button id="lastOrderBtn" onclick="loadLastOrder()"
+    style="padding:9px 16px;background:transparent;border:1px solid #444;border-radius:6px;
+           color:#888;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;
+           cursor:pointer;margin-right:8px;display:none">
+    📋 Load Last Order
+  </button>
   <button class="submit-btn" id="submitBtn" onclick="submitOrder()">Submit Order →</button>
 </div>
 
@@ -844,6 +850,9 @@ function renderForm() {
       ${DAYS.map(d => `<div class="day-btn ${d===currentDay?'active':''}" onclick="selectDay('${d}',this)">${d.slice(0,3).toUpperCase()}</div>`).join('')}
     </div>
   </div>`;
+  html += `<div id="lastOrderBanner" style="display:none;background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.25);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#888">
+    <span style="color:var(--accent);font-weight:600">📋 Last order found</span> — click <strong style="color:var(--text)">Load Last Order</strong> below to pre-fill this form with your previous order, then edit as needed.
+  </div>`;
 
   // Products
   if (custId === 'mhchef') {
@@ -863,6 +872,7 @@ function renderForm() {
   main.innerHTML = html;
   document.getElementById('footerBar').style.display = 'flex';
   updateFooter();
+  fetchLastOrder();
 }
 
 function buildSection(title, products) {
@@ -1008,6 +1018,79 @@ function showNotFound(msg) {
       <p>${msg}</p>
       <p style="margin-top:8px;font-size:13px">Please ask MH Meats to resend your order link.</p>
     </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LAST ORDER — fetch and pre-fill from Google Sheet
+// ══════════════════════════════════════════════════════════════════
+let lastOrderData = null;
+
+function fetchLastOrder() {
+  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+  if (!custId) return;
+
+  const callbackName = 'lastOrderCallback_' + Date.now();
+  const script = document.createElement('script');
+
+  window[callbackName] = function(data) {
+    delete window[callbackName];
+    if (document.body.contains(script)) document.body.removeChild(script);
+    if (!data.orders || !data.orders.length) return;
+
+    // Store last order data
+    lastOrderData = {};
+    data.orders.forEach(row => {
+      lastOrderData[row.productKey] = parseInt(row.quantity) || 0;
+    });
+
+    // Show the banner and button
+    const banner = document.getElementById('lastOrderBanner');
+    const btn = document.getElementById('lastOrderBtn');
+    if (banner) banner.style.display = 'block';
+    if (btn) btn.style.display = 'inline-block';
+  };
+
+  script.onerror = function() {
+    delete window[callbackName];
+    if (document.body.contains(script)) document.body.removeChild(script);
+  };
+
+  // Get most recent order for this customer regardless of day
+  script.src = APPS_SCRIPT_URL + '?action=getLastOrder&customer=' + custId + '&callback=' + callbackName;
+  document.body.appendChild(script);
+}
+
+function loadLastOrder() {
+  if (!lastOrderData) return;
+
+  // Pre-fill quantities from last order
+  quantities = { ...lastOrderData };
+
+  // Update all input fields on the page
+  document.querySelectorAll('.qty-input').forEach(input => {
+    const key = input.getAttribute('data-key');
+    if (key && quantities[key]) {
+      input.value = quantities[key];
+      const row = input.closest('.product-row');
+      if (row) row.classList.add('has-qty');
+    }
+  });
+
+  updateFooter();
+
+  // Update button to show it's loaded
+  const btn = document.getElementById('lastOrderBtn');
+  if (btn) {
+    btn.textContent = '✓ Last Order Loaded';
+    btn.style.color = 'var(--success)';
+    btn.style.borderColor = 'var(--success)';
+    btn.disabled = true;
+  }
+
+  const banner = document.getElementById('lastOrderBanner');
+  if (banner) {
+    banner.innerHTML = '<span style="color:var(--success);font-weight:600">✓ Last order loaded</span> — quantities pre-filled below. Edit as needed, then press Submit Order.';
+  }
 }
 
 init();
