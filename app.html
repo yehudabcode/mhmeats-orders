@@ -524,7 +524,14 @@
   <div class="logo">MH<span> MEATS</span> — DAILY ORDERS</div>
   <div class="header-right">
     <div class="date-badge" id="liveDateBadge"></div>
+    <button class="btn btn-ghost no-print" id="voiceBtn" onclick="toggleVoice()" title="Voice Input">🎤 Voice</button>
     <button class="btn btn-ghost no-print" onclick="clearDay()">🗑 Clear Day</button>
+  </div>
+  <div id="voiceStatus" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+    background:rgba(200,168,75,0.95);color:#000;padding:12px 24px;border-radius:30px;
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;z-index:999;
+    box-shadow:0 4px 20px rgba(0,0,0,0.5);text-align:center;min-width:280px">
+    🎤 Listening... say a product name and quantity
   </div>
 </div>
 
@@ -614,7 +621,7 @@
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
       <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+        <button class="btn btn-primary" onclick="printActivePanel()">🖨 Print Packer Lists</button>
       </div>
     </div>
     <div id="packerSheetContent"></div>
@@ -1060,6 +1067,8 @@ const CUSTOMERS = [
     {plu:null,name:"TURKEY DRUMSTICKS"},
     {plu:null,name:"TURKEY WINGS"},
     {plu:null,name:"TURKEY  FILLETS"}
+  ,
+    {plu:null,name:"PARGIOT (SKIN ON)",unit:"UNITS",mult:1}
   ]},
 
   { id:"mhchef",   name:"MH Meats Chef",     color:"#c0392b", products:[
@@ -1159,8 +1168,10 @@ const CUSTOMERS = [
     {plu:721,name:"CHICKEN LIVER"},
     {plu:476,name:"CHICKEN THIGHS"},
     {plu:456,name:"PARGIOT"},
-    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},
-    {plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"PARGIOT (SKIN ON)",unit:"UNITS",mult:1},
+    {plu:166,name:"SINGLE MEAT BALL",unit:"UNITS",flavoured:true},
+    {plu:81,name:"SINGLE 2OZ BEEFBURGER",unit:"UNITS",flavoured:true},
+    {plu:504,name:"SINGLE 5OZ AMERICAN BEEF BURGER",unit:"UNITS",flavoured:true},
     {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},
     {plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
     {plu:null,name:"BEEF STIR-FRY",flavoured:true},
@@ -1198,8 +1209,10 @@ const CUSTOMERS = [
     {plu:721,name:"CHICKEN LIVER"},
     {plu:476,name:"CHICKEN THIGHS"},
     {plu:456,name:"PARGIOT"},
-    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},
-    {plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"PARGIOT (SKIN ON)",unit:"UNITS",mult:1},
+    {plu:166,name:"SINGLE MEAT BALL",unit:"UNITS",flavoured:true},
+    {plu:81,name:"SINGLE 2OZ BEEFBURGER",unit:"UNITS",flavoured:true},
+    {plu:504,name:"SINGLE 5OZ AMERICAN BEEF BURGER",unit:"UNITS",flavoured:true},
     {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},
     {plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
     {plu:null,name:"BEEF STIR-FRY",flavoured:true},
@@ -1237,8 +1250,10 @@ const CUSTOMERS = [
     {plu:721,name:"CHICKEN LIVER"},
     {plu:476,name:"CHICKEN THIGHS"},
     {plu:456,name:"PARGIOT"},
-    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},
-    {plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"PARGIOT (SKIN ON)",unit:"UNITS",mult:1},
+    {plu:166,name:"SINGLE MEAT BALL",unit:"UNITS",flavoured:true},
+    {plu:81,name:"SINGLE 2OZ BEEFBURGER",unit:"UNITS",flavoured:true},
+    {plu:504,name:"SINGLE 5OZ AMERICAN BEEF BURGER",unit:"UNITS",flavoured:true},
     {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},
     {plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
     {plu:null,name:"BEEF STIR-FRY",flavoured:true},
@@ -1276,8 +1291,10 @@ const CUSTOMERS = [
     {plu:721,name:"CHICKEN LIVER"},
     {plu:476,name:"CHICKEN THIGHS"},
     {plu:456,name:"PARGIOT"},
-    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},
-    {plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"PARGIOT (SKIN ON)",unit:"UNITS",mult:1},
+    {plu:166,name:"SINGLE MEAT BALL",unit:"UNITS",flavoured:true},
+    {plu:81,name:"SINGLE 2OZ BEEFBURGER",unit:"UNITS",flavoured:true},
+    {plu:504,name:"SINGLE 5OZ AMERICAN BEEF BURGER",unit:"UNITS",flavoured:true},
     {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},
     {plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
     {plu:null,name:"BEEF STIR-FRY",flavoured:true},
@@ -1315,8 +1332,10 @@ const CUSTOMERS = [
     {plu:721,name:"CHICKEN LIVER"},
     {plu:476,name:"CHICKEN THIGHS"},
     {plu:456,name:"PARGIOT"},
-    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},
-    {plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"PARGIOT (SKIN ON)",unit:"UNITS",mult:1},
+    {plu:166,name:"SINGLE MEAT BALL",unit:"UNITS",flavoured:true},
+    {plu:81,name:"SINGLE 2OZ BEEFBURGER",unit:"UNITS",flavoured:true},
+    {plu:504,name:"SINGLE 5OZ AMERICAN BEEF BURGER",unit:"UNITS",flavoured:true},
     {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},
     {plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
     {plu:null,name:"BEEF STIR-FRY",flavoured:true},
@@ -1354,8 +1373,10 @@ const CUSTOMERS = [
     {plu:721,name:"CHICKEN LIVER"},
     {plu:476,name:"CHICKEN THIGHS"},
     {plu:456,name:"PARGIOT"},
-    {plu:null,name:"MEAT BALLS:24 PACK",flavoured:true},
-    {plu:null,name:"CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6",flavoured:true},
+    {plu:null,name:"PARGIOT (SKIN ON)",unit:"UNITS",mult:1},
+    {plu:166,name:"SINGLE MEAT BALL",unit:"UNITS",flavoured:true},
+    {plu:81,name:"SINGLE 2OZ BEEFBURGER",unit:"UNITS",flavoured:true},
+    {plu:504,name:"SINGLE 5OZ AMERICAN BEEF BURGER",unit:"UNITS",flavoured:true},
     {plu:null,name:"TASTY BEEF SKEWERS",flavoured:true},
     {plu:null,name:"MIXED SKEWERS PACK",flavoured:true},
     {plu:null,name:"BEEF STIR-FRY",flavoured:true},
@@ -2262,16 +2283,27 @@ function getTotalsForDay(day) {
 
 function renderChefSheet(day) {
   const totals = getTotalsForDay(day);
-  const flavoured = Object.values(totals).filter(i => i.flavoured);
-  const totalQty = flavoured.reduce((a,b) => a + b.qty, 0);
+  const allItems = Object.values(totals);
+  const beef = allItems.filter(i => i.beef);
+  const chicken = allItems.filter(i => !i.beef && !i.flavoured);
+  const flavoured = allItems.filter(i => i.flavoured);
+  const totalItems = allItems.length;
+  const totalQty = allItems.reduce((a,b) => a + b.qty, 0);
+
   let html = `<div class="summary-grid">
-    <div class="summary-card"><div class="summary-label">Flavoured Lines</div><div class="summary-value">${flavoured.length}</div><div class="summary-sub">for ${day}</div></div>
-    <div class="summary-card"><div class="summary-label">Total Units</div><div class="summary-value">${totalQty}</div><div class="summary-sub">flavoured products</div></div>
+    <div class="summary-card"><div class="summary-label">Total Lines</div><div class="summary-value">${totalItems}</div><div class="summary-sub">for ${day}</div></div>
+    <div class="summary-card"><div class="summary-label">Total Units</div><div class="summary-value">${totalQty}</div></div>
+    <div class="summary-card"><div class="summary-label">Beef</div><div class="summary-value">${beef.length}</div></div>
+    <div class="summary-card"><div class="summary-label">Chicken</div><div class="summary-value">${chicken.length}</div></div>
+    <div class="summary-card"><div class="summary-label">Flavoured</div><div class="summary-value">${flavoured.length}</div></div>
   </div>`;
-  if (!flavoured.length) {
-    html += `<div class="empty-state"><div class="empty-icon">🌶</div><div class="empty-text">No flavoured product orders for ${day}</div></div>`;
+
+  if (!totalItems) {
+    html += `<div class="empty-state"><div class="empty-icon">👨‍🍳</div><div class="empty-text">No orders for ${day}</div></div>`;
   } else {
-    html += buildSheetTable(`🌶 FLAVOURED PRODUCTS — ${day.toUpperCase()}`, flavoured, true);
+    if (beef.length) html += buildSheetTable(`🥩 BEEF — ${day.toUpperCase()}`, beef, true);
+    if (chicken.length) html += buildSheetTable(`🐔 CHICKEN — ${day.toUpperCase()}`, chicken, true);
+    if (flavoured.length) html += buildSheetTable(`🌶 FLAVOURED — ${day.toUpperCase()}`, flavoured, true);
   }
   document.getElementById('chefSheetContent').innerHTML = html;
 }
@@ -2358,6 +2390,10 @@ function renderButcherSheet(day) {
     'SHNITZELS - 6-PACK':         6,
     'SHNITZELS - 10-PACK':        10,
     'PARGIOT':                    6,
+    'PARGIOT (SKIN ON)':           1,
+    'SINGLE MEAT BALL':            1,
+    'SINGLE 2OZ BEEFBURGER':       1,
+    'SINGLE 5OZ AMERICAN BEEF BURGER': 1,
     'MINCED CHICKEN':             0.5,
     'CHICKEN STIRFRY':            0.5,
     // KS Meats / Halpern's / Kaye's packs
@@ -2640,9 +2676,9 @@ function renderPackerSheet(day) {
   }
 
   let html = '';
-  if (poultryItems.length)   html += buildPackerTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, poultryItems);
-  if (flavouredItems.length) html += buildPackerTable(`🌶 FLAVOURED PACKER LIST — ${day.toUpperCase()}`, flavouredItems);
   if (beefItems.length)      html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
+  if (poultryItems.length)   html += buildPackerTable(`🐔 CHICKEN PACKER LIST — ${day.toUpperCase()}`, poultryItems);
+  if (flavouredItems.length) html += buildPackerTable(`🌶 FLAVOURED PACKER LIST — ${day.toUpperCase()}`, flavouredItems);
 
   document.getElementById('packerSheetContent').innerHTML = html;
 }
@@ -2696,9 +2732,10 @@ function renderDispatchSheet(day) {
   let any = false;
   CUSTOMERS.forEach(cust => {
     const custOrders = orders[day][cust.id] || {};
-    const poultryItems = cust.products.map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
     const beefItems = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const all = [...poultryItems, ...beefItems];
+    const chickenItems = cust.products.filter(p=>!p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const flavouredItems = cust.products.filter(p=>p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const all = [...beefItems, ...chickenItems, ...flavouredItems];
     if (!all.length) return;
     any = true;
     html += buildSheetTable(`🚚 ${cust.name.toUpperCase()} — DISPATCH`, all, false);
@@ -2756,7 +2793,7 @@ const PORTAL_BASE = 'https://yehudabcode.github.io/mhmeats-orders/portal.html';
 function buildStaticLinksTable() {
   const tbody = document.getElementById('staticLinksBody');
   if (!tbody) return;
-  const remoteCustomers = CUSTOMERS.filter(c => c.id !== 'mhmeats');
+  const remoteCustomers = CUSTOMERS; // all customers including MH Meats
   tbody.innerHTML = remoteCustomers.map(c => {
     const link = PORTAL_BASE + '?customer=' + c.id;
     const whatsappMsg = encodeURIComponent('Hi, here is your MH Meats order link: ' + link);
@@ -2783,7 +2820,7 @@ function buildCustomerLinksTable() {
   const tbody = document.getElementById('customerLinksBody');
   if (!tbody) return;
 
-  const remoteCustomers = CUSTOMERS.filter(c => c.id !== 'mhmeats');
+  const remoteCustomers = CUSTOMERS; // all customers including MH Meats
 
   tbody.innerHTML = remoteCustomers.map(c => {
     const link = `${PORTAL_BASE}?customer=${c.id}`;
@@ -2808,7 +2845,7 @@ function buildCustomerLinksTable() {
 }
 
 function copyAllLinks() {
-  const remoteCustomers = CUSTOMERS.filter(c => c.id !== 'mhmeats');
+  const remoteCustomers = CUSTOMERS; // all customers including MH Meats
   const text = remoteCustomers.map(c =>
     c.name + ':\n' + PORTAL_BASE + '?customer=' + c.id
   ).join('\n\n');
@@ -3219,6 +3256,166 @@ function loadOrderCode() {
     resultEl.style.color='var(--danger)';
     resultEl.textContent = '✗ Invalid order code. Ask the customer to resend.';
   }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// VOICE ACTIVATION
+// ══════════════════════════════════════════════════════════════════
+let voiceActive = false;
+let recognition = null;
+
+function initVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('Voice input is not supported in this browser. Please use Chrome.');
+    return null;
+  }
+  const rec = new SpeechRecognition();
+  rec.continuous = true;
+  rec.interimResults = false;
+  rec.lang = 'en-GB';
+
+  rec.onresult = function(event) {
+    const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+    console.log('Voice heard:', transcript);
+    processVoiceCommand(transcript);
+  };
+
+  rec.onerror = function(e) {
+    console.warn('Voice error:', e.error);
+    if (e.error === 'no-speech') return;
+    stopVoice();
+  };
+
+  rec.onend = function() {
+    if (voiceActive) rec.start(); // keep listening
+  };
+
+  return rec;
+}
+
+function toggleVoice() {
+  if (voiceActive) {
+    stopVoice();
+  } else {
+    startVoice();
+  }
+}
+
+function startVoice() {
+  if (!recognition) recognition = initVoice();
+  if (!recognition) return;
+  voiceActive = true;
+  recognition.start();
+  document.getElementById('voiceBtn').style.background = 'var(--danger)';
+  document.getElementById('voiceBtn').style.color = '#fff';
+  document.getElementById('voiceBtn').textContent = '🎤 Stop';
+  document.getElementById('voiceStatus').style.display = 'block';
+  showToast('Voice activated — say product name and quantity');
+}
+
+function stopVoice() {
+  voiceActive = false;
+  if (recognition) recognition.stop();
+  document.getElementById('voiceBtn').style.background = '';
+  document.getElementById('voiceBtn').style.color = '';
+  document.getElementById('voiceBtn').textContent = '🎤 Voice';
+  document.getElementById('voiceStatus').style.display = 'none';
+  showToast('Voice stopped');
+}
+
+function processVoiceCommand(text) {
+  // Update status to show what was heard
+  document.getElementById('voiceStatus').textContent = '🎤 Heard: "' + text + '"';
+  setTimeout(() => {
+    if (voiceActive) document.getElementById('voiceStatus').textContent = '🎤 Listening... say a product name and quantity';
+  }, 2000);
+
+  // Parse quantity — look for numbers in the text
+  // Patterns: "20 whole roasters", "whole roaster 20", "twenty whole roasters"
+  const numberWords = {
+    'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,
+    'nine':9,'ten':10,'eleven':11,'twelve':12,'thirteen':13,'fourteen':14,
+    'fifteen':15,'sixteen':16,'seventeen':17,'eighteen':18,'nineteen':19,
+    'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,'seventy':70,
+    'eighty':80,'ninety':90,'hundred':100
+  };
+
+  let qty = null;
+  let productText = text;
+
+  // Replace number words
+  Object.keys(numberWords).forEach(word => {
+    text = text.replace(new RegExp('\\b' + word + '\\b', 'g'), numberWords[word]);
+  });
+
+  // Extract number
+  const numMatch = text.match(/\b(\d+)\b/);
+  if (numMatch) {
+    qty = parseInt(numMatch[1]);
+    productText = text.replace(numMatch[0], '').trim();
+  }
+
+  if (!qty || qty <= 0) return;
+  if (!productText) return;
+
+  // Find best matching product for current customer
+  if (!currentCustomer) {
+    showToast('Select a customer first');
+    return;
+  }
+
+  const cust = CUSTOMERS.find(c => c.id === currentCustomer);
+  if (!cust) return;
+
+  const allProducts = [
+    ...cust.products,
+    ...(BEEF_BY_CUSTOMER[currentCustomer] || [])
+  ];
+
+  // Find best match using fuzzy word matching
+  let bestMatch = null;
+  let bestScore = 0;
+
+  allProducts.forEach(p => {
+    const pName = p.name.toLowerCase();
+    const score = voiceMatchScore(productText, pName);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = p;
+    }
+  });
+
+  if (bestMatch && bestScore > 0.4) {
+    setQty(currentDay, currentCustomer, bestMatch, qty);
+    updateCustomerCounts();
+    updateSectionCount(currentCustomer, bestMatch.flavoured ? 'flavoured' : (bestMatch.unit ? 'beef' : 'poultry'));
+
+    // Re-render to show updated quantity
+    renderProducts(currentCustomer);
+
+    document.getElementById('voiceStatus').textContent =
+      '✓ Set ' + bestMatch.name + ' = ' + qty;
+    setTimeout(() => {
+      if (voiceActive) document.getElementById('voiceStatus').textContent = '🎤 Listening...';
+    }, 2000);
+    showToast(bestMatch.name + ' → ' + qty);
+  } else {
+    document.getElementById('voiceStatus').textContent = '? Not recognised: "' + productText + '"';
+  }
+}
+
+function voiceMatchScore(spoken, productName) {
+  // Score how well spoken text matches product name
+  const spokenWords = spoken.split(/\s+/).filter(w => w.length > 2);
+  const productWords = productName.split(/\s+/).filter(w => w.length > 2);
+  if (!spokenWords.length) return 0;
+
+  let matches = 0;
+  spokenWords.forEach(sw => {
+    if (productWords.some(pw => pw.includes(sw) || sw.includes(pw))) matches++;
+  });
+  return matches / Math.max(spokenWords.length, productWords.length);
 }
 
 // ── BOOT ──
