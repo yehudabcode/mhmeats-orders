@@ -516,6 +516,23 @@
   .cat-deli { background: rgba(139,94,0,0.3); color: #d0a040; }
   .cat-cat { background: rgba(26,92,74,0.3); color: #60c0a0; }
   .cat-mh { background: rgba(26,58,92,0.3); color: #7090c0; }
+
+  /* ── Dispatch section labels ── */
+  .sheet-block { margin-bottom: 24px; }
+  .sheet-block-header {
+    font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 8px 12px; background: rgba(255,255,255,.06); border-radius: 8px 8px 0 0;
+    border: 1px solid rgba(255,255,255,.12); border-bottom: none; color: #e8b84b;
+  }
+  .dispatch-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 5px 12px; border-left: 3px solid;
+  }
+  .dispatch-beef     { background: rgba(192,57,43,.12); color: #e57373; border-color: #c0392b; }
+  .dispatch-chicken  { background: rgba(230,126,34,.12); color: #ffb74d; border-color: #e67e22; }
+  .dispatch-flavoured{ background: rgba(142,68,173,.12); color: #ce93d8; border-color: #8e44ad; }
+  .sheet-block .sheet-table { border-radius: 0; margin-bottom: 0; border: 1px solid rgba(255,255,255,.08); border-top: none; }
+  .sheet-block .sheet-table:last-child { border-radius: 0 0 8px 8px; }
 </style>
 </head>
 <body>
@@ -2732,16 +2749,54 @@ function renderDispatchSheet(day) {
   let any = false;
   CUSTOMERS.forEach(cust => {
     const custOrders = orders[day][cust.id] || {};
-    const beefItems = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const chickenItems = cust.products.filter(p=>!p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const beefItems     = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const chickenItems  = cust.products.filter(p=>!p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
     const flavouredItems = cust.products.filter(p=>p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const all = [...beefItems, ...chickenItems, ...flavouredItems];
-    if (!all.length) return;
+    if (!beefItems.length && !chickenItems.length && !flavouredItems.length) return;
     any = true;
-    html += buildSheetTable(`🚚 ${cust.name.toUpperCase()} — DISPATCH`, all, false);
+
+    // Customer header
+    html += `<div class="sheet-block">
+      <div class="sheet-block-header">🚚 ${cust.name.toUpperCase()} — DISPATCH</div>`;
+
+    // Beef section
+    if (beefItems.length) {
+      html += `<div class="dispatch-section-label dispatch-beef">🥩 BEEF</div>`;
+      html += buildSheetTableInner(beefItems, false);
+    }
+
+    // Chicken / Poultry section
+    if (chickenItems.length) {
+      html += `<div class="dispatch-section-label dispatch-chicken">🍗 CHICKEN / POULTRY</div>`;
+      html += buildSheetTableInner(chickenItems, false);
+    }
+
+    // Flavoured section
+    if (flavouredItems.length) {
+      html += `<div class="dispatch-section-label dispatch-flavoured">🌶 FLAVOURED & MARINATED</div>`;
+      html += buildSheetTableInner(flavouredItems, false);
+    }
+
+    html += `</div>`;
   });
   if (!any) html = `<div class="empty-state"><div class="empty-icon">🚚</div><div class="empty-text">No orders for ${day}</div></div>`;
   document.getElementById('dispatchSheetContent').innerHTML = html;
+}
+
+// Inner table builder used by dispatch (no outer wrapper/title — that's handled by the caller)
+function buildSheetTableInner(items, showSources) {
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const rows = items.sort((a,b) => (a.plu||9999)-(b.plu||9999)).map(item => {
+    const sourceTags = (showSources && item.sources && item.sources.length > 1)
+      ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
+      : '';
+    return `<tr class="${item.qty > 10 ? 'row-highlight' : ''}">
+      <td class="td-plu">${item.plu || '—'}</td>
+      <td>${item.name}${sourceTags ? ' '+sourceTags : ''}</td>
+      <td class="td-qty">${item.qty}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="sheet-table"><thead><tr><th>PLU</th><th>Product</th><th>Qty</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 
