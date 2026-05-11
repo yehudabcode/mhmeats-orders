@@ -139,6 +139,20 @@
     background: rgba(200,168,75,0.1); border: 1px solid rgba(200,168,75,0.3);
     border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 12px; color: var(--accent);
   }
+
+  /* Order History */
+  .history-day { background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden; }
+  .history-day-header { padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none; }
+  .history-day-title { font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--text); }
+  .history-day-meta { font-family:'DM Mono',monospace;font-size:10px;color:var(--muted); }
+  .history-items { padding:4px 0; }
+  .history-item { display:flex;align-items:center;padding:5px 14px;border-bottom:1px solid var(--border);font-size:12px;gap:10px; }
+  .history-item:last-child { border-bottom:none; }
+  .history-item-plu { font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);width:36px;flex-shrink:0; }
+  .history-item-name { flex:1; }
+  .history-item-qty { font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--accent); }
+  .reorder-btn { background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:3px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;white-space:nowrap; }
+  .reorder-btn:hover { border-color:var(--accent);color:var(--accent); }
 </style>
 </head>
 <body>
@@ -869,10 +883,24 @@ function renderForm() {
     if (beef.length) html += buildSection('🥩 Beef', beef);
   }
 
+  // Add order history section
+  html += `<div id="orderHistorySection" style="margin-top:24px">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;
+      letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;
+      display:flex;align-items:center;gap:10px">
+      📋 ORDER HISTORY
+      <span style="font-size:10px;font-weight:400;color:#555">(last 7 days)</span>
+    </div>
+    <div id="historyContent" style="color:var(--muted);font-size:12px">
+      Loading history...
+    </div>
+  </div>`;
+
   main.innerHTML = html;
   document.getElementById('footerBar').style.display = 'flex';
   updateFooter();
   fetchLastOrder();
+  fetchOrderHistory();
 }
 
 function buildSection(title, products) {
@@ -1090,6 +1118,154 @@ function loadLastOrder() {
   const banner = document.getElementById('lastOrderBanner');
   if (banner) {
     banner.innerHTML = '<span style="color:var(--success);font-weight:600">✓ Last order loaded</span> — quantities pre-filled below. Edit as needed, then press Submit Order.';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ORDER HISTORY — last 7 days
+// ══════════════════════════════════════════════════════════════════
+let orderHistory = null;
+
+function fetchOrderHistory() {
+  if (!custId || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    document.getElementById('historyContent').innerHTML =
+      '<div style="color:#555;font-size:11px;padding:8px 0">No history available.</div>';
+    return;
+  }
+
+  const callbackName = 'historyCallback_' + Date.now();
+  const script = document.createElement('script');
+
+  window[callbackName] = function(data) {
+    delete window[callbackName];
+    if (document.body.contains(script)) document.body.removeChild(script);
+
+    if (!data.orders || !data.orders.length) {
+      document.getElementById('historyContent').innerHTML =
+        '<div style="color:#555;font-size:11px;padding:8px 0">No order history found.</div>';
+      return;
+    }
+
+    orderHistory = data.orders;
+    renderOrderHistory(data.orders);
+  };
+
+  script.onerror = function() {
+    delete window[callbackName];
+    if (document.body.contains(script)) document.body.removeChild(script);
+    document.getElementById('historyContent').innerHTML =
+      '<div style="color:#555;font-size:11px;padding:8px 0">Could not load history.</div>';
+  };
+
+  script.src = APPS_SCRIPT_URL + '?action=getHistory&customer=' + custId + '&days=7&callback=' + callbackName;
+  document.body.appendChild(script);
+}
+
+function renderOrderHistory(orders) {
+  const historyEl = document.getElementById('historyContent');
+  if (!historyEl) return;
+
+  // Group by day + timestamp (each submission is a group)
+  const groups = {};
+  orders.forEach(row => {
+    const key = row.day + '|' + row.timestamp;
+    if (!groups[key]) groups[key] = { day: row.day, timestamp: row.timestamp, items: [] };
+    groups[key].items.push(row);
+  });
+
+  const sortedGroups = Object.values(groups).sort((a,b) =>
+    new Date(b.timestamp) - new Date(a.timestamp)
+  );
+
+  if (!sortedGroups.length) {
+    historyEl.innerHTML = '<div style="color:#555;font-size:11px;padding:8px 0">No order history found.</div>';
+    return;
+  }
+
+  historyEl.innerHTML = sortedGroups.map((group, gi) => {
+    const date = new Date(group.timestamp);
+    const dateStr = date.toLocaleDateString('en-GB', {weekday:'short', day:'2-digit', month:'short'});
+    const timeStr = date.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    const itemCount = group.items.length;
+
+    const itemRows = group.items.map(item => {
+      const parts = (item.productKey || '').split('|');
+      const plu = parts[0] || '—';
+      const name = item.productName || parts[1] || item.productKey;
+      return `<div class="history-item">
+        <span class="history-item-plu">${plu}</span>
+        <span class="history-item-name">${name}</span>
+        <span class="history-item-qty">× ${item.quantity}</span>
+      </div>`;
+    }).join('');
+
+    // Build reorder data for this group
+    const reorderData = JSON.stringify(group.items.reduce((acc, item) => {
+      acc[item.productKey] = parseInt(item.quantity) || 0;
+      return acc;
+    }, {})).replace(/"/g, '&quot;');
+
+    return `<div class="history-day">
+      <div class="history-day-header" onclick="toggleHistory(${gi})">
+        <div>
+          <span class="history-day-title">${group.day}</span>
+          <span class="history-day-meta" style="margin-left:10px">${dateStr} at ${timeStr}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="history-day-meta">${itemCount} items</span>
+          <button class="reorder-btn" onclick="event.stopPropagation();reorderFromHistory('${reorderData}')">
+            🔄 Reorder
+          </button>
+          <span id="history-toggle-${gi}" style="color:var(--muted);font-size:10px">▼</span>
+        </div>
+      </div>
+      <div class="history-items" id="history-items-${gi}" style="display:none">
+        ${itemRows}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHistory(idx) {
+  const items = document.getElementById('history-items-' + idx);
+  const toggle = document.getElementById('history-toggle-' + idx);
+  if (items.style.display === 'none') {
+    items.style.display = 'block';
+    toggle.textContent = '▲';
+  } else {
+    items.style.display = 'none';
+    toggle.textContent = '▼';
+  }
+}
+
+function reorderFromHistory(dataStr) {
+  try {
+    const data = JSON.parse(dataStr.replace(/&quot;/g, '"'));
+    quantities = { ...data };
+
+    // Update all visible inputs
+    document.querySelectorAll('.qty-input').forEach(input => {
+      const key = input.getAttribute('data-key');
+      if (key && quantities[key]) {
+        input.value = quantities[key];
+        const row = input.closest('.product-row');
+        if (row) row.classList.add('has-qty');
+      }
+    });
+
+    updateFooter();
+
+    // Scroll to top of form
+    document.getElementById('mainArea').scrollTo({top: 0, behavior: 'smooth'});
+
+    // Show confirmation
+    const banner = document.getElementById('lastOrderBanner');
+    if (banner) {
+      banner.style.display = 'block';
+      banner.innerHTML = '<span style="color:var(--success);font-weight:600">✓ Order loaded from history</span> — quantities pre-filled. Edit as needed and press Submit Order.';
+    }
+  } catch(e) {
+    console.error('Reorder error:', e);
   }
 }
 
