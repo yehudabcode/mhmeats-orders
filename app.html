@@ -660,6 +660,10 @@
 
   <!-- ════════════════════════════════ CUSTOMER LINKS PANEL ════════════════════════════════ -->
   <div class="panel" id="panel-links" data-print-title="CUSTOMER LINKS">
+    <div class="sheet-controls no-print">
+      <div class="sheet-day-btns"></div>
+      <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+    </div>
     <div style="max-width:900px;margin:0 auto">
       <div class="card">
         <div class="card-header">
@@ -685,6 +689,10 @@
 
   <!-- ════════════════════════════════ REMOTE ORDERS PANEL ════════════════════════════════ -->
   <div class="panel" id="panel-remote" data-print-title="REMOTE ORDERS">
+    <div class="sheet-controls no-print">
+      <div class="sheet-day-btns"></div>
+      <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+    </div>
     <div style="max-width:820px;margin:0 auto">
 
       <!-- Customer links table -->
@@ -3049,7 +3057,7 @@ function printActivePanel() {
     <div class="date">${today}</div>
   </div>
   ${contentEl.innerHTML}
-  window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body></html>`;
 
   const pw = window.open('', '_blank', 'width=900,height=700');
