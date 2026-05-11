@@ -2057,9 +2057,8 @@ function init() {
   try { buildCustomerList(); } catch(e) { console.error('buildCustomerList error:', e); }
   try { buildDayButtonSets(); } catch(e) { console.error('buildDayButtonSets error:', e); }
   try {
-    if (!localStorage.getItem('mhmeats_script_url')) {
-      localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2feew5djxBI5uLkmxEyFXV5fwzrYcEIEDwoJmsrWUTzg6/exec');
-    }
+    // Always update to latest URL
+    localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbyKK1KjFVottrY1O23Xqm6eN81RMDv8r9u5-UKM7pGLRRmMLNgB3w1FlfuP5R5tbOdX/exec');
   } catch(e) {}
 }
 
