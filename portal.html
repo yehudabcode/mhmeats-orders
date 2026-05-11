@@ -186,7 +186,16 @@
            cursor:pointer;margin-right:8px;display:none">
     📋 Load Last Order
   </button>
+  <button id="voiceBtn" onclick="toggleVoice()"
+    style="padding:9px 14px;background:transparent;border:1px solid #444;border-radius:6px;
+           color:#888;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;
+           cursor:pointer;margin-right:8px;transition:.2s">🎤</button>
   <button class="submit-btn" id="submitBtn" onclick="submitOrder()">Submit Order →</button>
+</div>
+<div id="voiceStatus" style="display:none;position:fixed;bottom:72px;left:50%;transform:translateX(-50%);
+  background:#1a1a2e;border:1px solid #4b9ee8;color:#90caf9;padding:8px 18px;border-radius:20px;
+  font-size:13px;font-family:'Barlow Condensed',sans-serif;z-index:500;white-space:nowrap">
+  🎤 Listening...
 </div>
 
 <script>
@@ -1267,6 +1276,137 @@ function reorderFromHistory(dataStr) {
   } catch(e) {
     console.error('Reorder error:', e);
   }
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// VOICE INPUT
+// ══════════════════════════════════════════════════════════════════
+let recognition = null;
+let voiceActive = false;
+
+function initVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('Voice input is not supported in this browser. Please use Chrome.');
+    return null;
+  }
+  const r = new SpeechRecognition();
+  r.continuous = true;
+  r.interimResults = false;
+  r.lang = 'en-GB';
+  r.onresult = e => {
+    const text = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
+    processVoiceCommand(text);
+  };
+  r.onerror = e => {
+    if (e.error !== 'aborted') showVoiceStatus('Error: ' + e.error, 3000);
+  };
+  r.onend = () => { if (voiceActive) r.start(); };
+  return r;
+}
+
+function toggleVoice() {
+  if (voiceActive) stopVoice();
+  else startVoice();
+}
+
+function startVoice() {
+  if (!recognition) recognition = initVoice();
+  if (!recognition) return;
+  voiceActive = true;
+  recognition.start();
+  const btn = document.getElementById('voiceBtn');
+  btn.style.background = '#c0392b';
+  btn.style.color = '#fff';
+  btn.style.borderColor = '#c0392b';
+  btn.textContent = '🎤 Stop';
+  showVoiceStatus('🎤 Listening... say product name and quantity', 0);
+}
+
+function stopVoice() {
+  voiceActive = false;
+  if (recognition) recognition.stop();
+  const btn = document.getElementById('voiceBtn');
+  btn.style.background = 'transparent';
+  btn.style.color = '#888';
+  btn.style.borderColor = '#444';
+  btn.textContent = '🎤';
+  document.getElementById('voiceStatus').style.display = 'none';
+}
+
+function showVoiceStatus(msg, duration) {
+  const el = document.getElementById('voiceStatus');
+  el.textContent = msg;
+  el.style.display = 'block';
+  if (duration > 0) setTimeout(() => {
+    if (!voiceActive) el.style.display = 'none';
+    else el.textContent = '🎤 Listening...';
+  }, duration);
+}
+
+function processVoiceCommand(text) {
+  showVoiceStatus('🎤 Heard: "' + text + '"', 2500);
+
+  // Number word conversion
+  const numberWords = {
+    'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,
+    'nine':9,'ten':10,'eleven':11,'twelve':12,'thirteen':13,'fourteen':14,
+    'fifteen':15,'sixteen':16,'seventeen':17,'eighteen':18,'nineteen':19,
+    'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,'seventy':70,
+    'eighty':80,'ninety':90,'hundred':100
+  };
+  let t = text;
+  Object.keys(numberWords).forEach(w => {
+    t = t.replace(new RegExp('\\b' + w + '\\b', 'g'), numberWords[w]);
+  });
+
+  const numMatch = t.match(/\b(\d+)\b/);
+  if (!numMatch) return;
+  const qty = parseInt(numMatch[1]);
+  const productText = t.replace(numMatch[0], '').trim();
+  if (!qty || qty <= 0 || !productText) return;
+
+  // Build full product list for this customer
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  if (!cust) return;
+  const allProducts = [
+    ...cust.products,
+    ...(BEEF_BY_CUSTOMER[custId] || [])
+  ];
+
+  // Fuzzy match
+  let bestMatch = null;
+  let bestScore = 0;
+  allProducts.forEach(p => {
+    const score = voiceScore(productText, p.name.toLowerCase());
+    if (score > bestScore) { bestScore = score; bestMatch = p; }
+  });
+
+  if (bestMatch && bestScore > 0.35) {
+    const k = orderKey(bestMatch);
+    // Set the input field value
+    const safeKey = k.replace(/[^a-z0-9]/gi, '_');
+    const input = document.querySelector('[data-key="' + k + '"]');
+    if (input) {
+      input.value = qty;
+      setQty(k, qty, input);
+      // Scroll to it
+      input.closest('.product-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    showVoiceStatus('✓ ' + bestMatch.name + ' = ' + qty, 2500);
+  } else {
+    showVoiceStatus('? Not recognised: "' + productText + '"', 3000);
+  }
+}
+
+function voiceScore(spoken, productName) {
+  const sw = spoken.split(/\s+/).filter(w => w.length > 2);
+  const pw = productName.split(/\s+/).filter(w => w.length > 2);
+  if (!sw.length) return 0;
+  let matches = 0;
+  sw.forEach(s => { if (pw.some(p => p.includes(s) || s.includes(p))) matches++; });
+  return matches / Math.max(sw.length, pw.length);
 }
 
 init();
