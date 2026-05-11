@@ -2959,7 +2959,7 @@ function pullRemoteOrders() {
 
   if (!scriptUrl) {
     status.style.color = 'var(--danger)';
-    status.textContent = '✗ No Apps Script URL saved — paste it in the box below and click Save first.';
+    status.textContent = '✗ No Apps Script URL saved.';
     return;
   }
 
@@ -2967,131 +2967,161 @@ function pullRemoteOrders() {
   status.textContent = '⏳ Pulling orders...';
   results.innerHTML = '';
 
-  const callbackName = 'mhCallback_' + Date.now();
+  const url = scriptUrl + '?action=getOrdersWithHistory&day=' + encodeURIComponent(day);
+
+  fetch(url)
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(data) {
+      handlePullData(data, day, status, results);
+    })
+    .catch(function(err) {
+      // fetch blocked by CORS — fall back to JSONP
+      console.log('Fetch failed, trying JSONP:', err.message);
+      pullViaJsonp(scriptUrl, day, status, results);
+    });
+}
+
+function pullViaJsonp(scriptUrl, day, status, results) {
+  const callbackName = 'mhCb_' + Date.now();
   const script = document.createElement('script');
+  let done = false;
 
-  window[callbackName] = function(data) {
-    delete window[callbackName];
-    if (document.body.contains(script)) document.body.removeChild(script);
-
-    if (!data || (!data.orders && !data.history)) {
-      status.style.color = 'var(--danger)';
-      status.textContent = '✗ No data returned. Check your Apps Script URL and Sheet setup.';
-      return;
-    }
-
-    const orderRows = data.orders || [];
-    const historyRows = data.history || [];
-
-    if (!orderRows.length && !historyRows.length) {
-      status.style.color = 'var(--muted)';
-      status.textContent = 'No remote orders found for ' + day + '.';
-      return;
-    }
-
-    // Load orders into the daily orders state
-    let loaded = 0;
-    const custsSeen = new Set();
-    orderRows.forEach(row => {
-      const { customer, productKey, quantity } = row;
-      if (!orders[day]) orders[day] = {};
-      if (!orders[day][customer]) orders[day][customer] = {};
-      orders[day][customer][productKey] = parseInt(quantity) || 0;
-      loaded++;
-      custsSeen.add(customer);
-    });
-
-    saveToStorage();
-    updateCustomerCounts();
-    updateSummary();
-
-    // ── Build display: current orders + history per customer ──
-    // Group current orders by customer
-    const byCustomer = {};
-    orderRows.forEach(row => {
-      if (!byCustomer[row.customer]) byCustomer[row.customer] = { current: [], name: row.customerName || row.customer };
-      byCustomer[row.customer].current.push(row);
-    });
-
-    // Group history by customer
-    const histByCustomer = {};
-    historyRows.forEach(row => {
-      if (!histByCustomer[row.customer]) histByCustomer[row.customer] = [];
-      histByCustomer[row.customer].push(row);
-    });
-
-    // Merge all customers seen
-    const allCusts = new Set([...Object.keys(byCustomer), ...Object.keys(histByCustomer)]);
-
-    let html = '';
-    allCusts.forEach(custId => {
-      const custObj = CUSTOMERS.find(c => c.id === custId);
-      const custName = (byCustomer[custId] && byCustomer[custId].name) || (custObj && custObj.name) || custId;
-      const currentItems = byCustomer[custId] ? byCustomer[custId].current : [];
-      const histItems = histByCustomer[custId] || [];
-
-      html += '<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden">';
-
-      // Customer header
-      html += '<div style="background:rgba(255,255,255,.05);padding:8px 14px;font-weight:700;font-size:13px;display:flex;justify-content:space-between">';
-      html += '<span>' + custName + '</span>';
-      html += '<span style="font-size:11px;color:var(--muted)">' + currentItems.length + ' items</span>';
-      html += '</div>';
-
-      // Current order
-      if (currentItems.length) {
-        html += '<div style="padding:6px 14px 2px;font-size:11px;color:var(--success);font-weight:600;text-transform:uppercase;letter-spacing:.06em">✓ Current Order</div>';
-        currentItems.forEach(row => {
-          html += '<div style="display:flex;padding:5px 14px;border-top:1px solid rgba(255,255,255,.04);font-size:13px">';
-          html += '<span style="flex:1">' + (row.productName || row.productKey) + '</span>';
-          html += '<span style="font-weight:700;color:var(--accent);font-family:monospace">' + row.quantity + '</span>';
-          html += '</div>';
-        });
-      }
-
-      // Order history
-      if (histItems.length) {
-        // Group history by timestamp
-        const histGroups = {};
-        histItems.forEach(r => {
-          const key = r.timestamp || 'unknown';
-          if (!histGroups[key]) histGroups[key] = [];
-          histGroups[key].push(r);
-        });
-        const sortedGroups = Object.entries(histGroups).sort((a,b) => new Date(b[0]) - new Date(a[0])).slice(0,3);
-
-        html += '<div style="padding:6px 14px 2px;margin-top:4px;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--border)">📋 Previous Orders</div>';
-        sortedGroups.forEach(([ts, rows]) => {
-          const d = ts !== 'unknown' ? new Date(ts).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Earlier';
-          html += '<div style="padding:4px 14px 2px;font-size:11px;color:var(--muted)">' + d + '</div>';
-          rows.forEach(row => {
-            html += '<div style="display:flex;padding:3px 14px;border-top:1px solid rgba(255,255,255,.03);font-size:12px;opacity:.7">';
-            html += '<span style="flex:1">' + (row.productName || row.productKey) + '</span>';
-            html += '<span style="font-weight:600;font-family:monospace">' + row.quantity + '</span>';
-            html += '</div>';
-          });
-        });
-      }
-
-      html += '</div>';
-    });
-
-    results.innerHTML = html;
-    status.style.color = 'var(--success)';
-    status.textContent = '✓ Loaded ' + loaded + ' order lines from ' + custsSeen.size + ' customer(s)';
-  };
-
-  script.onerror = function() {
+  const timer = setTimeout(function() {
+    if (done) return;
+    done = true;
     delete window[callbackName];
     if (document.body.contains(script)) document.body.removeChild(script);
     status.style.color = 'var(--danger)';
-    status.textContent = '✗ Connection failed. Check your Apps Script URL in the box below.';
+    status.textContent = '✗ Connection timed out. Check the URL is correct and deployed as Anyone.';
+  }, 10000);
+
+  window[callbackName] = function(data) {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    delete window[callbackName];
+    if (document.body.contains(script)) document.body.removeChild(script);
+    handlePullData(data, day, status, results);
   };
 
-  // Request both current orders AND history in one call
+  script.onerror = function() {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    delete window[callbackName];
+    if (document.body.contains(script)) document.body.removeChild(script);
+    status.style.color = 'var(--danger)';
+    status.textContent = '✗ Connection failed. Make sure deployment is set to "Anyone" and URL ends in /exec';
+  };
+
   script.src = scriptUrl + '?action=getOrdersWithHistory&day=' + encodeURIComponent(day) + '&callback=' + encodeURIComponent(callbackName);
   document.body.appendChild(script);
 }
+
+function handlePullData(data, day, status, results) {
+  if (!data || (!data.orders && !data.history)) {
+    status.style.color = 'var(--danger)';
+    status.textContent = '✗ Script returned no data. Make sure the Orders sheet exists in your Google Sheet.';
+    return;
+  }
+
+  const orderRows = data.orders || [];
+  const historyRows = data.history || [];
+
+  if (!orderRows.length && !historyRows.length) {
+    status.style.color = 'var(--muted)';
+    status.textContent = 'No remote orders found for ' + day + '.';
+    return;
+  }
+
+  // Load into daily orders state
+  let loaded = 0;
+  const custsSeen = new Set();
+  orderRows.forEach(function(row) {
+    const { customer, productKey, quantity } = row;
+    if (!orders[day]) orders[day] = {};
+    if (!orders[day][customer]) orders[day][customer] = {};
+    orders[day][customer][productKey] = parseInt(quantity) || 0;
+    loaded++;
+    custsSeen.add(customer);
+  });
+
+  saveToStorage();
+  updateCustomerCounts();
+  updateSummary();
+
+  // Build display
+  const byCustomer = {};
+  orderRows.forEach(function(row) {
+    if (!byCustomer[row.customer]) byCustomer[row.customer] = { current: [], name: row.customerName || row.customer };
+    byCustomer[row.customer].current.push(row);
+  });
+
+  const histByCustomer = {};
+  historyRows.forEach(function(row) {
+    if (!histByCustomer[row.customer]) histByCustomer[row.customer] = [];
+    histByCustomer[row.customer].push(row);
+  });
+
+  const allCusts = new Set([...Object.keys(byCustomer), ...Object.keys(histByCustomer)]);
+  let html = '';
+
+  allCusts.forEach(function(custId) {
+    const custObj = CUSTOMERS.find(function(c) { return c.id === custId; });
+    const custName = (byCustomer[custId] && byCustomer[custId].name) || (custObj && custObj.name) || custId;
+    const currentItems = byCustomer[custId] ? byCustomer[custId].current : [];
+    const histItems = histByCustomer[custId] || [];
+
+    html += '<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden">';
+    html += '<div style="background:rgba(255,255,255,.05);padding:8px 14px;font-weight:700;font-size:13px;display:flex;justify-content:space-between">';
+    html += '<span>' + custName + '</span>';
+    html += '<span style="font-size:11px;color:var(--muted)">' + currentItems.length + ' items</span>';
+    html += '</div>';
+
+    if (currentItems.length) {
+      html += '<div style="padding:5px 14px 2px;font-size:11px;color:var(--success);font-weight:600;text-transform:uppercase;letter-spacing:.06em">✓ Current Order</div>';
+      currentItems.forEach(function(row) {
+        html += '<div style="display:flex;padding:5px 14px;border-top:1px solid rgba(255,255,255,.04);font-size:13px">';
+        html += '<span style="flex:1">' + (row.productName || row.productKey) + '</span>';
+        html += '<span style="font-weight:700;color:var(--accent);font-family:monospace">' + row.quantity + '</span>';
+        html += '</div>';
+      });
+    }
+
+    if (histItems.length) {
+      const histGroups = {};
+      histItems.forEach(function(r) {
+        const key = r.timestamp || 'unknown';
+        if (!histGroups[key]) histGroups[key] = [];
+        histGroups[key].push(r);
+      });
+      const sortedGroups = Object.entries(histGroups).sort(function(a,b){ return new Date(b[0]) - new Date(a[0]); }).slice(0,3);
+
+      html += '<div style="padding:5px 14px 2px;margin-top:4px;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--border)">📋 Previous Orders</div>';
+      sortedGroups.forEach(function(group) {
+        const ts = group[0]; const rows = group[1];
+        const d = ts !== 'unknown' ? new Date(ts).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Earlier';
+        html += '<div style="padding:3px 14px;font-size:11px;color:var(--muted)">' + d + '</div>';
+        rows.forEach(function(row) {
+          html += '<div style="display:flex;padding:3px 14px;border-top:1px solid rgba(255,255,255,.03);font-size:12px;opacity:.7">';
+          html += '<span style="flex:1">' + (row.productName || row.productKey) + '</span>';
+          html += '<span style="font-weight:600;font-family:monospace">' + row.quantity + '</span>';
+          html += '</div>';
+        });
+      });
+    }
+
+    html += '</div>';
+  });
+
+  results.innerHTML = html;
+  status.style.color = 'var(--success)';
+  status.textContent = '✓ Loaded ' + loaded + ' order lines from ' + custsSeen.size + ' customer(s)';
+}
+
 
 // Legacy code-based loading still works as fallback
 // ══════════════════════════════════════════════════════════════════
