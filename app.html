@@ -3060,10 +3060,16 @@ function printActivePanel() {
 </body></html>`;
 
   const pw = window.open('', '_blank', 'width=900,height=700');
-  if (!pw) { alert('Pop-up blocked — please allow pop-ups for this page then try again.'); return; }
+  if (!pw) { alert('Pop-up blocked — please allow pop-ups for this page, then try again.'); return; }
   pw.document.write(printHTML);
   pw.document.close();
-  setTimeout(function(){ pw.focus(); pw.print(); }, 400);
+  // Belt-and-braces: try both routes — onload inside the window AND a timed call from here
+  try {
+    pw.onload = function() { pw.focus(); pw.print(); };
+  } catch(e) {}
+  setTimeout(function() {
+    try { pw.focus(); pw.print(); } catch(e) {}
+  }, 600);
 }
 
 // ══════════════════════════════════════════════════════════════════
