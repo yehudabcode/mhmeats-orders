@@ -3057,12 +3057,13 @@ function printActivePanel() {
     <div class="date">${today}</div>
   </div>
   ${contentEl.innerHTML}
-  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body></html>`;
 
   const pw = window.open('', '_blank', 'width=900,height=700');
+  if (!pw) { alert('Pop-up blocked — please allow pop-ups for this page then try again.'); return; }
   pw.document.write(printHTML);
   pw.document.close();
+  setTimeout(function(){ pw.focus(); pw.print(); }, 400);
 }
 
 // ══════════════════════════════════════════════════════════════════
