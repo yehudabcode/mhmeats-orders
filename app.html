@@ -634,8 +634,9 @@
   <div class="panel" id="panel-chef" data-print-title="CHEF PRODUCTION SHEET">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="chefDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button onclick="printActivePanel()" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">🖨 CHEF PRODUCTION SHEET</button>
+      <div class="ml-auto flex gap8" style="flex-wrap:wrap;gap:6px">
+        <button onclick="printSection('chef','flavoured')" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 🌶 Flavoured</button>
+        <button onclick="printSection('chef','all')" style="background:#444;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 All</button>
       </div>
     </div>
     <div id="chefSheetContent"></div>
@@ -645,8 +646,10 @@
   <div class="panel" id="panel-butcher" data-print-title="BUTCHER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button onclick="printActivePanel()" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">🖨 BUTCHER LISTS</button>
+      <div class="ml-auto flex gap8" style="flex-wrap:wrap;gap:6px">
+        <button onclick="printSection('butcher','chicken')" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 🐔 Chicken</button>
+        <button onclick="printSection('butcher','beef')" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 🥩 Beef</button>
+        <button onclick="printSection('butcher','all')" style="background:#444;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 All</button>
       </div>
     </div>
     <div id="butcherSheetContent"></div>
@@ -656,8 +659,10 @@
   <div class="panel" id="panel-packer" data-print-title="PACKER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button onclick="printActivePanel()" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">🖨 PACKER LISTS</button>
+      <div class="ml-auto flex gap8" style="flex-wrap:wrap;gap:6px">
+        <button onclick="printSection('packer','chicken')" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 🐔 Chicken</button>
+        <button onclick="printSection('packer','beef')" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 🥩 Beef</button>
+        <button onclick="printSection('packer','all')" style="background:#444;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 All</button>
       </div>
     </div>
     <div id="packerSheetContent"></div>
@@ -667,8 +672,11 @@
   <div class="panel" id="panel-dispatch" data-print-title="DISPATCH SHEETS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="dispatchDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button onclick="printActivePanel()" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">🖨 DISPATCH SHEETS</button>
+      <div class="ml-auto flex gap8" style="flex-wrap:wrap;gap:6px">
+        <button onclick="printSection('dispatch','chicken')" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 🐔 Chicken</button>
+        <button onclick="printSection('dispatch','beef')" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 🥩 Beef</button>
+        <button onclick="printSection('dispatch','flavoured')" style="background:#c9a227;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 🌶 Flavoured</button>
+        <button onclick="printSection('dispatch','all')" style="background:#444;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap">🖨 All</button>
       </div>
     </div>
     <div id="dispatchSheetContent"></div>
@@ -1454,7 +1462,7 @@ const CUSTOMERS = [
 const BEEF_BY_CUSTOMER = {
   mhmeats: [
     {plu:114,name:"BEEF RIBLETS (FLANKEN)",unit:"UNITS",mult:2},
-    {plu:107,name:"BEEF STIRFRY",unit:"KG",mult:0.5},
+    {plu:107,name:"BEEF STIRFRY",unit:"KG",mult:1},
     {plu:51,name:"BEEF SPARE RIBS",unit:"UNITS",mult:4},
     {plu:51,name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {plu:108,name:"BLADE JOINT",unit:"UNITS",mult:1},
@@ -1465,9 +1473,9 @@ const BEEF_BY_CUSTOMER = {
     {plu:16,name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {plu:14,name:"BOLA STEAKS",unit:"UNITS",mult:2},
     {plu:42,name:"COTE DE BOUEF",unit:"UNITS",mult:1},
-    {plu:34,name:"CUBED CHOLENT BEEF",unit:"KG",mult:0.5},
-    {plu:34,name:"CUBED TOP RIB",unit:"KG",mult:0.5},
-    {plu:7,name:"CUBED SHIN",unit:"KG",mult:0.5},
+    {plu:34,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
+    {plu:34,name:"CUBED TOP RIB",unit:"KG",mult:1},
+    {plu:7,name:"CUBED SHIN",unit:"KG",mult:1},
     {plu:63,name:"DENVER STEAKS",unit:"UNITS",mult:4},
     {plu:63,name:"DOUBLE TOP RIB",unit:"UNITS",mult:1},
     {plu:65,name:"FAIRY STEAKS",unit:"UNITS",mult:4},
@@ -1482,14 +1490,14 @@ const BEEF_BY_CUSTOMER = {
     {plu:null,name:"FLAT IRON STEAK",unit:"UNITS",mult:1},
     {plu:75,name:"FRENCH ROAST",unit:"UNITS",mult:1},
     {plu:61,name:"GALLA BONES",unit:"UNITS",mult:1},
-    {plu:61,name:"GOULASH BEEF CUBES",unit:"KG",mult:0.5},
+    {plu:61,name:"GOULASH BEEF CUBES",unit:"KG",mult:1},
     {plu:14,name:"LEAN SANDWICH STEAKS",unit:"UNITS",mult:2},
     {plu:61,name:"LONDON BROIL 500G",unit:"UNITS",mult:1},
     {plu:62,name:"LONDON BROIL 1KG",unit:"UNITS",mult:1},
     {plu:62,name:"MARROW BONES",unit:"UNITS",mult:2},
     {plu:66,name:"MEAT BONES",unit:"UNITS",mult:2},
-    {plu:66,name:"MINCED BEEF",unit:"KG",mult:0.5},
-    {plu:19,name:"MINCED STEAK",unit:"KG",mult:0.5},
+    {plu:66,name:"MINCED BEEF",unit:"KG",mult:1},
+    {plu:19,name:"MINCED STEAK",unit:"KG",mult:1},
     {plu:63,name:"MINUTE STEAKS",unit:"UNITS",mult:2},
     {plu:null,name:"PHILADELPHIA STEAKS",unit:"UNITS",mult:4},
     {plu:null,name:"OYSTER STEAK",unit:"UNITS",mult:1},
@@ -1547,19 +1555,19 @@ const BEEF_BY_CUSTOMER = {
     {plu:16,name:"BOLA JOINT LARGE",unit:"UNITS",mult:1},
     {plu:108,name:"BOLA STEAKS",unit:"UNITS",mult:4},
     {plu:16,name:"CHOLENT PACK",unit:"UNITS",mult:1},
-    {plu:16,name:"CUBED CHOLENT BEEF",unit:"KG",mult:0.5},
-    {plu:15,name:"CUBED TOP RIB",unit:"KG",mult:0.5},
+    {plu:16,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
+    {plu:15,name:"CUBED TOP RIB",unit:"KG",mult:1},
     {plu:42,name:"FAIRY STEAKS",unit:"UNITS",mult:6},
     {plu:34,name:"BRAISING STEAK",unit:"UNITS",mult:4},
     {plu:7,name:"FLANK",unit:"UNITS",mult:1},
     {plu:2,name:"FLAT BRISKET JOINT LARGE",unit:"UNITS",mult:1},
     {plu:75,name:"FLAT PICKLED JOINT LARGE",unit:"UNITS",mult:1},
     {plu:65,name:"FLAT PICKLED BRISKET",unit:"UNITS",mult:1},
-    {plu:9,name:"GOULASH BEEF CUBES",unit:"KG",mult:0.5},
+    {plu:9,name:"GOULASH BEEF CUBES",unit:"KG",mult:1},
     {plu:29,name:"MARROW BONES",unit:"UNITS",mult:2},
     {plu:50,name:"MEAT BONES",unit:"UNITS",mult:5},
-    {plu:1,name:"MINCED BEEF",unit:"KG",mult:0.5},
-    {plu:2,name:"MINCED STEAK",unit:"KG",mult:0.5},
+    {plu:1,name:"MINCED BEEF",unit:"KG",mult:1},
+    {plu:2,name:"MINCED STEAK",unit:"KG",mult:1},
     {plu:null,name:"PICKLED BEEF ROLL LARGE",unit:"UNITS",mult:1},
     {plu:75,name:"PICKLED BEEF ROLL",unit:"UNITS",mult:1},
     {plu:null,name:"POT ROAST LARGE",unit:"UNITS",mult:1},
@@ -1576,19 +1584,19 @@ const BEEF_BY_CUSTOMER = {
     {plu:16,name:"BOLA JOINT LARGE",unit:"UNITS",mult:1},
     {plu:108,name:"BOLA STEAKS",unit:"UNITS",mult:4},
     {plu:16,name:"CHOLENT PACK",unit:"UNITS",mult:1},
-    {plu:16,name:"CUBED CHOLENT BEEF",unit:"KG",mult:0.5},
-    {plu:15,name:"CUBED TOP RIB",unit:"KG",mult:0.5},
+    {plu:16,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
+    {plu:15,name:"CUBED TOP RIB",unit:"KG",mult:1},
     {plu:42,name:"FAIRY STEAKS",unit:"UNITS",mult:6},
     {plu:34,name:"BRAISING STEAK",unit:"UNITS",mult:4},
     {plu:7,name:"FLANK",unit:"UNITS",mult:1},
     {plu:2,name:"FLAT BRISKET JOINT LARGE",unit:"UNITS",mult:1},
     {plu:75,name:"FLAT PICKLED JOINT LARGE",unit:"UNITS",mult:1},
     {plu:65,name:"FLAT PICKLED BRISKET",unit:"UNITS",mult:1},
-    {plu:9,name:"GOULASH BEEF CUBES",unit:"KG",mult:0.5},
+    {plu:9,name:"GOULASH BEEF CUBES",unit:"KG",mult:1},
     {plu:29,name:"MARROW BONES",unit:"UNITS",mult:2},
     {plu:50,name:"MEAT BONES",unit:"UNITS",mult:5},
-    {plu:1,name:"MINCED BEEF",unit:"KG",mult:0.5},
-    {plu:2,name:"MINCED STEAK",unit:"KG",mult:0.5},
+    {plu:1,name:"MINCED BEEF",unit:"KG",mult:1},
+    {plu:2,name:"MINCED STEAK",unit:"KG",mult:1},
     {plu:null,name:"PICKLED BEEF ROLL LARGE",unit:"UNITS",mult:1},
     {plu:75,name:"PICKLED BEEF ROLL",unit:"UNITS",mult:1},
     {plu:null,name:"POT ROAST LARGE",unit:"UNITS",mult:1},
@@ -2370,7 +2378,9 @@ function buildSheetTable(title, items, showSources) {
       <td class="td-check">☐</td>
     </tr>`;
   }).join('');
-  return `<div class="sheet-table">
+  // Infer section from title prefix for selective printing
+  const secTag = title.includes('🥩') ? 'beef' : title.includes('🌶') ? 'flavoured' : 'chicken';
+  return `<div class="sheet-table" data-section="${secTag}">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${items.length} lines</div>
@@ -2391,7 +2401,9 @@ function buildCategoryTable(category, items, day, extraTotal) {
   const totalRow = extraTotal !== undefined
     ? `<tr style="background:rgba(200,168,75,0.1)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">TOTAL ${category} = ${totalQty} &nbsp;|&nbsp; TOTAL ROASTERS NEEDED = ${extraTotal}</td></tr>`
     : `<tr style="background:rgba(255,255,255,0.03)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">TOTAL = ${totalQty}</td></tr>`;
-  return `<div class="sheet-table" style="margin-bottom:16px">
+  const CHICKEN_CATS_SET = new Set(['FULL BIRDS','BOTTOM QUARTERS','CROWNS','TURKEY']);
+  const sectionAttr = CHICKEN_CATS_SET.has(category) ? 'chicken' : 'beef';
+  return `<div class="sheet-table" style="margin-bottom:16px" data-section="${sectionAttr}">
     <div class="sheet-title-bar">
       <div class="sheet-title">${category}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${day.toUpperCase()}</div>
@@ -2738,7 +2750,7 @@ function buildPackerTable(title, items) {
       <td class="td-check">☐</td>
     </tr>`;
   }).join('');
-  return `<div class="sheet-table" style="margin-bottom:16px">
+  return `<div class="sheet-table" style="margin-bottom:16px" data-section="chicken">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${items.length} lines / ${totalQty} total</div>
@@ -2765,7 +2777,7 @@ function buildPackerBeefTable(title, items, day) {
       <td class="td-check">☐</td>
     </tr>`;
   }).join('');
-  return `<div class="sheet-table" style="margin-bottom:16px">
+  return `<div class="sheet-table" style="margin-bottom:16px" data-section="beef">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${items.length} lines</div>
@@ -2795,19 +2807,19 @@ function renderDispatchSheet(day) {
 
     // Beef section
     if (beefItems.length) {
-      html += `<div class="dispatch-section-label dispatch-beef">🥩 BEEF</div>`;
+      html += `<div class="dispatch-section-label dispatch-beef" data-section="beef">🥩 BEEF</div>`;
       html += buildSheetTableInner(beefItems, false);
     }
 
     // Chicken / Poultry section
     if (chickenItems.length) {
-      html += `<div class="dispatch-section-label dispatch-chicken">🍗 CHICKEN / POULTRY</div>`;
+      html += `<div class="dispatch-section-label dispatch-chicken" data-section="chicken">🍗 CHICKEN / POULTRY</div>`;
       html += buildSheetTableInner(chickenItems, false);
     }
 
     // Flavoured section
     if (flavouredItems.length) {
-      html += `<div class="dispatch-section-label dispatch-flavoured">🌶 FLAVOURED & MARINATED</div>`;
+      html += `<div class="dispatch-section-label dispatch-flavoured" data-section="flavoured">🌶 FLAVOURED & MARINATED</div>`;
       html += buildSheetTableInner(flavouredItems, false);
     }
 
@@ -3134,28 +3146,100 @@ function handlePullData(data, day, status, results) {
 // ══════════════════════════════════════════════════════════════════
 // PRINT — opens a clean white popup with just the sheet content
 // ══════════════════════════════════════════════════════════════════
-function printActivePanel() {
-  const activePanel = document.querySelector('.panel.active');
-  if (!activePanel) return;
+// ── printSection(panelId, section) ────────────────────────────────────────────
+// section: 'beef' | 'chicken' | 'flavoured' | 'all'
+// Collects only the tagged [data-section] blocks that match, or all if 'all'.
+// For dispatch, filters inside each customer block by section label.
+function printSection(panelId, section) {
+  const panel = document.getElementById('panel-' + panelId);
+  if (!panel) return;
 
-  let contentEl = activePanel.querySelector('[id$="SheetContent"]');
-  if (!contentEl || !contentEl.innerHTML.trim()) {
-    // For panels like Links and Remote that don't use *SheetContent div
-    const clone = activePanel.cloneNode(true);
-    clone.querySelectorAll('.no-print').forEach(el => el.remove());
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = clone.innerHTML;
-    contentEl = wrapper;
-    if (!contentEl.innerHTML.trim()) { alert('No data to print.'); return; }
-  }
-
-  const title = activePanel.getAttribute('data-print-title') || 'MH MEATS';
   const today = new Date().toLocaleDateString('en-GB', {
     weekday:'long', day:'2-digit', month:'long', year:'numeric'
   });
 
+  const SECTION_LABELS = {
+    beef:      { emoji:'🥩', label:'BEEF',           color:'#7b1f1f' },
+    chicken:   { emoji:'🐔', label:'CHICKEN / POULTRY', color:'#2d5a27' },
+    flavoured: { emoji:'🌶', label:'FLAVOURED',       color:'#5a1a00' },
+    all:       { emoji:'📄', label:'ALL SECTIONS',    color:'#000' },
+  };
+  const meta = SECTION_LABELS[section] || SECTION_LABELS.all;
+  const panelTitle = panel.getAttribute('data-print-title') || panelId.toUpperCase();
+
+  let contentEl = panel.querySelector('[id$="SheetContent"]');
+
+  // For non-sheet panels (Links, Remote) — print everything visible
+  if (!contentEl || !contentEl.innerHTML.trim()) {
+    const clone = panel.cloneNode(true);
+    clone.querySelectorAll('.no-print').forEach(el => el.remove());
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = clone.innerHTML;
+    if (!wrapper.innerHTML.trim()) { alert('No data to print.'); return; }
+    _openPrintWindow(wrapper.innerHTML, panelTitle, 'all', today, meta);
+    return;
+  }
+
+  let printContent = '';
+
+  if (panelId === 'dispatch') {
+    // Dispatch: per-customer blocks — within each, include only matching section rows
+    const blocks = contentEl.querySelectorAll('.sheet-block');
+    blocks.forEach(block => {
+      if (section === 'all') {
+        printContent += block.outerHTML;
+        return;
+      }
+      // Clone the block, remove non-matching section labels + their following table
+      const blockClone = block.cloneNode(true);
+      const labels = blockClone.querySelectorAll('.dispatch-section-label');
+      labels.forEach(label => {
+        const labelSection = label.getAttribute('data-section');
+        if (labelSection !== section) {
+          // Remove the label and the immediately following sibling table
+          let next = label.nextElementSibling;
+          while (next && next.tagName !== 'DIV') {
+            const toRemove = next;
+            next = next.nextElementSibling;
+            toRemove.remove();
+          }
+          label.remove();
+        }
+      });
+      // Only add the block if it has any table rows left
+      if (blockClone.querySelector('tr')) {
+        printContent += blockClone.outerHTML;
+      }
+    });
+  } else {
+    // Chef, Butcher, Packer: data-section tagged div blocks
+    if (section === 'all') {
+      printContent = contentEl.innerHTML;
+    } else {
+      const blocks = contentEl.querySelectorAll('[data-section]');
+      blocks.forEach(block => {
+        if (block.getAttribute('data-section') === section) {
+          printContent += block.outerHTML;
+        }
+      });
+    }
+  }
+
+  if (!printContent.trim()) {
+    alert('No ' + meta.label + ' orders for this day.');
+    return;
+  }
+
+  _openPrintWindow(printContent, panelTitle, section, today, meta);
+}
+
+function _openPrintWindow(printContent, panelTitle, section, today, meta) {
+  const sectionHeader = section !== 'all'
+    ? `<div style="display:inline-block;background:${meta.color};color:#fff;padding:3px 12px;border-radius:3px;font-size:13px;font-weight:bold;margin-top:6px">${meta.emoji} ${meta.label}</div>`
+    : '';
+
   const printHTML = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>MH Meats — ${title}</title>
+<html><head><meta charset="UTF-8"><title>MH Meats — ${panelTitle} — ${meta.label}</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:Arial,sans-serif; font-size:12px; color:#000; background:#fff; }
@@ -3171,7 +3255,8 @@ function printActivePanel() {
   .print-header h1 { font-size:22px; font-weight:bold; letter-spacing:2px; }
   .print-header h2 { font-size:15px; font-weight:normal; margin-top:4px; color:#444; }
   .print-header .date { font-size:12px; color:#666; margin-top:4px; }
-  table { width:100%; border-collapse:collapse; margin-bottom:20px; page-break-inside:avoid; }
+  table { width:100%; border-collapse:collapse; margin-bottom:16px; page-break-inside:avoid; }
+  .sheet-table { margin-bottom:16px; border:1px solid #ccc; border-radius:4px; overflow:hidden; }
   .sheet-title-bar { background:#ddd; padding:6px 12px; font-size:13px; font-weight:bold;
     border-bottom:1px solid #999; display:flex; align-items:center; justify-content:space-between; }
   th { background:#eee; text-align:left; padding:6px 10px; font-size:10px; font-weight:bold;
@@ -3181,14 +3266,23 @@ function printActivePanel() {
   .td-qty { font-size:14px; font-weight:bold; text-align:right; width:60px; }
   .td-check { text-align:center; width:30px; }
   tr:nth-child(even) td { background:#fafafa; }
-  .dispatch-section-label, .sheet-block-header { padding:5px 10px; font-weight:bold;
-    font-size:11px; text-transform:uppercase; letter-spacing:.06em; border-left:3px solid #999; }
+  .sheet-block { border:1px solid #ccc; border-radius:4px; margin-bottom:16px; overflow:hidden; }
+  .sheet-block-header { background:#333; color:#fff; padding:7px 12px; font-weight:bold;
+    font-size:12px; text-transform:uppercase; letter-spacing:.06em; }
+  .dispatch-section-label { padding:5px 10px; font-weight:bold; font-size:11px;
+    text-transform:uppercase; letter-spacing:.06em; border-left:4px solid #999; background:#f5f5f5; }
+  .dispatch-beef    { border-left-color:#8b0000; }
+  .dispatch-chicken { border-left-color:#2d5a27; }
+  .dispatch-flavoured { border-left-color:#8b3a00; }
   .cat-tag { display:inline-block; font-size:8px; padding:1px 4px; border:1px solid #aaa;
-    border-radius:2px; margin-left:4px; color:#333; }
+    border-radius:2px; margin-left:4px; color:#333; background:#f0f0f0; }
+  .summary-grid { display:none; }
   @media print {
     #print-btn { display:none !important; }
     body { padding:0; }
     @page { margin:1.5cm; size:A4 portrait; }
+    .sheet-table { page-break-inside:avoid; }
+    .sheet-block { page-break-inside:avoid; }
   }
 </style>
 </head>
@@ -3197,10 +3291,11 @@ function printActivePanel() {
   <div id="content">
     <div class="print-header">
       <h1>MH MEATS</h1>
-      <h2>${title}</h2>
+      <h2>${panelTitle}</h2>
+      ${sectionHeader}
       <div class="date">${today}</div>
     </div>
-    ${contentEl.innerHTML}
+    ${printContent}
   </div>
 </body></html>`;
 
@@ -3208,6 +3303,14 @@ function printActivePanel() {
   if (!pw) { alert('Pop-ups blocked — please allow pop-ups for this page then try again.'); return; }
   pw.document.write(printHTML);
   pw.document.close();
+}
+
+// Legacy alias — still works for Links/Remote panels via their existing buttons
+function printActivePanel() {
+  const activePanel = document.querySelector('.panel.active');
+  if (!activePanel) return;
+  const panelId = activePanel.id.replace('panel-', '');
+  printSection(panelId, 'all');
 }
 
 // ══════════════════════════════════════════════════════════════════
