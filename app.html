@@ -1527,7 +1527,7 @@ const BEEF_BY_CUSTOMER = {
     {plu:7,name:"FLANK",unit:"UNITS",mult:1},
     {plu:2,name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
     {plu:75,name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
-    {plu:9,name:"GOULASH BEEF CUBES",unit:"UNITS",mult:1},
+    {plu:9,name:"GOULASH BEEF CUBES",unit:"KG",mult:1},
     {plu:29,name:"MARROW BONES",unit:"UNITS",mult:2},
     {plu:50,name:"MEAT BONES",unit:"UNITS",mult:6},
     {plu:2,name:"MINCED STEAK",unit:"UNITS",mult:1},
@@ -1633,6 +1633,7 @@ const BEEF_BY_CUSTOMER = {
     {plu:34,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
     {plu:34,name:"CUBED TOP RIB",unit:"KG",mult:1},
     {plu:7,name:"CUBED SHIN",unit:"KG",mult:1},
+    {plu:null,name:"CHUCK",unit:"KG",mult:1},
     {plu:63,name:"DENVER STEAKS",unit:"UNITS",mult:1},
     {plu:63,name:"DOUBLE TOP RIB",unit:"UNITS",mult:1},
     {plu:65,name:"FAIRY STEAKS",unit:"UNITS",mult:1},
@@ -1697,6 +1698,7 @@ const BEEF_BY_CUSTOMER = {
     {plu:34,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
     {plu:34,name:"CUBED TOP RIB",unit:"KG",mult:1},
     {plu:7,name:"CUBED SHIN",unit:"KG",mult:1},
+    {plu:null,name:"CHUCK",unit:"KG",mult:1},
     {plu:63,name:"DENVER STEAKS",unit:"UNITS",mult:1},
     {plu:63,name:"DOUBLE TOP RIB",unit:"UNITS",mult:1},
     {plu:65,name:"FAIRY STEAKS",unit:"UNITS",mult:1},
@@ -1761,6 +1763,7 @@ const BEEF_BY_CUSTOMER = {
     {plu:34,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
     {plu:34,name:"CUBED TOP RIB",unit:"KG",mult:1},
     {plu:7,name:"CUBED SHIN",unit:"KG",mult:1},
+    {plu:null,name:"CHUCK",unit:"KG",mult:1},
     {plu:63,name:"DENVER STEAKS",unit:"UNITS",mult:1},
     {plu:63,name:"DOUBLE TOP RIB",unit:"UNITS",mult:1},
     {plu:65,name:"FAIRY STEAKS",unit:"UNITS",mult:1},
@@ -1825,6 +1828,7 @@ const BEEF_BY_CUSTOMER = {
     {plu:34,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
     {plu:34,name:"CUBED TOP RIB",unit:"KG",mult:1},
     {plu:7,name:"CUBED SHIN",unit:"KG",mult:1},
+    {plu:null,name:"CHUCK",unit:"KG",mult:1},
     {plu:63,name:"DENVER STEAKS",unit:"UNITS",mult:1},
     {plu:63,name:"DOUBLE TOP RIB",unit:"UNITS",mult:1},
     {plu:65,name:"FAIRY STEAKS",unit:"UNITS",mult:1},
@@ -1889,6 +1893,7 @@ const BEEF_BY_CUSTOMER = {
     {plu:34,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
     {plu:34,name:"CUBED TOP RIB",unit:"KG",mult:1},
     {plu:7,name:"CUBED SHIN",unit:"KG",mult:1},
+    {plu:null,name:"CHUCK",unit:"KG",mult:1},
     {plu:63,name:"DENVER STEAKS",unit:"UNITS",mult:1},
     {plu:63,name:"DOUBLE TOP RIB",unit:"UNITS",mult:1},
     {plu:65,name:"FAIRY STEAKS",unit:"UNITS",mult:1},
@@ -1953,6 +1958,7 @@ const BEEF_BY_CUSTOMER = {
     {plu:34,name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
     {plu:34,name:"CUBED TOP RIB",unit:"KG",mult:1},
     {plu:7,name:"CUBED SHIN",unit:"KG",mult:1},
+    {plu:null,name:"CHUCK",unit:"KG",mult:1},
     {plu:63,name:"DENVER STEAKS",unit:"UNITS",mult:1},
     {plu:63,name:"DOUBLE TOP RIB",unit:"UNITS",mult:1},
     {plu:65,name:"FAIRY STEAKS",unit:"UNITS",mult:1},
@@ -2057,8 +2063,9 @@ function init() {
   try { buildCustomerList(); } catch(e) { console.error('buildCustomerList error:', e); }
   try { buildDayButtonSets(); } catch(e) { console.error('buildDayButtonSets error:', e); }
   try {
-    // Always update to latest URL
-    localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbyKK1KjFVottrY1O23Xqm6eN81RMDv8r9u5-UKM7pGLRRmMLNgB3w1FlfuP5R5tbOdX/exec');
+    if (!localStorage.getItem('mhmeats_script_url')) {
+      localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2feew5djxBI5uLkmxEyFXV5fwzrYcEIEDwoJmsrWUTzg6/exec');
+    }
   } catch(e) {}
 }
 
@@ -2341,12 +2348,11 @@ function renderChefSheet(day) {
     <div class="summary-card"><div class="summary-label">Flavoured</div><div class="summary-value">${flavoured.length}</div></div>
   </div>`;
 
-  if (!totalItems) {
-    html += `<div class="empty-state"><div class="empty-icon">👨‍🍳</div><div class="empty-text">No orders for ${day}</div></div>`;
+  // Chef list shows FLAVOURED ONLY — beef is on butcher list, plain chicken on packer list
+  if (!flavoured.length) {
+    html += `<div class="empty-state"><div class="empty-icon">🌶</div><div class="empty-text">No flavoured items for ${day}</div></div>`;
   } else {
-    if (beef.length) html += buildSheetTable(`🥩 BEEF — ${day.toUpperCase()}`, beef, true);
-    if (chicken.length) html += buildSheetTable(`🐔 CHICKEN — ${day.toUpperCase()}`, chicken, true);
-    if (flavoured.length) html += buildSheetTable(`🌶 FLAVOURED — ${day.toUpperCase()}`, flavoured, true);
+    html += buildSheetTable(`🌶 FLAVOURED — ${day.toUpperCase()}`, flavoured, true);
   }
   document.getElementById('chefSheetContent').innerHTML = html;
 }
@@ -2488,7 +2494,7 @@ function renderButcherSheet(day) {
     {name:'WHOLE ROASTER', qty:poultryQty('WHOLE ROASTER')},
     {name:'ROASTER IN 1/4', qty:poultryQty('ROASTER IN 1/4')},
     {name:'ROASTER IN 1/8', qty:poultryQty('ROASTER IN 1/8')},
-    {name:'ROASTER IN 1/4 SHNITZELED', qty:poultryQty('ROASTER IN 1/4 SHNITZELED')},
+    {name:'ROASTER IN 1/4 SHNITZELED', qty:poultryQty('ROASTER IN 1/4 SHNITZELED')+poultryQty('ROASTER IN 1/4 SHNIZELED')},
     {name:'ROASTER IN 1/8 SHNIZELED', qty:poultryQty('ROASTER IN 1/8 SHNIZELED')},
     {name:'ROASTER IN 1/8 TOP MINCED', qty:poultryQty('ROASTER IN 1/8 TOP MINCED')},
   ].filter(i=>i.qty>0);
@@ -2552,6 +2558,7 @@ function renderButcherSheet(day) {
     ]},
     { cat:'CHUCK', items:[
       {name:'GOULASH BEEF CUBES',         unit:'KG',  desc:'70/30 fat content'},
+      {name:'CHUCK',                      unit:'KG',  desc:'Deli/caterer — whole piece'},
       {name:'POT ROAST SMALL',            unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
       {name:'POT ROAST LARGE',            unit:'UNITS',desc:'2-2.5KG, netted, max diameter 12cm'},
       {name:'ROLLED TOP RIB JOINT',       unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
@@ -2670,48 +2677,43 @@ function renderButcherSheet(day) {
 
 function renderPackerSheet(day) {
   // PACKER sheet — consolidated totals per product across ALL customers
-  // Uses RAW PACK QUANTITIES (what was ordered), not butcher amounts
-  // Consolidates by product NAME so same product from different customers adds up
+  // Shows per-customer breakdown notes (e.g. KS:20 KAY:4) on each line
 
   const poultryTotals = {};   // key = product name
-  const flavouredTotals = {}; // key = product name
   const beefTotals = {};      // key = product name
 
   CUSTOMERS.forEach(cust => {
     const custOrders = orders[day][cust.id] || {};
+    const shortName = CUSTOMER_SHORT[cust.id] || cust.name.slice(0,3).toUpperCase();
 
-    // Poultry products
+    // Poultry products — exclude flavoured (not needed on packer list)
     cust.products.forEach(p => {
+      if (p.flavoured) return;
       const qty = custOrders[orderKey(p)] || 0;
       if (qty === 0) return;
-      const k = p.name.trim(); // consolidate by name
-      if (p.flavoured) {
-        if (!flavouredTotals[k]) flavouredTotals[k] = { plu: p.plu, name: p.name, qty: 0 };
-        flavouredTotals[k].qty += qty;
-      } else {
-        if (!poultryTotals[k]) poultryTotals[k] = { plu: p.plu, name: p.name, qty: 0 };
-        poultryTotals[k].qty += qty;
-      }
+      const k = p.name.trim();
+      if (!poultryTotals[k]) poultryTotals[k] = { plu: p.plu, name: p.name, qty: 0, sources: {} };
+      poultryTotals[k].qty += qty;
+      poultryTotals[k].sources[shortName] = (poultryTotals[k].sources[shortName] || 0) + qty;
     });
 
-    // Beef products — consolidate by name, show pack quantities
+    // Beef products — consolidate by name, track per-customer
     (BEEF_BY_CUSTOMER[cust.id] || []).forEach(p => {
       const qty = custOrders[orderKey(p)] || 0;
       if (qty === 0) return;
       const k = p.name.trim();
-      if (!beefTotals[k]) beefTotals[k] = { plu: p.plu, name: p.name, qty: 0, unit: p.unit || 'UNITS' };
+      if (!beefTotals[k]) beefTotals[k] = { plu: p.plu, name: p.name, qty: 0, unit: p.unit || 'UNITS', sources: {} };
       beefTotals[k].qty += qty;
+      beefTotals[k].sources[shortName] = (beefTotals[k].sources[shortName] || 0) + qty;
     });
   });
 
-  // Sort by PLU then name
   const sort = items => items.sort((a,b) => (a.plu||9999) - (b.plu||9999) || a.name.localeCompare(b.name));
 
-  const poultryItems  = sort(Object.values(poultryTotals));
-  const flavouredItems = sort(Object.values(flavouredTotals));
-  const beefItems     = sort(Object.values(beefTotals));
+  const poultryItems = sort(Object.values(poultryTotals));
+  const beefItems    = sort(Object.values(beefTotals));
 
-  const any = poultryItems.length || flavouredItems.length || beefItems.length;
+  const any = poultryItems.length || beefItems.length;
   if (!any) {
     document.getElementById('packerSheetContent').innerHTML =
       `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No orders for ${day}</div></div>`;
@@ -2719,22 +2721,26 @@ function renderPackerSheet(day) {
   }
 
   let html = '';
-  if (beefItems.length)      html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
-  if (poultryItems.length)   html += buildPackerTable(`🐔 CHICKEN PACKER LIST — ${day.toUpperCase()}`, poultryItems);
-  if (flavouredItems.length) html += buildPackerTable(`🌶 FLAVOURED PACKER LIST — ${day.toUpperCase()}`, flavouredItems);
+  if (beefItems.length)    html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
+  if (poultryItems.length) html += buildPackerTable(`🐔 CHICKEN PACKER LIST — ${day.toUpperCase()}`, poultryItems);
 
   document.getElementById('packerSheetContent').innerHTML = html;
 }
 
 function buildPackerTable(title, items) {
   const totalQty = items.reduce((a,b) => a + b.qty, 0);
-  const rows = items.map(item => `
-    <tr>
+  const rows = items.map(item => {
+    // Build customer breakdown note: KS:20 KAY:4
+    const breakdown = item.sources && Object.keys(item.sources).length > 1
+      ? Object.entries(item.sources).map(([k,v]) => `<span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(200,168,75,0.15);color:var(--accent);border:1px solid rgba(200,168,75,0.3);border-radius:2px;padding:1px 4px;margin-left:2px">${k}:${v}</span>`).join('')
+      : '';
+    return `<tr>
       <td class="td-plu">${item.plu || '—'}</td>
-      <td>${item.name}</td>
+      <td>${item.name}${breakdown ? '<span style="margin-left:6px">'+breakdown+'</span>' : ''}</td>
       <td class="td-qty">${item.qty}</td>
       <td class="td-check">☐</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
@@ -2748,15 +2754,19 @@ function buildPackerTable(title, items) {
 }
 
 function buildPackerBeefTable(title, items, day) {
-  // Shows pack quantities with unit label — packers are packing these exact quantities
-  const rows = items.sort((a,b) => (a.plu||9999)-(b.plu||9999)).map(item => `
-    <tr>
+  // Shows pack quantities with unit label and per-customer breakdown
+  const rows = items.sort((a,b) => (a.plu||9999)-(b.plu||9999)).map(item => {
+    const breakdown = item.sources && Object.keys(item.sources).length > 1
+      ? Object.entries(item.sources).map(([k,v]) => `<span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(200,168,75,0.15);color:var(--accent);border:1px solid rgba(200,168,75,0.3);border-radius:2px;padding:1px 4px;margin-left:2px">${k}:${v}</span>`).join('')
+      : '';
+    return `<tr>
       <td class="td-plu">${item.plu || '—'}</td>
-      <td>${item.name}</td>
+      <td>${item.name}${breakdown ? '<span style="margin-left:6px">'+breakdown+'</span>' : ''}</td>
       <td style="width:60px;color:var(--muted);font-size:11px;text-align:center">${item.unit}</td>
       <td class="td-qty">${item.qty}</td>
       <td class="td-check">☐</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
