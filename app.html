@@ -917,7 +917,7 @@ function renderPulled(data,d){
         </div>
         <div>${Object.entries(c.items).map(([n,q])=>`<div style="display:flex;justify-content:space-between;padding:4px 12px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.03);"><span>${n}</span><span style="font-family:'DM Mono',monospace;color:var(--acc2);">${q}</span></div>`).join('')}</div>
         <div style="padding:8px 12px;border-top:1px solid var(--bdr);">
-          <button class="btn pri" style="width:100%;font-size:10px;" onclick='importOrder(${JSON.stringify({customerId:cid,customer:c.name,items:c.items})},"${d}")'>Import to ${d}</button>
+          <button class="btn pri" style="width:100%;font-size:10px;" onclick='importOrder(${JSON.stringify({customerId:cid,customer:c.name,items:c.items}).replace(/'/g,"&#39;")},"${d}")'>Import to ${d}</button>
         </div>
       </div>`).join('')+'</div>';
 }
