@@ -878,7 +878,8 @@ async function pullOrders(){
     clearTimeout(timeout);
     delete window[cbName];
     try{document.body.removeChild(script);}catch(e){}
-    const arr=Array.isArray(data)?data:[];
+    // Apps Script returns {orders:[...]} — unwrap it
+    const arr=Array.isArray(data)?data:(data&&Array.isArray(data.orders)?data.orders:[]);
     st.textContent=`✓ ${arr.length} order(s) for ${d}`;
     renderPulled(arr,d);
     if(arr.length)toast(`${arr.length} order(s) pulled`,'ok');
@@ -895,16 +896,30 @@ async function pullOrders(){
 function renderPulled(data,d){
   const el=document.getElementById('parea');
   if(!data||!data.length){el.innerHTML='<div style="color:var(--mut);font-size:12px;">No remote orders found.</div>';return;}
+
+  // Group rows by customer
+  const byCustomer={};
+  data.forEach(function(row){
+    const cid=row.customer||row.customerId||'unknown';
+    const cname=row.customerName||row.customer||'Unknown';
+    if(!byCustomer[cid])byCustomer[cid]={name:cname,items:{}};
+    // Clean product name — strip PLU prefix e.g. "251|WHOLE ROASTER" → "WHOLE ROASTER"
+    const rawName=row.productName||row.productKey||'';
+    const cleanName=rawName.includes('|')?rawName.split('|').slice(1).join('|').trim():rawName.replace(/_/g,' ').trim();
+    byCustomer[cid].items[cleanName]=(byCustomer[cid].items[cleanName]||0)+(parseInt(row.quantity)||0);
+  });
+
   el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">'+
-    data.map(o=>`<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:5px;overflow:hidden;">
-      <div style="padding:8px 12px;background:var(--sur2);border-bottom:1px solid var(--bdr);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;display:flex;justify-content:space-between;">
-        <span>${o.customer||'Unknown'}</span><span style="font-size:10px;color:var(--mut);font-weight:400;">${o.timestamp||''}</span>
-      </div>
-      <div>${Object.entries(o.items||{}).map(([n,q])=>`<div style="display:flex;justify-content:space-between;padding:4px 12px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.03);"><span>${n}</span><span style="font-family:'DM Mono',monospace;color:var(--acc2);">${q}</span></div>`).join('')}</div>
-      <div style="padding:8px 12px;border-top:1px solid var(--bdr);">
-        <button class="btn pri" style="width:100%;font-size:10px;" onclick='importOrder(${JSON.stringify(o)},"${d}")'>Import to ${d}</button>
-      </div>
-    </div>`).join('')+'</div>';
+    Object.entries(byCustomer).map(([cid,c])=>`
+      <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:5px;overflow:hidden;">
+        <div style="padding:8px 12px;background:var(--sur2);border-bottom:1px solid var(--bdr);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;display:flex;justify-content:space-between;">
+          <span>${c.name}</span><span style="font-size:10px;color:var(--mut);font-weight:400;">${Object.keys(c.items).length} lines</span>
+        </div>
+        <div>${Object.entries(c.items).map(([n,q])=>`<div style="display:flex;justify-content:space-between;padding:4px 12px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.03);"><span>${n}</span><span style="font-family:'DM Mono',monospace;color:var(--acc2);">${q}</span></div>`).join('')}</div>
+        <div style="padding:8px 12px;border-top:1px solid var(--bdr);">
+          <button class="btn pri" style="width:100%;font-size:10px;" onclick='importOrder(${JSON.stringify({customerId:cid,customer:c.name,items:c.items})},"${d}")'>Import to ${d}</button>
+        </div>
+      </div>`).join('')+'</div>';
 }
 function importOrder(o,d){
   const cid=o.customerId||o.id;if(!cid||!o.items)return;
