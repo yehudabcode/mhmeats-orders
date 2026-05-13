@@ -823,7 +823,7 @@ let custId = null;
 let currentDay = 'Monday';
 let quantities = {}; // productKey -> qty
 
-function orderKey(p) { return (p.plu||'') + '|' + p.name; }
+function orderKey(p) { return p.name; }
 
 // ══════════════════════════════════════════════════════════════════
 // INIT — read ?customer= from URL
