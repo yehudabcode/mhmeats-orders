@@ -413,7 +413,7 @@ const CUSTS = [
   {id:'mhmeats', name:'MH Meats',        col:'#c8a84b', beef:BEEF, poul:MH_POULTRY,  flav:MH_FLAVOURED},
   {id:'ksmeats', name:'KS Meats',         col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
   {id:'halperns',name:"Halpern's",        col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
-  {id:'kayes',   name:"Kaye's Kosher",    col:'#e05555', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
+  {id:'kayes',   name:"Kaye's Kosher",    col:'#e05555', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
   {id:'deli',    name:'Deli@MH Meats',    col:'#bb87fc', beef:BEEF, poul:MH_POULTRY,  flav:MH_FLAVOURED},
   {id:'mhchef',  name:'MH Meats Chef',    col:'#e05555', beef:CHEF_BEEF, poul:CHEF_POULTRY, flav:[]},
   {id:'yoels',   name:"Yoel's Kitchen",   col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
@@ -470,7 +470,7 @@ function getCustLists(c){
   return {
     beef: beefList(),
     poul: isKS ? ksPoul() : mhPoul(),
-    flav: (c.id==='halperns'||!isKS) ? mhFlav() : ksFlav()
+    flav: mhFlav()
   };
 }
 
