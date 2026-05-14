@@ -268,11 +268,8 @@ table.lt tr:last-child td{border:none;}
         <div class="sc">
           <div><div class="stitle">🚚 Dispatch Sheet</div><div class="ssub">Full order per customer — one section per customer</div></div>
           <div class="dts" id="ddts"></div>
-          <div class="pbts">
-            <button class="btn gh sm" onclick="printSec('dispatch','beef')">🖨 🥩 Beef</button>
-            <button class="btn gh sm" onclick="printSec('dispatch','poultry')">🖨 🐔 Chicken</button>
-            <button class="btn gh sm" onclick="printSec('dispatch','flavoured')">🖨 🌶 Flavoured</button>
-            <button class="btn gh sm" onclick="printSec('dispatch','all')">🖨 All Sheets</button>
+          <div class="pbts" id="dispatchPrintBtns">
+            <button class="btn gh sm" onclick="printSec('dispatch','all')">🖨 Print All</button>
           </div>
         </div>
         <div id="dc"></div>
@@ -723,13 +720,15 @@ function renderPacker(d){
 }
 
 function renderDispatch(d){
-  // One section per customer — full order as a single list (no sub-splitting)
   const el=document.getElementById('dc');
   let h='';
+  const activeCusts=[];
+
   CUSTS.forEach(c=>{
     const co=orders[d]&&orders[d][c.id]||{};
     const items=Object.entries(co).filter(([,v])=>v>0);
     if(!items.length)return;
+    activeCusts.push(c);
     const rows=items.map(([n,q])=>({cells:[n,q,''],t:['','q','ck'],q,sec:'customer'}));
     h+=`<div data-cust="${c.id}" style="margin-bottom:20px;page-break-inside:avoid;">
       <div style="background:#1c1c1c;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--acc2);border:1px solid var(--bdr2);border-bottom:none;margin-top:14px;display:flex;align-items:center;justify-content:space-between;">
@@ -739,7 +738,50 @@ function renderDispatch(d){
       ${mkT(['Product','Qty','✓'],rows)}
     </div>`;
   });
+
   el.innerHTML=h||`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
+
+  // Build per-customer print buttons dynamically
+  const btnContainer=document.getElementById('dispatchPrintBtns');
+  if(btnContainer){
+    let btns=`<button class="btn gh sm" onclick="printSec('dispatch','all')">🖨 Print All</button>`;
+    activeCusts.forEach(c=>{
+      btns+=`<button class="btn gh sm" onclick="printCustomer('${c.id}','${c.name.replace(/'/g,"\\'")}','${d}')"">🖨 ${c.name}</button>`;
+    });
+    btnContainer.innerHTML=btns;
+  }
+}
+
+function printCustomer(custId, custName, d){
+  const co=orders[d]&&orders[d][custId]||{};
+  const items=Object.entries(co).filter(([,v])=>v>0);
+  if(!items.length){toast(custName+' has no orders for '+d,'er');return;}
+
+  const rows=items.map(([n,q])=>`<tr><td>${n}</td><td style="text-align:center;width:60px;font-weight:bold;">${q}</td><td style="width:50px;text-align:center;"><span style="border:1px solid #999;width:14px;height:14px;display:inline-block;"></span></td></tr>`).join('');
+
+  const pw=window.open('','_blank');
+  pw.document.write(`<!DOCTYPE html><html><head><title>MH Meats — ${custName} — ${d}</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;margin:20px;color:#000;}
+    h1{font-size:18px;margin-bottom:4px;}
+    h2{font-size:13px;color:#555;margin-bottom:16px;font-weight:normal;}
+    table{width:100%;border-collapse:collapse;}
+    th{background:#f0f0f0;padding:6px 8px;text-align:left;border:1px solid #ccc;font-size:10px;text-transform:uppercase;}
+    td{padding:6px 8px;border:1px solid #ccc;}
+    tr:nth-child(even) td{background:#fafafa;}
+    .total{margin-top:12px;font-size:12px;color:#555;}
+  </style></head><body>
+  <h1>🚚 MH Meats — Dispatch Note</h1>
+  <h2>${custName} &nbsp;|&nbsp; ${d} &nbsp;|&nbsp; ${TODAY.toLocaleDateString('en-GB')}</h2>
+  <table>
+    <thead><tr><th>Product</th><th style="text-align:center;">Qty</th><th style="text-align:center;">✓</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="total">Total lines: <strong>${items.length}</strong> &nbsp;|&nbsp; Total units: <strong>${items.reduce((s,[,v])=>s+v,0)}</strong></div>
+  </body></html>`);
+  pw.document.close();
+  pw.focus();
+  setTimeout(()=>pw.print(),400);
 }
 
 function renderChef(d){
