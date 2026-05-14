@@ -185,7 +185,7 @@ table.lt tr:last-child td{border:none;}
   <div class="dp" id="dp"></div>
   <div class="hbtns">
     <button class="btn gh" id="vbtn" onclick="toggleVoice()" title="Voice input — Chrome only">🎤 Voice</button>
-    <button class="btn gh" onclick="clearDay()">Clear Day</button>
+    <button class="btn gh" onclick="clearDay()">Clear Customer</button>
     <button class="btn pri" onclick="go('summary')">View Summary</button>
   </div>
 </div>
@@ -223,7 +223,6 @@ table.lt tr:last-child td{border:none;}
           </div>
           <div class="pbts">
             <button class="btn gh sm" onclick="printSec('summary','all')">🖨 Print All</button>
-            <button class="btn rd sm" onclick="clearDay()">Clear Day</button>
           </div>
         </div>
         <div id="sumc"></div>
@@ -239,7 +238,6 @@ table.lt tr:last-child td{border:none;}
           <div class="pbts">
             <button class="btn gh sm" onclick="printSec('butcher','beef')">🖨 🥩 Beef</button>
             <button class="btn gh sm" onclick="printSec('butcher','poultry')">🖨 🐔 Chicken</button>
-            <button class="btn gh sm" onclick="printSec('butcher','flavoured')">🖨 🌶 Flavoured</button>
             <button class="btn gh sm" onclick="printSec('butcher','all')">🖨 All Sheets</button>
           </div>
         </div>
@@ -251,11 +249,12 @@ table.lt tr:last-child td{border:none;}
     <div class="panel" id="panel-packer">
       <div class="sw">
         <div class="sc">
-          <div><div class="stitle">📦 Packer Sheet</div><div class="ssub">Beef &amp; Poultry to pack per customer (Flavoured via Chef)</div></div>
+          <div><div class="stitle">📦 Packer Sheet</div><div class="ssub">Total units to pack across all customers</div></div>
           <div class="dts" id="pdts"></div>
           <div class="pbts">
             <button class="btn gh sm" onclick="printSec('packer','beef')">🖨 🥩 Beef</button>
             <button class="btn gh sm" onclick="printSec('packer','poultry')">🖨 🐔 Chicken</button>
+            <button class="btn gh sm" onclick="printSec('packer','flavoured')">🖨 🌶 Flavoured</button>
             <button class="btn gh sm" onclick="printSec('packer','all')">🖨 All Sheets</button>
           </div>
         </div>
@@ -267,7 +266,7 @@ table.lt tr:last-child td{border:none;}
     <div class="panel" id="panel-dispatch">
       <div class="sw">
         <div class="sc">
-          <div><div class="stitle">🚚 Dispatch Sheet</div><div class="ssub">Everything going to each customer</div></div>
+          <div><div class="stitle">🚚 Dispatch Sheet</div><div class="ssub">Full order per customer — one section per customer</div></div>
           <div class="dts" id="ddts"></div>
           <div class="pbts">
             <button class="btn gh sm" onclick="printSec('dispatch','beef')">🖨 🥩 Beef</button>
@@ -415,7 +414,7 @@ const SCRIPT = 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2f
 
 const CUSTS = [
   {id:'mhmeats', name:'MH Meats',        col:'#c8a84b', beef:BEEF, poul:MH_POULTRY,  flav:MH_FLAVOURED},
-  {id:'ksmeats', name:'KS Meats',         col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
+  {id:'ksmeats', name:'KS Meats',         col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
   {id:'halperns',name:"Halpern's",        col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
   {id:'kayes',   name:"Kaye's Kosher",    col:'#e05555', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
   {id:'deli',    name:'Deli@MH Meats',    col:'#bb87fc', beef:BEEF, poul:MH_POULTRY,  flav:MH_FLAVOURED},
@@ -685,6 +684,26 @@ function renderSheet(name,d){
 
 function renderButcher(d){
   const el=document.getElementById('bc');
+  const beef={},poul={};
+  CUSTS.forEach(c=>{
+    const co=orders[d]&&orders[d][c.id]||{};
+    const L=getCustLists(c);
+    Object.entries(co).forEach(([n,q])=>{
+      if(!q)return;
+      if(L.flav.includes(n)) return; // Flavoured goes to Chef sheet only
+      else if(L.beef.includes(n)) beef[n]=(beef[n]||0)+q;
+      else poul[n]=(poul[n]||0)+q;
+    });
+  });
+  const rows=[];
+  if(Object.keys(poul).length){rows.push({type:'sec',label:'🐔 POULTRY'});Object.entries(poul).forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'poultry'}));}
+  if(Object.keys(beef).length){rows.push({type:'sec',label:'🥩 BEEF'});Object.entries(beef).forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'beef'}));}
+  el.innerHTML=rows.length?mkT(['Product','Qty','✓'],rows):`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
+}
+
+function renderPacker(d){
+  // Aggregated totals across ALL customers — packer packs in bulk
+  const el=document.getElementById('pc');
   const beef={},poul={},flav={};
   CUSTS.forEach(c=>{
     const co=orders[d]&&orders[d][c.id]||{};
@@ -700,44 +719,25 @@ function renderButcher(d){
   if(Object.keys(poul).length){rows.push({type:'sec',label:'🐔 POULTRY'});Object.entries(poul).forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'poultry'}));}
   if(Object.keys(beef).length){rows.push({type:'sec',label:'🥩 BEEF'});Object.entries(beef).forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'beef'}));}
   if(Object.keys(flav).length){rows.push({type:'flv',label:'FLAVOURED / CHEF'});Object.entries(flav).forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'flavoured'}));}
-  el.innerHTML=rows.length?mkT(['Product','Qty','✓'],rows):`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
-}
-
-function renderPacker(d){
-  const el=document.getElementById('pc');
-  let h='';
-  CUSTS.forEach(c=>{
-    const co=orders[d]&&orders[d][c.id]||{};
-    const L=getCustLists(c);
-    // Packer: beef + poultry only — no flavoured
-    const items=Object.entries(co).filter(([n,v])=>v>0&&!L.flav.includes(n));
-    if(!items.length)return;
-    const brows=items.filter(([n])=>L.beef.includes(n));
-    const prows=items.filter(([n])=>!L.beef.includes(n));
-    const rows=[];
-    if(brows.length){rows.push({type:'sec',label:'🥩 BEEF'});brows.forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'beef'}));}
-    if(prows.length){rows.push({type:'sec',label:'🐔 POULTRY'});prows.forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'poultry'}));}
-    h+=`<div data-cust="${c.id}"><div class="csh" style="background:#1c1c1c;padding:7px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--acc2);border:1px solid var(--bdr2);border-bottom:none;margin-top:14px;">${c.name}</div>${mkT(['Product','Qty','✓'],rows)}</div>`;
-  });
-  el.innerHTML=h||`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
+  el.innerHTML=rows.length?mkT(['Product','Total Qty','✓'],rows):`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
 }
 
 function renderDispatch(d){
+  // One section per customer — full order as a single list (no sub-splitting)
   const el=document.getElementById('dc');
   let h='';
   CUSTS.forEach(c=>{
     const co=orders[d]&&orders[d][c.id]||{};
-    const L=getCustLists(c);
     const items=Object.entries(co).filter(([,v])=>v>0);
     if(!items.length)return;
-    const brows=items.filter(([n])=>L.beef.includes(n));
-    const prows=items.filter(([n])=>!L.beef.includes(n)&&!L.flav.includes(n));
-    const frows=items.filter(([n])=>L.flav.includes(n));
-    const rows=[];
-    if(brows.length){rows.push({type:'sec',label:'🥩 BEEF'});brows.forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'beef'}));}
-    if(prows.length){rows.push({type:'sec',label:'🐔 POULTRY'});prows.forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'poultry'}));}
-    if(frows.length){rows.push({type:'flv',label:'FLAVOURED'});frows.forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'flavoured'}));}
-    h+=`<div data-cust="${c.id}" style="margin-bottom:6px;"><div style="background:#1c1c1c;padding:7px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--acc2);border:1px solid var(--bdr2);border-bottom:none;margin-top:14px;">${c.name}</div>${mkT(['Product','Qty','✓'],rows)}</div>`;
+    const rows=items.map(([n,q])=>({cells:[n,q,''],t:['','q','ck'],q,sec:'customer'}));
+    h+=`<div data-cust="${c.id}" style="margin-bottom:20px;page-break-inside:avoid;">
+      <div style="background:#1c1c1c;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--acc2);border:1px solid var(--bdr2);border-bottom:none;margin-top:14px;display:flex;align-items:center;justify-content:space-between;">
+        <span>${c.name}</span>
+        <span style="font-size:11px;font-weight:400;color:var(--mut);font-family:'DM Mono',monospace;">${rows.length} lines</span>
+      </div>
+      ${mkT(['Product','Qty','✓'],rows)}
+    </div>`;
   });
   el.innerHTML=h||`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
 }
@@ -818,6 +818,9 @@ function printSec(sheetName,sec){
 // ═══════════════════════════════════════
 // CUSTOMER LINKS
 // ═══════════════════════════════════════
+// Persist pulled orders across tab switches
+let _lastPulledData=null, _lastPulledDay=null, _lastPulledStatus='';
+
 function renderLinks(){
   const el=document.getElementById('lc');
   const rows=CUSTS.map(c=>{
@@ -845,10 +848,14 @@ function renderLinks(){
           ${DAYS.map(d=>`<option${d===day?' selected':''}>${d}</option>`).join('')}
         </select>
         <button class="btn pri" onclick="pullOrders()">Pull Orders</button>
-        <span id="pst" style="font-size:11px;color:var(--mut);"></span>
+        <span id="pst" style="font-size:11px;color:var(--mut);">${_lastPulledStatus}</span>
       </div>
       <div id="parea" style="margin-top:12px;"></div>
     </div>`;
+  // Restore previously pulled orders if any
+  if(_lastPulledData&&_lastPulledData.length){
+    renderPulled(_lastPulledData,_lastPulledDay);
+  }
 }
 
 function cpLink(url,btn){
@@ -880,7 +887,9 @@ async function pullOrders(){
     try{document.body.removeChild(script);}catch(e){}
     // Apps Script returns {orders:[...]} — unwrap it
     const arr=Array.isArray(data)?data:(data&&Array.isArray(data.orders)?data.orders:[]);
-    st.textContent=`✓ ${arr.length} order(s) for ${d}`;
+    _lastPulledData=arr; _lastPulledDay=d;
+    _lastPulledStatus=`✓ ${arr.length} order(s) for ${d}`;
+    const pst=document.getElementById('pst');if(pst)pst.textContent=_lastPulledStatus;
     renderPulled(arr,d);
     if(arr.length)toast(`${arr.length} order(s) pulled`,'ok');
     else toast('No orders found for '+d);
@@ -924,13 +933,15 @@ function renderPulled(data,d){
 function importOrder(o,d){
   const cid=o.customerId||o.id;if(!cid||!o.items)return;
   Object.entries(o.items).forEach(([n,q])=>setQ(d,cid,n,getQ(d,cid,n)+(parseInt(q)||0)));
-  updCounts();toast('Imported for '+(o.customer||cid),'ok');
+  updCounts();
+  toast('Imported for '+(o.customer||cid)+' — click their name in sidebar to view','ok');
 }
 
 // ═══════════════════════════════════════
 // ADMIN PANEL — PIN 1234
 // ═══════════════════════════════════════
-const PIN='1234';
+const PIN_KEY='mhm4_pin';
+function getPin(){return localStorage.getItem(PIN_KEY)||'1234';}
 let adminOpen=false;
 
 function renderAdmin(){
@@ -950,6 +961,7 @@ function renderAdmin(){
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;">⚙️ Admin Panel</div>
       <div style="display:flex;gap:7px;">
         <button class="btn gh sm" onclick="exportData()">⬇️ Export Data</button>
+        <button class="btn gh sm" onclick="showChangePIN()">🔑 Change PIN</button>
         <button class="btn rd sm" onclick="if(confirm('Clear ALL order data for all days?')){DAYS.forEach(d=>orders[d]={});save();updCounts();toast('All data cleared','ok');}">🗑 Clear All Data</button>
         <button class="btn gh sm" onclick="adminOpen=false;renderAdmin()">🔒 Lock</button>
       </div>
@@ -984,7 +996,7 @@ function adminSection(title,key,hint){
 
 function checkPin(){
   const v=document.getElementById('pinf').value;
-  if(v===PIN){adminOpen=true;renderAdmin();}
+  if(v===getPin()){adminOpen=true;renderAdmin();}
   else{document.getElementById('perr').textContent='Incorrect PIN. Try again.';}
 }
 function adminAdd(key){
@@ -1010,6 +1022,16 @@ function exportData(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`mhmeats_orders_${TODAY.toISOString().slice(0,10)}.json`;a.click();
 }
+function showChangePIN(){
+  const cur=prompt('Enter current PIN:');
+  if(cur!==getPin()){toast('Incorrect current PIN','er');return;}
+  const n1=prompt('Enter new PIN (4 digits):');
+  if(!n1||n1.length<4||!/^\d+$/.test(n1)){toast('PIN must be 4 digits','er');return;}
+  const n2=prompt('Confirm new PIN:');
+  if(n1!==n2){toast('PINs do not match','er');return;}
+  localStorage.setItem(PIN_KEY,n1);
+  toast('PIN changed successfully','ok');
+}
 
 // ═══════════════════════════════════════
 // VOICE ACTIVATION
@@ -1023,6 +1045,7 @@ const NUMWORDS={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,t
 function toggleVoice(){voiceOn?stopVoice():startVoice();}
 
 function startVoice(){
+  if(!cust){toast('Please select a customer first before using voice','er');return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast('Voice only works in Chrome','er');return;}
   recog=new SR();
@@ -1103,11 +1126,19 @@ function processVoice(text){
 // CLEAR + TOAST + WARNINGS
 // ═══════════════════════════════════════
 function clearDay(){
-  if(!confirm(`Clear ALL orders for ${day}?`))return;
-  orders[day]={};save();updCounts();
-  if(cust)renderOrders(cust);
+  // Now clears only the currently selected customer for the current day
+  if(!cust){toast('Select a customer first','er');return;}
+  const c=CUSTS.find(x=>x.id===cust);
+  if(!confirm(`Clear ALL orders for ${c?c.name:cust} on ${day}?`))return;
+  if(orders[day]&&orders[day][cust]) delete orders[day][cust];
+  save();updCounts();
+  renderOrders(cust);
   if(panel==='summary')renderSummary(day);
-  toast('Orders cleared for '+day,'ok');
+  if(panel==='butcher')renderButcher(day);
+  if(panel==='packer')renderPacker(day);
+  if(panel==='dispatch')renderDispatch(day);
+  if(panel==='chef')renderChef(day);
+  toast(`Orders cleared for ${c?c.name:cust} on ${day}`,'ok');
 }
 
 function toast(msg,type=''){
