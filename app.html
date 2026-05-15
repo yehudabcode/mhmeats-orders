@@ -410,18 +410,18 @@ const PORTAL = 'https://yehudabcode.github.io/mhmeats-orders/portal.html?custome
 const SCRIPT = 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2feew5djxBI5uLkmxEyFXV5fwzrYcEIEDwoJmsrWUTzg6/exec';
 
 const CUSTS = [
-  {id:'mhmeats', name:'MH Meats',        col:'#c8a84b', beef:BEEF, poul:MH_POULTRY,  flav:MH_FLAVOURED},
-  {id:'ksmeats', name:'KS Meats',         col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
-  {id:'halperns',name:"Halpern's",        col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
-  {id:'kayes',   name:"Kaye's Kosher",    col:'#e05555', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
-  {id:'deli',    name:'Deli@MH Meats',    col:'#bb87fc', beef:BEEF, poul:MH_POULTRY,  flav:MH_FLAVOURED},
-  {id:'mhchef',  name:'MH Meats Chef',    col:'#e05555', beef:CHEF_BEEF, poul:CHEF_POULTRY, flav:[]},
-  {id:'yoels',   name:"Yoel's Kitchen",   col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
-  {id:'craft',   name:'Craft Caterer',    col:'#bb87fc', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
-  {id:'mottis',  name:"Motti's Kitchen",  col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
-  {id:'freilich',name:'Freilich',         col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
-  {id:'bsssem',  name:'BSS Sem',          col:'#e8a84b', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
-  {id:'ushis',   name:"Best of Ushi's",   col:'#bb87fc', beef:BEEF, poul:KS_POULTRY,  flav:KS_FLAVOURED},
+  {id:'mhmeats', name:'MH Meats',        short:'MH',       col:'#c8a84b', beef:BEEF, poul:MH_POULTRY,  flav:MH_FLAVOURED},
+  {id:'ksmeats', name:'KS Meats',         short:'KS',       col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
+  {id:'halperns',name:"Halpern's",        short:"Halp",     col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
+  {id:'kayes',   name:"Kaye's Kosher",    short:"Kaye's",   col:'#e05555', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
+  {id:'deli',    name:'Deli@MH Meats',    short:'Deli',     col:'#bb87fc', beef:BEEF, poul:MH_POULTRY,  flav:[]},
+  {id:'mhchef',  name:'MH Meats Chef',    short:'Chef',     col:'#e05555', beef:CHEF_BEEF, poul:CHEF_POULTRY, flav:[]},
+  {id:'yoels',   name:"Yoel's Kitchen",   short:"Yoel's",   col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
+  {id:'craft',   name:'Craft Caterer',    short:'Craft',    col:'#bb87fc', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
+  {id:'mottis',  name:"Motti's Kitchen",  short:"Motti's",  col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
+  {id:'freilich',name:'Freilich',         short:'Freilich', col:'#4caf7d', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
+  {id:'bsssem',  name:'BSS Sem',          short:'BSS',      col:'#e8a84b', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
+  {id:'ushis',   name:"Best of Ushi's",   short:"Ushi's",   col:'#bb87fc', beef:BEEF, poul:KS_POULTRY,  flav:MH_FLAVOURED},
 ];
 
 // ═══════════════════════════════════════
@@ -466,7 +466,8 @@ function chefPoul(){return[...CHEF_POULTRY,...custom.chef_poul];}
 
 function getCustLists(c){
   if(c.id==='mhchef') return {beef:chefBeef(),poul:chefPoul(),flav:[]};
-  const isKS = !['mhmeats','deli'].includes(c.id);
+  if(c.id==='deli')   return {beef:beefList(),poul:mhPoul(),flav:[]};
+  const isKS = !['mhmeats'].includes(c.id);
   return {
     beef: beefList(),
     poul: isKS ? ksPoul() : mhPoul(),
@@ -699,24 +700,69 @@ function renderButcher(d){
 }
 
 function renderPacker(d){
-  // Aggregated totals across ALL customers — packer packs in bulk
+  // Aggregated totals + per-customer breakdown tags
   const el=document.getElementById('pc');
   const beef={},poul={},flav={};
+  const beefBy={},poulBy={},flavBy={};
+
   CUSTS.forEach(c=>{
     const co=orders[d]&&orders[d][c.id]||{};
     const L=getCustLists(c);
     Object.entries(co).forEach(([n,q])=>{
       if(!q)return;
-      if(L.flav.includes(n)) flav[n]=(flav[n]||0)+q;
-      else if(L.beef.includes(n)) beef[n]=(beef[n]||0)+q;
-      else poul[n]=(poul[n]||0)+q;
+      if(L.flav.includes(n)){
+        flav[n]=(flav[n]||0)+q;
+        if(!flavBy[n])flavBy[n]=[];
+        flavBy[n].push({s:c.short,q});
+      } else if(L.beef.includes(n)){
+        beef[n]=(beef[n]||0)+q;
+        if(!beefBy[n])beefBy[n]=[];
+        beefBy[n].push({s:c.short,q});
+      } else {
+        poul[n]=(poul[n]||0)+q;
+        if(!poulBy[n])poulBy[n]=[];
+        poulBy[n].push({s:c.short,q});
+      }
     });
   });
+
+  function custTags(byList){
+    if(!byList||!byList.length)return'';
+    return byList.map(x=>
+      `<span style="display:inline-block;background:var(--sur2);border:1px solid var(--bdr2);border-radius:3px;font-family:'DM Mono',monospace;font-size:9px;padding:1px 5px;margin:0 2px;white-space:nowrap;color:var(--acc2);">${x.s}<strong style="margin-left:3px;">${x.q}</strong></span>`
+    ).join('');
+  }
+
+  // Custom table builder with customer tags column
+  function mkPackerT(rows){
+    let h=`<table class="t"><thead><tr><th>Product</th><th style="width:65px;text-align:center;">Total</th><th>Customer Breakdown</th><th style="width:50px;text-align:center;">✓</th></tr></thead><tbody>`;
+    rows.forEach(r=>{
+      if(r.type==='sec'){h+=`<tr class="sec"><td colspan="4">${r.label}</td></tr>`;return;}
+      if(r.type==='flv'){h+=`<tr class="flv"><td colspan="4">🌶 ${r.label}</td></tr>`;return;}
+      h+=`<tr data-sec="${r.sec||''}">
+        <td>${r.name}</td>
+        <td class="qd">${r.total}</td>
+        <td style="padding:4px 6px;">${custTags(r.by)}</td>
+        <td style="text-align:center;"><div class="ck" onclick="this.classList.toggle('done')">✓</div></td>
+      </tr>`;
+    });
+    return h+'</tbody></table>';
+  }
+
   const rows=[];
-  if(Object.keys(poul).length){rows.push({type:'sec',label:'🐔 POULTRY'});Object.entries(poul).forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'poultry'}));}
-  if(Object.keys(beef).length){rows.push({type:'sec',label:'🥩 BEEF'});Object.entries(beef).forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'beef'}));}
-  if(Object.keys(flav).length){rows.push({type:'flv',label:'FLAVOURED / CHEF'});Object.entries(flav).forEach(([n,q])=>rows.push({cells:[n,q,''],t:['','q','ck'],q,sec:'flavoured'}));}
-  el.innerHTML=rows.length?mkT(['Product','Total Qty','✓'],rows):`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
+  if(Object.keys(poul).length){
+    rows.push({type:'sec',label:'🐔 POULTRY'});
+    Object.entries(poul).forEach(([n,q])=>rows.push({name:n,total:q,by:poulBy[n],sec:'poultry'}));
+  }
+  if(Object.keys(beef).length){
+    rows.push({type:'sec',label:'🥩 BEEF'});
+    Object.entries(beef).forEach(([n,q])=>rows.push({name:n,total:q,by:beefBy[n],sec:'beef'}));
+  }
+  if(Object.keys(flav).length){
+    rows.push({type:'flv',label:'FLAVOURED / CHEF'});
+    Object.entries(flav).forEach(([n,q])=>rows.push({name:n,total:q,by:flavBy[n],sec:'flavoured'}));
+  }
+  el.innerHTML=rows.length?mkPackerT(rows):`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
 }
 
 function renderDispatch(d){
