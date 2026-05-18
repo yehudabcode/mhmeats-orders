@@ -252,9 +252,8 @@ table.lt tr:last-child td{border:none;}
           <div><div class="stitle">📦 Packer Sheet</div><div class="ssub">Total units to pack across all customers</div></div>
           <div class="dts" id="pdts"></div>
           <div class="pbts">
-            <button class="btn gh sm" onclick="printSec('packer','beef')">🖨 🥩 Beef</button>
             <button class="btn gh sm" onclick="printSec('packer','poultry')">🖨 🐔 Chicken</button>
-            <button class="btn gh sm" onclick="printSec('packer','flavoured')">🖨 🌶 Flavoured</button>
+            <button class="btn gh sm" onclick="printSec('packer','beef')">🖨 🥩 Beef</button>
             <button class="btn gh sm" onclick="printSec('packer','all')">🖨 All Sheets</button>
           </div>
         </div>
@@ -364,7 +363,7 @@ const MH_FLAVOURED = [
   'SWEET AND SOUR SHNITZELS','BBQ SHNITZELS','TERIYAKI CHICKEN SHNITZELS',
   'CRUMB COATED SHNITZELS','CRUMB COATED DARK SHNITZEL',
   'SWEET AND SOUR DARK SHNITZELS','DELI STYLE DARK SHNITZELS','BBQ DARK SHNITZELS',
-  'CHICKEN DIPPERS','CHICKEN STIR FRY','CHICKEN SHWARMA','CHICKEN SHISHLIK'
+  'CHICKEN DIPPERS','CHICKEN SHWARMA','CHICKEN SHISHLIK'
 ];
 
 const KS_FLAVOURED = [
@@ -467,11 +466,14 @@ function chefPoul(){return[...CHEF_POULTRY,...custom.chef_poul];}
 function getCustLists(c){
   if(c.id==='mhchef') return {beef:chefBeef(),poul:chefPoul(),flav:[]};
   if(c.id==='deli')   return {beef:beefList(),poul:mhPoul(),flav:[]};
+  // Caterers (Yoel's, Craft, Motti's, Freilich, BSS, Ushi's) use KS_FLAVOURED (7 items)
+  // Retailers (KS Meats, Halpern's, Kaye's) use full MH_FLAVOURED (27 items)
+  const CATERERS = ['yoels','craft','mottis','freilich','bsssem','ushis'];
   const isKS = !['mhmeats'].includes(c.id);
   return {
     beef: beefList(),
     poul: isKS ? ksPoul() : mhPoul(),
-    flav: mhFlav()
+    flav: CATERERS.includes(c.id) ? ksFlav() : mhFlav()
   };
 }
 
@@ -582,8 +584,8 @@ function renderOrders(id){
   const c=CUSTS.find(x=>x.id===id);if(!c)return;
   const L=getCustLists(c);
   let h='';
-  h+=secHTML(`🥩 ${c.name} — Beef`,L.beef,id,'b',false);
   h+=secHTML(`🐔 ${c.name} — Poultry`,L.poul,id,'p',false);
+  h+=secHTML(`🥩 ${c.name} — Beef`,L.beef,id,'b',false);
   if(L.flav.length) h+=secHTML('🌶 Flavoured Products',L.flav,id,'f',true);
   document.getElementById('oa').innerHTML=h;
 }
@@ -702,19 +704,16 @@ function renderButcher(d){
 function renderPacker(d){
   // Aggregated totals + per-customer breakdown tags
   const el=document.getElementById('pc');
-  const beef={},poul={},flav={};
-  const beefBy={},poulBy={},flavBy={};
+  const beef={},poul={};
+  const beefBy={},poulBy={};
 
   CUSTS.forEach(c=>{
     const co=orders[d]&&orders[d][c.id]||{};
     const L=getCustLists(c);
     Object.entries(co).forEach(([n,q])=>{
       if(!q)return;
-      if(L.flav.includes(n)){
-        flav[n]=(flav[n]||0)+q;
-        if(!flavBy[n])flavBy[n]=[];
-        flavBy[n].push({s:c.short,q});
-      } else if(L.beef.includes(n)){
+      if(L.flav.includes(n)) return; // Flavoured → Chef sheet only, not Packer
+      else if(L.beef.includes(n)){
         beef[n]=(beef[n]||0)+q;
         if(!beefBy[n])beefBy[n]=[];
         beefBy[n].push({s:c.short,q});
@@ -758,10 +757,7 @@ function renderPacker(d){
     rows.push({type:'sec',label:'🥩 BEEF'});
     Object.entries(beef).forEach(([n,q])=>rows.push({name:n,total:q,by:beefBy[n],sec:'beef'}));
   }
-  if(Object.keys(flav).length){
-    rows.push({type:'flv',label:'FLAVOURED / CHEF'});
-    Object.entries(flav).forEach(([n,q])=>rows.push({name:n,total:q,by:flavBy[n],sec:'flavoured'}));
-  }
+  // Flavoured products are on Chef sheet — not shown on Packer
   el.innerHTML=rows.length?mkPackerT(rows):`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
 }
 
