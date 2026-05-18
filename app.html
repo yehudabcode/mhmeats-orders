@@ -467,15 +467,14 @@ function chefPoul(){return[...CHEF_POULTRY,...custom.chef_poul];}
 function getCustLists(c){
   if(c.id==='mhchef') return {beef:chefBeef(),poul:chefPoul(),flav:[]};
   if(c.id==='deli')   return {beef:beefList(),poul:mhPoul(),flav:[]};
-  // KS retail + Halperns + Kayes get full MH flavoured range
-  // Caterers (yoels/craft/mottis/freilich/bsssem/ushis) get KS caterer range
-  const CATERERS = ['yoels','craft','mottis','freilich','bsssem','ushis'];
-  const isMH = c.id==='mhmeats';
-  const isCaterer = CATERERS.includes(c.id);
+  // KS retail / Halperns / Kayes → full MH flavoured range
+  // Caterers (Yoel's / Craft / Motti's / Freilich / BSS / Ushi's) → KS caterer range
+  const CATERERS=['yoels','craft','mottis','freilich','bsssem','ushis'];
+  const isMH=c.id==='mhmeats';
   return {
     beef: beefList(),
     poul: isMH ? mhPoul() : ksPoul(),
-    flav: isCaterer ? ksFlav() : mhFlav()
+    flav: CATERERS.includes(c.id) ? ksFlav() : mhFlav()
   };
 }
 
@@ -483,6 +482,7 @@ function getCustLists(c){
 // INIT
 // ═══════════════════════════════════════
 function init(){
+  migrateOrders(); // Normalise any legacy product names in stored data
   // Date badge
   document.getElementById('dp').innerHTML=`<strong>${TODAYNAME.toUpperCase()}</strong>&nbsp;&nbsp;${TODAY.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
   buildSidebar();
@@ -1245,53 +1245,148 @@ window.addEventListener('beforeunload',e=>{
 });
 
 
-// ── NAME NORMALISATION MAP ────────────────────────────────────────────────────
-const LEGACY_NAME_MAP = {
-  'LEG QUARTERS 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEGS 2 PACK':'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEGS 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEG QUARTERS':'ROASTER LEG QUARTERS 2-PACK',
-  'ROASTER LEG QUARTERS':'ROASTER LEG QUARTERS 2-PACK',
-  'LEG QUARTERS':'ROASTER LEG QUARTERS 2-PACK',
-  'PARGIOT':'DARK SHNITZEL (PARGIOT)',
-  'DARK SHNITZEL':'DARK SHNITZEL (PARGIOT)',
-  'CHICKEN FILLETS':'CHICKEN FILLET',
-  'CHICKEN LIVER':'KOSHERED CHICKEN LIVER',
-  'MINCED CHICKEN':'HIGH QUALITY MINCED CHICKEN',
-  'DOUBLE SOUP PACK':'FAMILY SIZE SOUP PACK',
-  'BREAST QUARTERS':'BREAST ROASTER',
-  'BREAST QUARTER ROASTER':'BREAST ROASTER',
-  'CARCASS - 5-PACK':'CARCASS 5-PACK',
-  'CARCASS - 2-PACK':'CARCASS DOUBLE PACK',
-  'CARCASS - 1-PACK':'CARCASS',
-  'WINGS - 12-PACK':'CHICKEN WINGS (12 PIECES)',
-  'WINGS - 6-PACK':'CHICKEN WINGS 6-PACK',
-  'NECKS 8-PACK':'CHICKEN NECKS (8-PACK)',
-  'SHNITZELS - 10-PACK':'CHICKEN SHNITZEL VALUE PACK (10)',
-  'SHNITZELS - 6-PACK':'CHICKEN SHNITZEL 6-PACK',
-  'SHNITZELS - 2-PACK':'CHICKEN SHNITZEL',
-  'THIGH - 2-PACK':'ROASTER THIGHS 2-PACK',
-  'THIGH - 4-PACK':'ROASTER THIGHS 4-PACK',
-  'CHICKEN THIGHS':'ROASTER THIGHS',
-  'CAPONS (BONED THIGHS)':'CAPONS (BONELESS DARKS)',
-  'LEG QUARTERS IN 1/8 VALUE PACK':'ROASTER LEG QUARTERS IN 1/8 VALUE PACK',
-  'LEG QUARTERS IN 1/8':'ROASTER LEG QUARTERS IN 1/8',
-  'LEG QUARTERS - 1-PACK':'ROASTER LEG QUARTERS',
-  'LEG QUARTERS - 4-PACK':'ROASTER LEG QUARTERS 4-PACK',
-  'LEG QUARTERS - 6-PACK':'ROASTER LEG QUARTERS VALUE PACK (6)',
-  'LEG QUARTERS - VALUE PACK':'ROASTER LEG QUARTERS VALUE PACK (4)',
-  'CHICKEN SHNITZEL:6 PIECES':'CHICKEN SHNITZEL 6-PACK',
+// ═══════════════════════════════════════
+// NAME NORMALISATION
+// Maps every known variant → canonical name
+// Applied at load (migrateOrders) and on import
+// ═══════════════════════════════════════
+const NAME_MAP={
+  // ── Carcass variants
+  'CARCASS-5-PACK':                    'CARCASS 5-PACK',
+  'CARCASS - 5-PACK':                  'CARCASS 5-PACK',
+  '5-PACK CARCASSES':                  'CARCASS 5-PACK',
+  '5 PACK CARCASSES':                  'CARCASS 5-PACK',
+  'CARCASS FIVE PACK':                 'CARCASS 5-PACK',
+  'CARCASS-2-PACK':                    'CARCASS DOUBLE PACK',
+  'CARCASS - 2-PACK':                  'CARCASS DOUBLE PACK',
+  'CARCASS DOUBLE':                    'CARCASS DOUBLE PACK',
+  'CARCASS-1-PACK':                    'CARCASS',
+  'CARCASS - 1-PACK':                  'CARCASS',
+  // ── Soup
+  'DOUBLE SOUP PACK':                  'FAMILY SIZE SOUP PACK',
+  // ── Breast
+  'BREAST QUARTERS':                   'BREAST ROASTER',
+  'BREAST QUARTER ROASTER':            'BREAST ROASTER',
+  // ── Leg quarters
+  'LEG QUARTERS IN 1/8 VALUE PACK':    'ROASTER LEG QUARTERS IN 1/8 VALUE PACK',
+  'LEG QUARTERS-IN-1/8-VALUE-PACK':    'ROASTER LEG QUARTERS IN 1/8 VALUE PACK',
+  'LEG QUARTERS IN 1/8':               'ROASTER LEG QUARTERS IN 1/8',
+  'LEG QUARTERS-IN-1/8':               'ROASTER LEG QUARTERS IN 1/8',
+  'ROASTER LEG QUARTERS IN 1/8':       'ROASTER LEG QUARTERS IN 1/8',
+  'LEG QUARTERS - 1-PACK':             'ROASTER LEG QUARTERS',
+  'LEG QUARTERS-1-PACK':               'ROASTER LEG QUARTERS',
+  'ROASTER LEG QUARTERS':              'ROASTER LEG QUARTERS',
+  'LEG QUARTERS - 2-PACK':             'ROASTER LEG QUARTERS 2-PACK',
+  'LEG QUARTERS-2-PACK':               'ROASTER LEG QUARTERS 2-PACK',
+  'LEG QUARTERS- 2-PACK':              'ROASTER LEG QUARTERS 2-PACK',
+  'LEG QUARTERS -2-PACK':              'ROASTER LEG QUARTERS 2-PACK',
+  '2-PACK LEG QUARTERS':               'ROASTER LEG QUARTERS 2-PACK',
+  'LEG QUARTERS - 4-PACK':             'ROASTER LEG QUARTERS 4-PACK',
+  'LEG QUARTERS-4-PACK':               'ROASTER LEG QUARTERS 4-PACK',
+  'LEG QUARTERS- 4-PACK':              'ROASTER LEG QUARTERS 4-PACK',
+  'ROASTER LEG QUARTERS 4-PACK':       'ROASTER LEG QUARTERS 4-PACK',
+  'LEG QUARTERS - 6-PACK':             'ROASTER LEG QUARTERS VALUE PACK (6)',
+  'LEG QUARTERS-6-PACK':               'ROASTER LEG QUARTERS VALUE PACK (6)',
+  'LEG QUARTERS- 6-PACK':              'ROASTER LEG QUARTERS VALUE PACK (6)',
+  'LEG QUARTERS VALUE PACK 6':         'ROASTER LEG QUARTERS VALUE PACK (6)',
+  'LEG QUARTERS - VALUE PACK':         'ROASTER LEG QUARTERS VALUE PACK (4)',
+  'LEG QUARTERS VALUE PACK':           'ROASTER LEG QUARTERS VALUE PACK (4)',
+  // ── Thighs
+  'THIGH - 2-PACK':                    'ROASTER THIGHS 2-PACK',
+  'THIGH-2-PACK':                      'ROASTER THIGHS 2-PACK',
+  'THIGH – 2-PACK':                    'ROASTER THIGHS 2-PACK',
+  'THIGH - 4-PACK':                    'ROASTER THIGHS 4-PACK',
+  'THIGH-4-PACK':                      'ROASTER THIGHS 4-PACK',
+  'THIGH – 4-PACK':                    'ROASTER THIGHS 4-PACK',
+  'CHICKEN THIGHS':                    'ROASTER THIGHS',
+  'ROASTER THIGHS':                    'ROASTER THIGHS',
+  'CAPONS (BONED THIGHS)':             'CAPONS (BONELESS DARKS)',
+  // ── Wings
+  'WINGS - 6-PACK':                    'CHICKEN WINGS 6-PACK',
+  'WINGS-6-PACK':                      'CHICKEN WINGS 6-PACK',
+  'WINGS – 6-PACK':                    'CHICKEN WINGS 6-PACK',
+  'WINGS - 12-PACK':                   'CHICKEN WINGS (12 PIECES)',
+  'WINGS-12-PACK':                     'CHICKEN WINGS (12 PIECES)',
+  'WINGS –12-PACK':                    'CHICKEN WINGS (12 PIECES)',
+  'WINGS – 12-PACK':                   'CHICKEN WINGS (12 PIECES)',
+  '12-PACK CHICKEN WINGS':             'CHICKEN WINGS (12 PIECES)',
+  '12 PACK CHICKEN WINGS':             'CHICKEN WINGS (12 PIECES)',
+  // ── Necks
+  'NECKS 8-PACK':                      'CHICKEN NECKS (8-PACK)',
+  'NECKS-8-PACK':                      'CHICKEN NECKS (8-PACK)',
+  '8-PACK CHICKEN NECKS':              'CHICKEN NECKS (8-PACK)',
+  // ── Fillets
+  'CHICKEN FILLETS':                   'CHICKEN FILLET',
+  // ── Shnitzels
+  'SHNITZELS - 10-PACK':               'CHICKEN SHNITZEL VALUE PACK (10)',
+  'SHNITZELS-10-PACK':                 'CHICKEN SHNITZEL VALUE PACK (10)',
+  'SHNITZELS – 10-PACK':               'CHICKEN SHNITZEL VALUE PACK (10)',
+  '10-PACK CHICKEN SHNITZELS':         'CHICKEN SHNITZEL VALUE PACK (10)',
+  '10 PACK CHICKEN SHNITZELS':         'CHICKEN SHNITZEL VALUE PACK (10)',
+  'CHICKEN SHNITZELS - 10-PACK':       'CHICKEN SHNITZEL VALUE PACK (10)',
+  'CHICKEN SHNITZELS VALUE PACK (10)': 'CHICKEN SHNITZEL VALUE PACK (10)',
+  'CHICKEN SHNITZEL:VALUE PACK (10 PIECES)':'CHICKEN SHNITZEL VALUE PACK (10)',
   'CHICKEN SHNITZEL VALUE PACK (10 PIECES)':'CHICKEN SHNITZEL VALUE PACK (10)',
-  'ROASTER THIGHS BACK-BONE OUT':'POLKIES',
-  'FAMILY SIZE SOUP PACK':'FAMILY SIZE SOUP PACK',
+  'SHNITZELS - 6-PACK':                'CHICKEN SHNITZEL 6-PACK',
+  'SHNITZELS-6-PACK':                  'CHICKEN SHNITZEL 6-PACK',
+  'SHNITZELS – 6-PACK':                'CHICKEN SHNITZEL 6-PACK',
+  '6-PACK CHICKEN SHNITZELS':          'CHICKEN SHNITZEL 6-PACK',
+  '6 PACK CHICKEN SHNITZELS':          'CHICKEN SHNITZEL 6-PACK',
+  'CHICKEN SHNITZELS - 6-PACK':        'CHICKEN SHNITZEL 6-PACK',
+  'CHICKEN SHNITZEL:6 PIECES':         'CHICKEN SHNITZEL 6-PACK',
+  'SHNITZELS - 2-PACK':                'CHICKEN SHNITZEL',
+  'SHNITZELS-2-PACK':                  'CHICKEN SHNITZEL',
+  // ── Goujons
+  'GOUJONS':                           'CHICKEN GOUJONS',
+  // ── Pargiot
+  'PARGIOT':                           'DARK SHNITZEL (PARGIOT)',
+  'DARK SHNITZEL':                     'DARK SHNITZEL (PARGIOT)',
+  // ── Minced chicken
+  'MINCED CHICKEN':                    'HIGH QUALITY MINCED CHICKEN',
+  // ── Chicken liver
+  'CHICKEN LIVER':                     'KOSHERED CHICKEN LIVER',
+  // ── PLU-prefixed variants (strip prefix then re-run)
 };
-function normalizeName(raw) {
+
+function normalizeName(raw){
   if(!raw) return '';
-  let s = String(raw).trim();
-  const pipeIdx = s.search(/^\d+[|]/);
-  if(pipeIdx === 0) s = s.replace(/^\d+\|/, '').trim();
-  s = s.replace(/_/g,' ').trim().toUpperCase();
-  return LEGACY_NAME_MAP[s] || s;
+  let s=String(raw).trim();
+  // Strip PLU prefix  e.g. "451|ROASTER LEG QUARTERS IN 1/8"
+  s=s.replace(/^\d+\|/,'').trim();
+  // Replace underscores
+  s=s.replace(/_/g,' ').trim();
+  // Try exact match first
+  if(NAME_MAP[s]) return NAME_MAP[s];
+  // Try uppercase
+  const u=s.toUpperCase();
+  if(NAME_MAP[u]) return NAME_MAP[u];
+  // Try trimming extra spaces/dashes and retry
+  const clean=u.replace(/\s*-\s*/g,'-').replace(/\s+/g,' ');
+  if(NAME_MAP[clean]) return NAME_MAP[clean];
+  return s; // return as-is if no match
+}
+
+// Migrate ALL existing localStorage orders to canonical names
+// Runs once at startup — rewrites dirty stored data
+function migrateOrders(){
+  let changed=0;
+  DAYS.forEach(d=>{
+    if(!orders[d]) return;
+    Object.keys(orders[d]).forEach(cid=>{
+      const co=orders[d][cid];
+      if(!co) return;
+      Object.keys(co).forEach(name=>{
+        const canonical=normalizeName(name);
+        if(canonical!==name){
+          const qty=co[name];
+          delete co[name];
+          co[canonical]=(co[canonical]||0)+qty;
+          changed++;
+        }
+      });
+    });
+  });
+  if(changed>0){save();console.log('[MH Meats] Migrated '+changed+' product name(s) to canonical form');}
 }
 
 // ═══════════════════════════════════════
