@@ -252,8 +252,9 @@ table.lt tr:last-child td{border:none;}
           <div><div class="stitle">📦 Packer Sheet</div><div class="ssub">Total units to pack across all customers</div></div>
           <div class="dts" id="pdts"></div>
           <div class="pbts">
-            <button class="btn gh sm" onclick="printSec('packer','poultry')">🖨 🐔 Chicken</button>
             <button class="btn gh sm" onclick="printSec('packer','beef')">🖨 🥩 Beef</button>
+            <button class="btn gh sm" onclick="printSec('packer','poultry')">🖨 🐔 Chicken</button>
+            <button class="btn gh sm" onclick="printSec('packer','flavoured')">🖨 🌶 Flavoured</button>
             <button class="btn gh sm" onclick="printSec('packer','all')">🖨 All Sheets</button>
           </div>
         </div>
@@ -331,27 +332,27 @@ const BEEF = [
 const MH_POULTRY = [
   'WHOLE ROASTER','ROASTER IN 1/4','ROASTER IN 1/8',
   'ROASTER IN 1/4 SHNITZELED','ROASTER IN 1/8 SHNITZELED','ROASTER IN 1/8 TOP MINCED',
-  'CARCASS - 1-PACK','CARCASS - 2-PACK','CARCASS - 5-PACK',
-  'SOUP PACK','DOUBLE SOUP PACK','FAMILY SOUP PARCEL','BREAST QUARTERS',
-  'LEG QUARTERS - 1-PACK','LEG QUARTERS - 2-PACK','LEG QUARTERS - 4-PACK','LEG QUARTERS - 6-PACK',
-  'LEG QUARTERS IN 1/8','LEG QUARTERS IN 1/8 VALUE PACK',
-  'POLKIES','THIGH - 2-PACK','THIGH - 4-PACK','CAPONS (BONED THIGHS)',
-  'WINGS - 6-PACK','WINGS - 12-PACK','NECKS 8-PACK','CHICKEN FILLETS',
-  'CUBED CHICKEN','CHICKEN GOUJONS','SHNITZELS - 2-PACK','SHNITZELS - 6-PACK',
-  'SHNITZELS - 10-PACK','PARGIOT','MINCED CHICKEN','CHICKEN STIR FRY',
-  'CHICKEN LIVER','PUPICKS'
+  'CARCASS','CARCASS DOUBLE PACK','CARCASS 5-PACK',
+  'SOUP PACK','FAMILY SIZE SOUP PACK','FAMILY SOUP PARCEL','BREAST ROASTER',
+  'ROASTER LEG QUARTERS','ROASTER LEG QUARTERS 2-PACK','ROASTER LEG QUARTERS 4-PACK','ROASTER LEG QUARTERS VALUE PACK (6)',
+  'ROASTER LEG QUARTERS IN 1/8','ROASTER LEG QUARTERS IN 1/8 VALUE PACK',
+  'POLKIES','ROASTER THIGHS 2-PACK','ROASTER THIGHS 4-PACK','CAPONS (BONELESS DARKS)',
+  'CHICKEN WINGS 6-PACK','CHICKEN WINGS (12 PIECES)','CHICKEN NECKS (8-PACK)','CHICKEN FILLET',
+  'CUBED CHICKEN','CHICKEN GOUJONS','CHICKEN SHNITZEL','CHICKEN SHNITZEL 6-PACK',
+  'CHICKEN SHNITZEL VALUE PACK (10)','DARK SHNITZEL (PARGIOT)','HIGH QUALITY MINCED CHICKEN','CHICKEN STIR FRY',
+  'KOSHERED CHICKEN LIVER','PUPICKS'
 ];
 
 const KS_POULTRY = [
   'WHOLE ROASTER','ROASTER IN 1/4','ROASTER IN 1/8',
   'ROASTER IN 1/4 SHNITZELED','ROASTER IN 1/8 SHNITZELED',
-  'BREAST QUARTER ROASTER','CARCASS - 5-PACK','DOUBLE SOUP PACK',
-  'LEG QUARTERS - 2-PACK','LEG QUARTERS - VALUE PACK',
-  'LEG QUARTERS IN 1/8','LEG QUARTERS IN 1/8 VALUE PACK',
-  'CHICKEN THIGHS','CHICKEN DRUMSTICKS','CHICKEN FILLETS','CHICKEN GOUJONS',
-  'CHICKEN LIVER','NECKS 8-PACK','MINCED CHICKEN',
-  'SHNITZELS - 10-PACK','SHNITZELS - 6-PACK','WINGS - 12-PACK',
-  'PARGIOT','PUPICKS'
+  'BREAST ROASTER','CARCASS 5-PACK','FAMILY SIZE SOUP PACK',
+  'ROASTER LEG QUARTERS 2-PACK','ROASTER LEG QUARTERS VALUE PACK (4)',
+  'ROASTER LEG QUARTERS IN 1/8','ROASTER LEG QUARTERS IN 1/8 VALUE PACK',
+  'ROASTER THIGHS','CHICKEN DRUMSTICKS','CHICKEN FILLET','CHICKEN GOUJONS',
+  'KOSHERED CHICKEN LIVER','CHICKEN NECKS (8-PACK)','HIGH QUALITY MINCED CHICKEN',
+  'CHICKEN SHNITZEL VALUE PACK (10)','CHICKEN SHNITZEL 6-PACK','CHICKEN WINGS (12 PIECES)',
+  'DARK SHNITZEL (PARGIOT)','PUPICKS'
 ];
 
 const MH_FLAVOURED = [
@@ -363,7 +364,7 @@ const MH_FLAVOURED = [
   'SWEET AND SOUR SHNITZELS','BBQ SHNITZELS','TERIYAKI CHICKEN SHNITZELS',
   'CRUMB COATED SHNITZELS','CRUMB COATED DARK SHNITZEL',
   'SWEET AND SOUR DARK SHNITZELS','DELI STYLE DARK SHNITZELS','BBQ DARK SHNITZELS',
-  'CHICKEN DIPPERS','CHICKEN SHWARMA','CHICKEN SHISHLIK'
+  'CHICKEN DIPPERS','CHICKEN STIR FRY','CHICKEN SHWARMA','CHICKEN SHISHLIK'
 ];
 
 const KS_FLAVOURED = [
@@ -466,14 +467,15 @@ function chefPoul(){return[...CHEF_POULTRY,...custom.chef_poul];}
 function getCustLists(c){
   if(c.id==='mhchef') return {beef:chefBeef(),poul:chefPoul(),flav:[]};
   if(c.id==='deli')   return {beef:beefList(),poul:mhPoul(),flav:[]};
-  // Caterers (Yoel's, Craft, Motti's, Freilich, BSS, Ushi's) use KS_FLAVOURED (7 items)
-  // Retailers (KS Meats, Halpern's, Kaye's) use full MH_FLAVOURED (27 items)
+  // KS retail + Halperns + Kayes get full MH flavoured range
+  // Caterers (yoels/craft/mottis/freilich/bsssem/ushis) get KS caterer range
   const CATERERS = ['yoels','craft','mottis','freilich','bsssem','ushis'];
-  const isKS = !['mhmeats'].includes(c.id);
+  const isMH = c.id==='mhmeats';
+  const isCaterer = CATERERS.includes(c.id);
   return {
     beef: beefList(),
-    poul: isKS ? ksPoul() : mhPoul(),
-    flav: CATERERS.includes(c.id) ? ksFlav() : mhFlav()
+    poul: isMH ? mhPoul() : ksPoul(),
+    flav: isCaterer ? ksFlav() : mhFlav()
   };
 }
 
@@ -584,8 +586,8 @@ function renderOrders(id){
   const c=CUSTS.find(x=>x.id===id);if(!c)return;
   const L=getCustLists(c);
   let h='';
-  h+=secHTML(`🐔 ${c.name} — Poultry`,L.poul,id,'p',false);
   h+=secHTML(`🥩 ${c.name} — Beef`,L.beef,id,'b',false);
+  h+=secHTML(`🐔 ${c.name} — Poultry`,L.poul,id,'p',false);
   if(L.flav.length) h+=secHTML('🌶 Flavoured Products',L.flav,id,'f',true);
   document.getElementById('oa').innerHTML=h;
 }
@@ -704,16 +706,19 @@ function renderButcher(d){
 function renderPacker(d){
   // Aggregated totals + per-customer breakdown tags
   const el=document.getElementById('pc');
-  const beef={},poul={};
-  const beefBy={},poulBy={};
+  const beef={},poul={},flav={};
+  const beefBy={},poulBy={},flavBy={};
 
   CUSTS.forEach(c=>{
     const co=orders[d]&&orders[d][c.id]||{};
     const L=getCustLists(c);
     Object.entries(co).forEach(([n,q])=>{
       if(!q)return;
-      if(L.flav.includes(n)) return; // Flavoured → Chef sheet only, not Packer
-      else if(L.beef.includes(n)){
+      if(L.flav.includes(n)){
+        flav[n]=(flav[n]||0)+q;
+        if(!flavBy[n])flavBy[n]=[];
+        flavBy[n].push({s:c.short,q});
+      } else if(L.beef.includes(n)){
         beef[n]=(beef[n]||0)+q;
         if(!beefBy[n])beefBy[n]=[];
         beefBy[n].push({s:c.short,q});
@@ -757,7 +762,10 @@ function renderPacker(d){
     rows.push({type:'sec',label:'🥩 BEEF'});
     Object.entries(beef).forEach(([n,q])=>rows.push({name:n,total:q,by:beefBy[n],sec:'beef'}));
   }
-  // Flavoured products are on Chef sheet — not shown on Packer
+  if(Object.keys(flav).length){
+    rows.push({type:'flv',label:'FLAVOURED / CHEF'});
+    Object.entries(flav).forEach(([n,q])=>rows.push({name:n,total:q,by:flavBy[n],sec:'flavoured'}));
+  }
   el.innerHTML=rows.length?mkPackerT(rows):`<div class="emp"><div class="empi">📭</div>No orders for ${d}</div>`;
 }
 
@@ -998,7 +1006,7 @@ function renderPulled(data,d){
     if(!byCustomer[cid])byCustomer[cid]={name:cname,items:{}};
     // Clean product name — strip PLU prefix e.g. "251|WHOLE ROASTER" → "WHOLE ROASTER"
     const rawName=row.productName||row.productKey||'';
-    const cleanName=rawName.includes('|')?rawName.split('|').slice(1).join('|').trim():rawName.replace(/_/g,' ').trim();
+    const cleanName=normalizeName(rawName);
     byCustomer[cid].items[cleanName]=(byCustomer[cid].items[cleanName]||0)+(parseInt(row.quantity)||0);
   });
 
@@ -1016,7 +1024,7 @@ function renderPulled(data,d){
 }
 function importOrder(o,d){
   const cid=o.customerId||o.id;if(!cid||!o.items)return;
-  Object.entries(o.items).forEach(([n,q])=>setQ(d,cid,n,getQ(d,cid,n)+(parseInt(q)||0)));
+  Object.entries(o.items).forEach(([n,q])=>{const cn=normalizeName(n);setQ(d,cid,cn,getQ(d,cid,cn)+(parseInt(q)||0));});
   updCounts();
   toast('Imported for '+(o.customer||cid)+' — click their name in sidebar to view','ok');
 }
@@ -1235,6 +1243,56 @@ window.addEventListener('beforeunload',e=>{
   const has=DAYS.some(d=>CUSTS.some(c=>{const co=orders[d]&&orders[d][c.id];return co&&Object.values(co).some(v=>v>0);}));
   if(has){e.preventDefault();e.returnValue='';}
 });
+
+
+// ── NAME NORMALISATION MAP ────────────────────────────────────────────────────
+const LEGACY_NAME_MAP = {
+  'LEG QUARTERS 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEGS 2 PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEGS 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEG QUARTERS':'ROASTER LEG QUARTERS 2-PACK',
+  'ROASTER LEG QUARTERS':'ROASTER LEG QUARTERS 2-PACK',
+  'LEG QUARTERS':'ROASTER LEG QUARTERS 2-PACK',
+  'PARGIOT':'DARK SHNITZEL (PARGIOT)',
+  'DARK SHNITZEL':'DARK SHNITZEL (PARGIOT)',
+  'CHICKEN FILLETS':'CHICKEN FILLET',
+  'CHICKEN LIVER':'KOSHERED CHICKEN LIVER',
+  'MINCED CHICKEN':'HIGH QUALITY MINCED CHICKEN',
+  'DOUBLE SOUP PACK':'FAMILY SIZE SOUP PACK',
+  'BREAST QUARTERS':'BREAST ROASTER',
+  'BREAST QUARTER ROASTER':'BREAST ROASTER',
+  'CARCASS - 5-PACK':'CARCASS 5-PACK',
+  'CARCASS - 2-PACK':'CARCASS DOUBLE PACK',
+  'CARCASS - 1-PACK':'CARCASS',
+  'WINGS - 12-PACK':'CHICKEN WINGS (12 PIECES)',
+  'WINGS - 6-PACK':'CHICKEN WINGS 6-PACK',
+  'NECKS 8-PACK':'CHICKEN NECKS (8-PACK)',
+  'SHNITZELS - 10-PACK':'CHICKEN SHNITZEL VALUE PACK (10)',
+  'SHNITZELS - 6-PACK':'CHICKEN SHNITZEL 6-PACK',
+  'SHNITZELS - 2-PACK':'CHICKEN SHNITZEL',
+  'THIGH - 2-PACK':'ROASTER THIGHS 2-PACK',
+  'THIGH - 4-PACK':'ROASTER THIGHS 4-PACK',
+  'CHICKEN THIGHS':'ROASTER THIGHS',
+  'CAPONS (BONED THIGHS)':'CAPONS (BONELESS DARKS)',
+  'LEG QUARTERS IN 1/8 VALUE PACK':'ROASTER LEG QUARTERS IN 1/8 VALUE PACK',
+  'LEG QUARTERS IN 1/8':'ROASTER LEG QUARTERS IN 1/8',
+  'LEG QUARTERS - 1-PACK':'ROASTER LEG QUARTERS',
+  'LEG QUARTERS - 4-PACK':'ROASTER LEG QUARTERS 4-PACK',
+  'LEG QUARTERS - 6-PACK':'ROASTER LEG QUARTERS VALUE PACK (6)',
+  'LEG QUARTERS - VALUE PACK':'ROASTER LEG QUARTERS VALUE PACK (4)',
+  'CHICKEN SHNITZEL:6 PIECES':'CHICKEN SHNITZEL 6-PACK',
+  'CHICKEN SHNITZEL VALUE PACK (10 PIECES)':'CHICKEN SHNITZEL VALUE PACK (10)',
+  'ROASTER THIGHS BACK-BONE OUT':'POLKIES',
+  'FAMILY SIZE SOUP PACK':'FAMILY SIZE SOUP PACK',
+};
+function normalizeName(raw) {
+  if(!raw) return '';
+  let s = String(raw).trim();
+  const pipeIdx = s.search(/^\d+[|]/);
+  if(pipeIdx === 0) s = s.replace(/^\d+\|/, '').trim();
+  s = s.replace(/_/g,' ').trim().toUpperCase();
+  return LEGACY_NAME_MAP[s] || s;
+}
 
 // ═══════════════════════════════════════
 // BOOT
