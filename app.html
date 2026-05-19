@@ -2616,20 +2616,50 @@ function renderPackerSheet(day) {
 
   // Canonical name map — all pack variants consolidate into one packer row
   const LEG_CANONICAL = {
+    // Chicken legs
     'CHICKEN LEGS - 2 PACK':            'CHICKEN LEGS',
     'CHICKEN LEGS - VALUE PACK':        'CHICKEN LEGS',
     'CHICKEN LEGS IN 1/8 - 2 PACK':    'CHICKEN LEGS IN 1/8',
     'CHICKEN LEGS IN 1/8 - VALUE PACK': 'CHICKEN LEGS IN 1/8',
+    // Leg quarters
     'LEG QUARTERS- 1-PACK':            'LEG QUARTERS',
     'LEG QUARTERS- 2-PACK':            'LEG QUARTERS',
     'LEG QUARTERS- 4-PACK':            'LEG QUARTERS',
     'LEG QUARTERS- 6-PACK':            'LEG QUARTERS',
     'LEG QUARTERS IN 1/8 - 2 PACK':   'LEG QUARTERS IN 1/8',
     'LEG QUARTERS IN 1/8 VALUE PACK':  'LEG QUARTERS IN 1/8',
+    // Shnitzels — same pack size, different name per customer
+    'SHNITZELS -  2-PACK':             'SHNITZELS 2-PACK',
+    'SHNITZELS -  6-PACK':             'SHNITZELS 6-PACK',
+    'SHNITZELS - 10-PACK':             'SHNITZELS 10-PACK',
+    '6-PACK CHICKEN SHNITZELS':        'SHNITZELS 6-PACK',
+    '10-PACK CHICKEN SHNITZELS':       'SHNITZELS 10-PACK',
+    // Wings
+    'WINGS -6-PACK':                   'WINGS 6-PACK',
+    'WINGS -12-PACK':                  'WINGS 12-PACK',
+    '12-PACK CHICKEN WINGS':           'WINGS 12-PACK',
+    // Carcasses
+    'CARCASS-1-PACK':                  'CARCASS 1-PACK',
+    'CARCASS-2-PACK':                  'CARCASS 2-PACK',
+    'CARCASS-5-PACK':                  'CARCASS 5-PACK',
+    '5-PACK CARCASSES':                'CARCASS 5-PACK',
+    // Pargiot
+    'PARGIOT':                         'PARGIOT',
+    'CHICKEN PARGIOT':                 'PARGIOT',
+    // Fillets
+    'FILLETS':                         'CHICKEN FILLETS',
+    // Goujons
+    'GOUJONS':                         'CHICKEN GOUJONS',
+    // Double soup
+    'DOUBLE SOUP PACK':                'DOUBLE SOUP PACK',
   };
   const LEG_PLU = {
     'CHICKEN LEGS': 449, 'CHICKEN LEGS IN 1/8': 451,
     'LEG QUARTERS': 288, 'LEG QUARTERS IN 1/8': 289,
+    'SHNITZELS 2-PACK': 329, 'SHNITZELS 6-PACK': 507, 'SHNITZELS 10-PACK': 508,
+    'WINGS 6-PACK': 310, 'WINGS 12-PACK': 651,
+    'CARCASS 1-PACK': 280, 'CARCASS 2-PACK': 281, 'CARCASS 5-PACK': 604,
+    'PARGIOT': 456, 'CHICKEN FILLETS': 503, 'CHICKEN GOUJONS': 524,
   };
 
   CUSTOMERS.forEach(cust => {
