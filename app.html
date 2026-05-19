@@ -530,7 +530,6 @@
 
 <div class="nav">
   <div class="nav-tab active" onclick="switchPanel('order')">📋 Order Input</div>
-  <div class="nav-tab" onclick="switchPanel('summary')">📊 Summary</div>
   <div class="nav-tab" onclick="switchPanel('chef')">👨‍🍳 Chef Sheet</div>
   <div class="nav-tab" onclick="switchPanel('butcher')">🔪 Butcher Lists</div>
   <div class="nav-tab" onclick="switchPanel('packer')">📦 Packer Lists</div>
@@ -597,14 +596,6 @@
       </div>
     </div>
     <div id="chefSheetContent"></div>
-  </div>
-
-  <!-- ════════════════════════════════ SUMMARY PANEL ════════════════════════════════ -->
-  <div class="panel" id="panel-summary">
-    <div style="padding:16px 24px 0">
-      <div class="sheet-day-btns" id="summaryDayBtns"></div>
-    </div>
-    <div id="summaryContent" style="padding:16px 24px"></div>
   </div>
 
   <!-- ════════════════════════════════ BUTCHER LISTS PANEL ════════════════════════════════ -->
@@ -781,10 +772,6 @@
 
       <!-- Admin content (hidden until PIN correct) -->
       <div id="adminContent" style="display:none">
-
-        <!-- Alert Controls -->
-        <div id="alertControlsMount"></div>
-
         <div class="card" style="margin-bottom:16px">
           <div class="card-header">
             ⚙️ Admin Settings
@@ -1469,16 +1456,16 @@ const BEEF_BY_CUSTOMER = {
     {plu:107,name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {plu:16,name:"BOLA JOINT",unit:"UNITS",mult:1},
     {plu:108,name:"BOLA STEAKS",unit:"UNITS",mult:2},
-    {plu:16,name:"CUBED CHOLENT BEEF",unit:"KG",mult:0.5},
-    {plu:15,name:"CUBED TOP RIB",unit:"KG",mult:0.5},
+    {plu:16,name:"CUBED CHOLENT BEEF",unit:"UNITS",mult:1},
+    {plu:15,name:"CUBED TOP RIB",unit:"UNITS",mult:1},
     {plu:42,name:"FAIRY STEAKS",unit:"UNITS",mult:4},
     {plu:7,name:"FLANK",unit:"UNITS",mult:1},
     {plu:2,name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
     {plu:75,name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
-    {plu:9,name:"GOULASH BEEF CUBES",unit:"KG",mult:0.5},
+    {plu:9,name:"GOULASH BEEF CUBES",unit:"UNITS",mult:1},
     {plu:29,name:"MARROW BONES",unit:"UNITS",mult:2},
     {plu:50,name:"MEAT BONES",unit:"UNITS",mult:6},
-    {plu:2,name:"MINCED STEAK",unit:"KG",mult:0.5},
+    {plu:2,name:"MINCED STEAK",unit:"UNITS",mult:1},
     {plu:75,name:"PICKLED BEEF ROLL",unit:"UNITS",mult:1},
     {plu:null,name:"POT ROAST",unit:"UNITS",mult:1},
     {plu:14,name:"PRIME CHOLENT MEAT",unit:"UNITS",mult:1},
@@ -2030,9 +2017,8 @@ function buildCustomerList() {
 }
 
 function buildDayButtonSets() {
-  ['chef','butcher','packer','dispatch','summary'].forEach(panel => {
+  ['chef','butcher','packer','dispatch'].forEach(panel => {
     const el = document.getElementById(`${panel}DayBtns`);
-    if (!el) return;
     el.innerHTML = DAYS.map((d,i) => `
       <div class="sheet-day-btn ${i===0?'active':''}" onclick="selectSheetDay('${panel}','${d}',this)">${d.slice(0,3).toUpperCase()}</div>
     `).join('');
@@ -2247,7 +2233,6 @@ function selectSheetDay(panel, day, btn) {
   if (panel === 'butcher') renderButcherSheet(day);
   if (panel === 'packer') renderPackerSheet(day);
   if (panel === 'dispatch') renderDispatchSheet(day);
-  if (panel === 'summary') renderSummaryPanel(day);
 }
 
 function getTotalsForDay(day) {
@@ -2403,7 +2388,6 @@ function renderButcherSheet(day) {
     'BREADED SHNITZELS':          1,
     'CHICKEN LEGS':               1,
     'CHICKEN LEGS IN 1/8':        1,
-    'CHICKEN LEGS IN 1/8':        1,
   };
 
   function poultryQty(name) {
@@ -2431,8 +2415,8 @@ function renderButcherSheet(day) {
   ].filter(i=>i.qty>0);
 
   const bottomQuarters = [
-    {name:'LEG QUARTERS (ALL PACKS)', qty:['LEG QUARTERS- 1-PACK','LEG QUARTERS- 2-PACK','LEG QUARTERS- 4-PACK','LEG QUARTERS- 6-PACK','CHICKEN LEGS - 2 PACK','CHICKEN LEGS - VALUE PACK','CHICKEN LEGS'].reduce((a,n)=>a+poultryQty(n),0)},
-    {name:'LEG QUARTERS IN 1/8 (ALL PACKS)', qty:['LEG QUARTERS IN 1/8 - 2 PACK','LEG QUARTERS IN 1/8 VALUE PACK','CHICKEN LEGS IN 1/8 - 2 PACK','CHICKEN LEGS IN 1/8 - VALUE PACK','CHICKEN LEGS IN 1/8'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'LEG QUARTERS (ALL PACKS)', qty:['LEG QUARTERS- 1-PACK','LEG QUARTERS- 2-PACK','LEG QUARTERS- 4-PACK','LEG QUARTERS- 6-PACK','CHICKEN LEGS - 2 PACK','CHICKEN LEGS - VALUE PACK'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'LEG QUARTERS IN 1/8 (ALL PACKS)', qty:['LEG QUARTERS IN 1/8 - 2 PACK','LEG QUARTERS IN 1/8 VALUE PACK','CHICKEN LEGS IN 1/8 - 2 PACK','CHICKEN LEGS IN 1/8 - VALUE PACK'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'CAPONS (BONED THIGHS)', qty:poultryQty('CAPONS (BONED THIGHS)')},
     {name:'PARGIOT', qty:poultryQty('PARGIOT')+poultryQty('CHICKEN PARGIOT')},
     {name:'CHICKEN DRUMSTICKS', qty:poultryQty('CHICKEN DRUMSTICKS')},
@@ -2466,41 +2450,18 @@ function renderButcherSheet(day) {
   ].filter(i=>i.qty>0);
 
   // beefQty returns BUTCHER AMOUNT — packs × multiplier
-  // NAME_ALIASES: customer-facing product name → butcher category name
-  // Needed because KS/Kaye's/Halpern's use shorthand names for products
-  // that are listed with SMALL/LARGE suffixes (or different names) in the butcher sheet.
-  const NAME_ALIASES = {
-    'BOLA JOINT':                'BOLA JOINT SMALL',
-    'FLAT BRISKET JOINT':        'FLAT BRISKET JOINT LARGE',
-    'FLAT PICKLED JOINT':        'FLAT PICKLED JOINT LARGE',
-    'PICKLED BEEF ROLL':         'PICKLED BEEF ROLL LARGE',
-    'POT ROAST':                 'POT ROAST LARGE',
-    'ROLLED BRISKET JOINT':      'ROLLED BRISKET JOINT LARGE',
-    'ROLLED PICKLED BRISKET':    'ROLLED PICKLED BRISKET LARGE',
-    'WHOLE SHIN BEEF':           'WHOLE SHIN',
-  };
-
-  function beefQty(categoryName) {
+  function beefQty(name) {
     let total = 0;
-    // Build reverse alias map: butcher category name → set of customer product names
-    const reverseAliases = {};
-    Object.entries(NAME_ALIASES).forEach(([custName, butcherName]) => {
-      if (!reverseAliases[butcherName]) reverseAliases[butcherName] = [];
-      reverseAliases[butcherName].push(custName);
-    });
-    const acceptedNames = new Set([categoryName, ...(reverseAliases[categoryName] || [])]);
-
     CUSTOMERS.forEach(cust => {
       const custOrders = orders[day][cust.id] || {};
-      (BEEF_BY_CUSTOMER[cust.id] || []).forEach(p => {
-        if (!acceptedNames.has(p.name.trim())) return;
-        const packs = custOrders[orderKey(p)] || 0;
-        if (!packs) return;
-        const mult = p.mult !== undefined ? p.mult : 1;
+      const match = (BEEF_BY_CUSTOMER[cust.id]||[]).find(p=>p.name.trim()===name.trim());
+      if (match) {
+        const packs = custOrders[orderKey(match)] || 0;
+        const mult = match.mult !== undefined ? match.mult : 1;
         total += packs * mult;
-      });
+      }
     });
-    return Math.round(total * 10) / 10;
+    return Math.round(total * 10) / 10; // round to 1dp for KG items
   }
 
   // Full categorised beef butcher list — exact match to DAILY BUTCHER BEEF LISTS sheet
@@ -2534,7 +2495,6 @@ function renderButcherSheet(day) {
       {name:'FLAT BRISKET JOINT LARGE',   unit:'UNITS',desc:'2-2.5KG'},
       {name:'FLAT PICKLED JOINT SMALL',   unit:'UNITS',desc:'1.5-1.8KG'},
       {name:'FLAT PICKLED JOINT LARGE',   unit:'UNITS',desc:'2-2.5KG'},
-      {name:'FLAT PICKLED BRISKET',       unit:'UNITS'},
       {name:'ROLLED PICKLED BRISKET SMALL',unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
       {name:'ROLLED PICKLED BRISKET LARGE',unit:'UNITS',desc:'2-2.5KG, netted, max diameter 12cm'},
       {name:'PICKLED BEEF ROLL SMALL',    unit:'UNITS',desc:'1.5-1.8KG'},
@@ -2542,7 +2502,6 @@ function renderButcherSheet(day) {
     ]},
     { cat:'RIBEYE', items:[
       {name:'MINUTE STEAKS',              unit:'UNITS',desc:'Thin, pre-freeze 2-3 hours'},
-      {name:'THIN SLICED GRILLING STEAK', unit:'UNITS',desc:'Thin, pre-freeze 2-3 hours'},
       {name:'RIB-EYE STEAKS',             unit:'UNITS',desc:'2cm thick'},
       {name:'COTE DE BOUEF',              unit:'UNITS',desc:'Marbled, chine each steak'},
       {name:'LONDON BROIL 500G',          unit:'UNITS'},
@@ -2578,7 +2537,6 @@ function renderButcherSheet(day) {
     { cat:'FLANK', items:[
       {name:'FLANK',                      unit:'UNITS',desc:'400-500G'},
       {name:'CUBED CHOLENT BEEF',         unit:'KG',   desc:'70/30 fat content'},
-      {name:'PRIME CHOLENT MEAT',         unit:'UNITS'},
       {name:'CHOLENT PACK',               unit:'KG'},
       {name:'GALLA BONES',                unit:'UNITS'},
       {name:'MARROW BONES',               unit:'UNITS'},
@@ -2640,6 +2598,24 @@ function renderPackerSheet(day) {
   const flavouredTotals = {}; // key = product name
   const beefTotals = {};      // key = product name
 
+  // Canonical name map — all pack variants consolidate into one packer row
+  const LEG_CANONICAL = {
+    'CHICKEN LEGS - 2 PACK':            'CHICKEN LEGS',
+    'CHICKEN LEGS - VALUE PACK':        'CHICKEN LEGS',
+    'CHICKEN LEGS IN 1/8 - 2 PACK':    'CHICKEN LEGS IN 1/8',
+    'CHICKEN LEGS IN 1/8 - VALUE PACK': 'CHICKEN LEGS IN 1/8',
+    'LEG QUARTERS- 1-PACK':            'LEG QUARTERS',
+    'LEG QUARTERS- 2-PACK':            'LEG QUARTERS',
+    'LEG QUARTERS- 4-PACK':            'LEG QUARTERS',
+    'LEG QUARTERS- 6-PACK':            'LEG QUARTERS',
+    'LEG QUARTERS IN 1/8 - 2 PACK':   'LEG QUARTERS IN 1/8',
+    'LEG QUARTERS IN 1/8 VALUE PACK':  'LEG QUARTERS IN 1/8',
+  };
+  const LEG_PLU = {
+    'CHICKEN LEGS': 449, 'CHICKEN LEGS IN 1/8': 451,
+    'LEG QUARTERS': 288, 'LEG QUARTERS IN 1/8': 289,
+  };
+
   CUSTOMERS.forEach(cust => {
     const custOrders = orders[day][cust.id] || {};
 
@@ -2647,13 +2623,20 @@ function renderPackerSheet(day) {
     cust.products.forEach(p => {
       const qty = custOrders[orderKey(p)] || 0;
       if (qty === 0) return;
-      const k = p.name.trim(); // consolidate by name
+      const canonical = LEG_CANONICAL[p.name.trim()];
+      const k = canonical || p.name.trim();
+      const displayName = canonical || p.name;
+      const plu = canonical ? (LEG_PLU[canonical] || p.plu) : p.plu;
       if (p.flavoured) {
-        // Flavoured products excluded from packer list (handled by Chef/Flavoured department)
-        return;
+        if (!flavouredTotals[k]) flavouredTotals[k] = { plu, name: displayName, qty: 0, sources: [] };
+        flavouredTotals[k].qty += qty;
+        const src = flavouredTotals[k].sources.find(s => s.name === cust.name);
+        if (src) src.qty += qty; else flavouredTotals[k].sources.push({ name: cust.name, qty });
       } else {
-        if (!poultryTotals[k]) poultryTotals[k] = { plu: p.plu, name: p.name, qty: 0 };
+        if (!poultryTotals[k]) poultryTotals[k] = { plu, name: displayName, qty: 0, sources: [] };
         poultryTotals[k].qty += qty;
+        const src = poultryTotals[k].sources.find(s => s.name === cust.name);
+        if (src) src.qty += qty; else poultryTotals[k].sources.push({ name: cust.name, qty });
       }
     });
 
@@ -2662,8 +2645,10 @@ function renderPackerSheet(day) {
       const qty = custOrders[orderKey(p)] || 0;
       if (qty === 0) return;
       const k = p.name.trim();
-      if (!beefTotals[k]) beefTotals[k] = { plu: p.plu, name: p.name, qty: 0, unit: p.unit || 'UNITS' };
+      if (!beefTotals[k]) beefTotals[k] = { plu: p.plu, name: p.name, qty: 0, unit: p.unit || 'UNITS', sources: [] };
       beefTotals[k].qty += qty;
+      const src = beefTotals[k].sources.find(s => s.name === cust.name);
+      if (src) src.qty += qty; else beefTotals[k].sources.push({ name: cust.name, qty });
     });
   });
 
@@ -2671,9 +2656,10 @@ function renderPackerSheet(day) {
   const sort = items => items.sort((a,b) => (a.plu||9999) - (b.plu||9999) || a.name.localeCompare(b.name));
 
   const poultryItems  = sort(Object.values(poultryTotals));
+  const flavouredItems = sort(Object.values(flavouredTotals));
   const beefItems     = sort(Object.values(beefTotals));
 
-  const any = poultryItems.length || beefItems.length;
+  const any = poultryItems.length || flavouredItems.length || beefItems.length;
   if (!any) {
     document.getElementById('packerSheetContent').innerHTML =
       `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No orders for ${day}</div></div>`;
@@ -2682,6 +2668,7 @@ function renderPackerSheet(day) {
 
   let html = '';
   if (poultryItems.length)   html += buildPackerTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, poultryItems);
+  if (flavouredItems.length) html += buildPackerTable(`🌶 FLAVOURED PACKER LIST — ${day.toUpperCase()}`, flavouredItems);
   if (beefItems.length)      html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
 
   document.getElementById('packerSheetContent').innerHTML = html;
@@ -2689,13 +2676,19 @@ function renderPackerSheet(day) {
 
 function buildPackerTable(title, items) {
   const totalQty = items.reduce((a,b) => a + b.qty, 0);
-  const rows = items.map(item => `
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const rows = items.map(item => {
+    const sourceTags = (item.sources && item.sources.length > 1)
+      ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
+      : '';
+    return `
     <tr>
       <td class="td-plu">${item.plu || '—'}</td>
-      <td>${item.name}</td>
+      <td>${item.name}${sourceTags ? ' '+sourceTags : ''}</td>
       <td class="td-qty">${item.qty}</td>
       <td class="td-check">☐</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
@@ -2710,14 +2703,20 @@ function buildPackerTable(title, items) {
 
 function buildPackerBeefTable(title, items, day) {
   // Shows pack quantities with unit label — packers are packing these exact quantities
-  const rows = items.sort((a,b) => (a.plu||9999)-(b.plu||9999)).map(item => `
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const rows = items.sort((a,b) => (a.plu||9999)-(b.plu||9999)).map(item => {
+    const sourceTags = (item.sources && item.sources.length > 1)
+      ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
+      : '';
+    return `
     <tr>
       <td class="td-plu">${item.plu || '—'}</td>
-      <td>${item.name}</td>
+      <td>${item.name}${sourceTags ? ' '+sourceTags : ''}</td>
       <td style="width:60px;color:var(--muted);font-size:11px;text-align:center">${item.unit}</td>
       <td class="td-qty">${item.qty}</td>
       <td class="td-check">☐</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
@@ -3019,7 +3018,6 @@ function checkPin() {
     document.getElementById('adminGate').style.display = 'none';
     document.getElementById('adminContent').style.display = 'block';
     populateAdminSelects();
-    initAlertControls();
   } else {
     document.getElementById('pinError').textContent = 'Incorrect PIN. Try again.';
     document.getElementById('adminPin').value = '';
@@ -3171,7 +3169,6 @@ function switchPanel(name) {
 
   if (name === 'chef') renderChefSheet(currentDay);
   if (name === 'butcher') renderButcherSheet(currentDay);
-  if (name === 'summary') renderSummaryPanel(currentDay);
   if (name === 'packer') renderPackerSheet(currentDay);
   if (name === 'dispatch') renderDispatchSheet(currentDay);
   if (name === 'links') buildStaticLinksTable();
@@ -3261,289 +3258,6 @@ function loadOrderCode() {
     resultEl.style.color='var(--danger)';
     resultEl.textContent = '✗ Invalid order code. Ask the customer to resend.';
   }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// ── SUMMARY PANEL ──
-// ══════════════════════════════════════════════════════════════════
-function renderSummaryPanel(day) {
-  const el = document.getElementById('summaryContent');
-  if (!el) return;
-
-  let grandTotal = 0;
-  let grandLines = 0;
-  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
-
-  CUSTOMERS.forEach(cust => {
-    const custOrders = orders[day][cust.id] || {};
-
-    // Gather poultry/flavoured lines
-    const poultryLines = [];
-    cust.products.forEach(p => {
-      const qty = custOrders[orderKey(p)] || 0;
-      if (!qty) return;
-      poultryLines.push({ name: p.name, qty, flavoured: !!p.flavoured });
-    });
-
-    // Gather beef lines
-    const beefLines = [];
-    (BEEF_BY_CUSTOMER[cust.id] || []).forEach(p => {
-      const qty = custOrders[orderKey(p)] || 0;
-      if (!qty) return;
-      beefLines.push({ name: p.name, qty, unit: p.unit || 'UNITS', mult: p.mult || 1 });
-    });
-
-    const allLines = poultryLines.length + beefLines.length;
-    if (!allLines) return;
-
-    const custTotal = [...poultryLines, ...beefLines].reduce((a, b) => a + b.qty, 0);
-    grandTotal += custTotal;
-    grandLines += allLines;
-
-    const poultryRows = poultryLines.map(l =>
-      `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);gap:8px">
-        <span style="font-size:12px;color:${l.flavoured ? '#b89fcc' : 'var(--text)'}">${l.name}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap">${l.qty}</span>
-      </div>`
-    ).join('');
-
-    const beefRows = beefLines.map(l => {
-      const butcherAmt = Math.round(l.qty * l.mult * 10) / 10;
-      const unitLabel = l.unit === 'KG' ? 'KG' : 'pcs';
-      return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);gap:8px">
-        <span style="font-size:12px;color:#e08888">${l.name}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;white-space:nowrap">
-          <span style="color:var(--muted)">${l.qty}pk</span>
-          <span style="color:var(--accent);margin-left:6px">${butcherAmt} ${unitLabel}</span>
-        </span>
-      </div>`;
-    }).join('');
-
-    const beefSection = beefLines.length
-      ? `<div style="font-size:10px;color:#e08888;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;font-family:'Barlow Condensed',sans-serif;font-weight:700">🥩 Beef</div>${beefRows}`
-      : '';
-    const poultrySection = poultryLines.length
-      ? `<div style="font-size:10px;color:#6dbf99;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700">🐔 Poultry / Flavoured</div>${poultryRows}`
-      : '';
-
-    html += `
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden">
-        <div style="background:var(--surface2);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cust.color}"></span>
-            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px">${cust.name}</span>
-          </div>
-          <span style="font-size:11px;color:var(--muted)">${allLines} lines</span>
-        </div>
-        <div style="padding:10px 14px">
-          ${poultrySection}
-          ${beefSection}
-          <div style="margin-top:8px;padding-top:6px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">
-            TOTAL UNITS: <strong style="color:var(--accent)">${custTotal}</strong>
-          </div>
-        </div>
-      </div>`;
-  });
-
-  html += '</div>';
-
-  if (grandLines === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No orders for ${day}</div></div>`;
-    return;
-  }
-
-  // Totals bar
-  const totalsBar = `<div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px">
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Day</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--accent)">${day.toUpperCase()}</div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px">
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Customers</div>
-      <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:20px;color:var(--text)">${CUSTOMERS.filter(c => Object.keys(orders[day][c.id]||{}).length > 0).length}</div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px">
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Total Lines</div>
-      <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:20px;color:var(--text)">${grandLines}</div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px">
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Total Units</div>
-      <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:20px;color:var(--accent)">${grandTotal}</div>
-    </div>
-  </div>`;
-
-  el.innerHTML = totalsBar + html;
-}
-
-// ══════════════════════════════════════════════════════════════════
-// ── ORDER ALERT SYSTEM ──
-// Fires on: (1) manual loadOrderCode(), (2) auto-poll from Apps Script
-// ══════════════════════════════════════════════════════════════════
-
-let alertEnabled = false;
-let alertPollInterval = null;
-const ALERT_POLL_MS = 30000;
-const ALERT_SEEN_KEY = 'mhmeats_alert_seen_codes';
-
-function playAlertSound() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const playBeep = (freq, start, dur) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'sine'; osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.4, ctx.currentTime + start);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
-      osc.start(ctx.currentTime + start);
-      osc.stop(ctx.currentTime + start + dur + 0.05);
-    };
-    playBeep(880,  0,    0.12);
-    playBeep(1100, 0.15, 0.12);
-    playBeep(1320, 0.30, 0.18);
-  } catch(e) {}
-}
-
-async function requestNotificationPermission() {
-  if (!('Notification' in window)) return false;
-  if (Notification.permission === 'granted') return true;
-  if (Notification.permission === 'denied') return false;
-  const result = await Notification.requestPermission();
-  return result === 'granted';
-}
-
-function fireNotification(customerName, day, itemCount) {
-  playAlertSound();
-  if (Notification.permission === 'granted') {
-    const n = new Notification('NEW ORDER — MH Meats', {
-      body: customerName + ' — ' + day + ' (' + itemCount + ' items)',
-      tag: 'mhmeats-order',
-      renotify: true
-    });
-    n.onclick = () => { window.focus(); switchPanel('orders'); n.close(); };
-  }
-  showToast('NEW ORDER: ' + customerName + ' — ' + day);
-}
-
-function getSeenCodes() {
-  try { return JSON.parse(localStorage.getItem(ALERT_SEEN_KEY) || '[]'); } catch(e) { return []; }
-}
-function markCodeSeen(code) {
-  const seen = getSeenCodes();
-  seen.push(code);
-  if (seen.length > 200) seen.splice(0, 100);
-  try { localStorage.setItem(ALERT_SEEN_KEY, JSON.stringify(seen)); } catch(e) {}
-}
-
-// Hook into loadOrderCode to fire alert on successful paste
-const _origLoadOrderCode = loadOrderCode;
-loadOrderCode = function() {
-  const code = document.getElementById('incomingCode').value.trim();
-  _origLoadOrderCode();
-  setTimeout(() => {
-    const resultEl = document.getElementById('loadResult');
-    if (resultEl && resultEl.textContent.startsWith('\u2713')) {
-      try {
-        const payload = JSON.parse(atob(code));
-        const cust = CUSTOMERS.find(c => c.id === payload.c);
-        const itemCount = Object.keys(payload.o || {}).length;
-        if (!getSeenCodes().includes(code)) {
-          markCodeSeen(code);
-          fireNotification(cust ? cust.name : payload.c, payload.d, itemCount);
-        }
-      } catch(e) {}
-    }
-  }, 150);
-};
-
-async function pollForNewOrders() {
-  const url = getScriptUrl();
-  if (!url) return;
-  try {
-    const r = await fetch(url + '?action=fetchOrders');
-    const data = await r.json();
-    if (!Array.isArray(data)) return;
-    const seen = getSeenCodes();
-    data.forEach(entry => {
-      if (!entry.code || seen.includes(entry.code)) return;
-      try {
-        const payload = JSON.parse(atob(entry.code));
-        const { c: custId, d: day, o: custOrders } = payload;
-        const cust = CUSTOMERS.find(c => c.id === custId);
-        if (!cust) return;
-        if (!orders[day]) orders[day] = {};
-        orders[day][custId] = Object.assign({}, orders[day][custId] || {}, custOrders);
-        saveToStorage();
-        updateCustomerCounts();
-        updateSummary();
-        markCodeSeen(entry.code);
-        fireNotification(cust.name, day, Object.keys(custOrders).length);
-      } catch(e) {}
-    });
-  } catch(e) {}
-}
-
-function initAlertControls() {
-  const container = document.getElementById('alertControlsMount');
-  if (!container) return;
-  container.innerHTML = [
-    '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px">',
-      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.5px;margin-bottom:12px;color:var(--accent)">',
-        '🔔 ORDER ALERTS',
-      '</div>',
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">',
-        '<button id="alertToggleBtn" onclick="toggleAlerts()" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 16px;border-radius:5px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:0.5px">',
-          'ENABLE ALERTS',
-        '</button>',
-        '<span id="alertStatusText" style="font-size:12px;color:var(--muted)">Alerts off</span>',
-      '</div>',
-      '<div style="font-size:11px;color:var(--muted);line-height:1.7">',
-        'When enabled: browser notification + audio beep on every new order.<br>',
-        'Auto-poll checks Apps Script every 30s for portal submissions.<br>',
-        'Manual paste (Customer Links panel) also fires instantly.',
-      '</div>',
-      '<button onclick="testAlert()" style="margin-top:10px;background:var(--surface);border:1px solid var(--border2);color:var(--muted);padding:5px 12px;border-radius:4px;font-size:11px;cursor:pointer">',
-        '🔊 Test Sound &amp; Notification',
-      '</button>',
-    '</div>'
-  ].join('');
-  const saved = localStorage.getItem('mhmeats_alerts_enabled');
-  if (saved === 'true') enableAlerts();
-}
-
-async function toggleAlerts() {
-  if (alertEnabled) {
-    disableAlerts();
-  } else {
-    const granted = await requestNotificationPermission();
-    if (!granted) showToast('Notifications blocked — enable in browser site settings');
-    enableAlerts();
-  }
-}
-
-function enableAlerts() {
-  alertEnabled = true;
-  try { localStorage.setItem('mhmeats_alerts_enabled', 'true'); } catch(e) {}
-  if (alertPollInterval) clearInterval(alertPollInterval);
-  alertPollInterval = setInterval(pollForNewOrders, ALERT_POLL_MS);
-  const btn = document.getElementById('alertToggleBtn');
-  const txt = document.getElementById('alertStatusText');
-  if (btn) { btn.textContent = 'DISABLE ALERTS'; btn.style.borderColor = 'var(--success)'; btn.style.color = 'var(--success)'; }
-  if (txt) txt.textContent = 'Active — polling every 30s';
-}
-
-function disableAlerts() {
-  alertEnabled = false;
-  try { localStorage.setItem('mhmeats_alerts_enabled', 'false'); } catch(e) {}
-  if (alertPollInterval) { clearInterval(alertPollInterval); alertPollInterval = null; }
-  const btn = document.getElementById('alertToggleBtn');
-  const txt = document.getElementById('alertStatusText');
-  if (btn) { btn.textContent = 'ENABLE ALERTS'; btn.style.borderColor = ''; btn.style.color = 'var(--text)'; }
-  if (txt) txt.textContent = 'Alerts off';
-}
-
-function testAlert() {
-  fireNotification('TEST CUSTOMER', 'Monday', 7);
 }
 
 // ── BOOT ──
