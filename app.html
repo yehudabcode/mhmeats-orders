@@ -2279,7 +2279,7 @@ function renderChefSheet(day) {
 function buildSheetTable(title, items, showSources) {
   const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
   const rows = items.sort((a,b) => (a.plu||9999)-(b.plu||9999)).map(item => {
-    const sourceTags = (showSources && item.sources && item.sources.length > 1)
+    const sourceTags = (showSources && item.sources && item.sources.length > 0)
       ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
       : '';
     return `<tr class="${item.qty > 10 ? 'row-highlight' : ''}">
@@ -2668,7 +2668,6 @@ function renderPackerSheet(day) {
 
   let html = '';
   if (poultryItems.length)   html += buildPackerTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, poultryItems);
-  if (flavouredItems.length) html += buildPackerTable(`🌶 FLAVOURED PACKER LIST — ${day.toUpperCase()}`, flavouredItems);
   if (beefItems.length)      html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
 
   document.getElementById('packerSheetContent').innerHTML = html;
@@ -2678,7 +2677,7 @@ function buildPackerTable(title, items) {
   const totalQty = items.reduce((a,b) => a + b.qty, 0);
   const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
   const rows = items.map(item => {
-    const sourceTags = (item.sources && item.sources.length > 1)
+    const sourceTags = (item.sources && item.sources.length > 0)
       ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
       : '';
     return `
@@ -2705,7 +2704,7 @@ function buildPackerBeefTable(title, items, day) {
   // Shows pack quantities with unit label — packers are packing these exact quantities
   const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
   const rows = items.sort((a,b) => (a.plu||9999)-(b.plu||9999)).map(item => {
-    const sourceTags = (item.sources && item.sources.length > 1)
+    const sourceTags = (item.sources && item.sources.length > 0)
       ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
       : '';
     return `
