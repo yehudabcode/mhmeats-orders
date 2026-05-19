@@ -2616,18 +2616,26 @@ function renderPackerSheet(day) {
 
   // Canonical name map — all pack variants consolidate into one packer row
   const LEG_CANONICAL = {
-    // Chicken legs
-    'CHICKEN LEGS - 2 PACK':            'CHICKEN LEGS',
-    'CHICKEN LEGS - VALUE PACK':        'CHICKEN LEGS',
-    'CHICKEN LEGS IN 1/8 - 2 PACK':    'CHICKEN LEGS IN 1/8',
-    'CHICKEN LEGS IN 1/8 - VALUE PACK': 'CHICKEN LEGS IN 1/8',
-    // Leg quarters
-    'LEG QUARTERS- 1-PACK':            'LEG QUARTERS',
-    'LEG QUARTERS- 2-PACK':            'LEG QUARTERS',
-    'LEG QUARTERS- 4-PACK':            'LEG QUARTERS',
-    'LEG QUARTERS- 6-PACK':            'LEG QUARTERS',
-    'LEG QUARTERS IN 1/8 - 2 PACK':   'LEG QUARTERS IN 1/8',
-    'LEG QUARTERS IN 1/8 VALUE PACK':  'LEG QUARTERS IN 1/8',
+    // Chicken legs + leg quarters — same product, combine all variants
+    'CHICKEN LEGS':                    'LEG QUARTERS',
+    'CHICKEN LEGS - 2 PACK':          'LEG QUARTERS',
+    'CHICKEN LEGS - VALUE PACK':      'LEG QUARTERS',
+    'LEG QUARTERS- 1-PACK':           'LEG QUARTERS',
+    'LEG QUARTERS- 2-PACK':           'LEG QUARTERS',
+    'LEG QUARTERS- 4-PACK':           'LEG QUARTERS',
+    'LEG QUARTERS- 6-PACK':           'LEG QUARTERS',
+    // In 1/8 variants
+    'CHICKEN LEGS IN 1/8':            'LEG QUARTERS IN 1/8',
+    'CHICKEN LEGS IN 1/8 - 2 PACK':  'LEG QUARTERS IN 1/8',
+    'CHICKEN LEGS IN 1/8 - VALUE PACK':'LEG QUARTERS IN 1/8',
+    'LEG QUARTERS IN 1/8 - 2 PACK':  'LEG QUARTERS IN 1/8',
+    'LEG QUARTERS IN 1/8 VALUE PACK': 'LEG QUARTERS IN 1/8',
+    // Polkies + drumsticks — same cut
+    'POLKIES':                        'DRUMSTICKS / POLKIES',
+    'CHICKEN DRUMSTICKS':             'DRUMSTICKS / POLKIES',
+    // Thighs — combine all variants
+    'CHICKEN THIGHS':                 'THIGH - 4-PACK',
+    'THIGH - 2-PACK':                 'THIGH - 4-PACK',
     // Shnitzels — same pack size, different name per customer
     'SHNITZELS -  2-PACK':             'SHNITZELS 2-PACK',
     'SHNITZELS -  6-PACK':             'SHNITZELS 6-PACK',
@@ -2654,8 +2662,8 @@ function renderPackerSheet(day) {
     'DOUBLE SOUP PACK':                'DOUBLE SOUP PACK',
   };
   const LEG_PLU = {
-    'CHICKEN LEGS': 449, 'CHICKEN LEGS IN 1/8': 451,
     'LEG QUARTERS': 288, 'LEG QUARTERS IN 1/8': 289,
+    'DRUMSTICKS / POLKIES': 465, 'THIGH - 4-PACK': 307,
     'SHNITZELS 2-PACK': 329, 'SHNITZELS 6-PACK': 507, 'SHNITZELS 10-PACK': 508,
     'WINGS 6-PACK': 310, 'WINGS 12-PACK': 651,
     'CARCASS 1-PACK': 280, 'CARCASS 2-PACK': 281, 'CARCASS 5-PACK': 604,
