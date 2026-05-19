@@ -603,7 +603,9 @@
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
       <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+        <button class="btn btn-ghost" onclick="printButcherSection('poultry')">🖨 🐔 Chicken</button>
+        <button class="btn btn-ghost" onclick="printButcherSection('beef')">🖨 🥩 Beef</button>
+        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 All</button>
       </div>
     </div>
     <div id="butcherSheetContent"></div>
@@ -624,9 +626,12 @@
   <div class="panel" id="panel-dispatch" data-print-title="DISPATCH SHEETS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="dispatchDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+      <div class="ml-auto flex gap8" id="dispatchPrintBtns">
+        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print All</button>
       </div>
+
+
+
     </div>
     <div id="dispatchSheetContent"></div>
   </div>
@@ -1944,7 +1949,9 @@ const CUSTOMER_SHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',del
 // ══════════════════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════════════════
-let currentDay = 'Monday';
+const _todayIdx = new Date().getDay(); // 0=Sun,6=Sat
+let currentDay = [null,'Monday','Tuesday','Wednesday','Thursday','Friday',null][_todayIdx] || 'Monday';
+let pendingOrders = {}; // staged pulled orders awaiting manual post
 let currentCustomer = null;
 
 // orders[day][customerId][productKey] = qty
@@ -1990,7 +1997,16 @@ function init() {
   try { loadCustomProducts(); } catch(e) { console.warn('loadCustomProducts error:', e); }
   try { setDateBadge(); } catch(e) {}
   try { buildCustomerList(); } catch(e) { console.error('buildCustomerList error:', e); }
-  try { buildDayButtonSets(); } catch(e) { console.error('buildDayButtonSets error:', e); }
+  try {
+    buildDayButtonSets();
+    document.querySelectorAll(".day-btn, .sheet-day-btn").forEach(btn => {
+      const label = btn.textContent.trim().toUpperCase();
+      if (label === currentDay.slice(0,3).toUpperCase()) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
+    const pd = document.getElementById("pullDay");
+    if (pd) pd.value = currentDay;
+  } catch(e) { console.error("buildDayButtonSets error:", e); }
   try {
     if (!localStorage.getItem('mhmeats_script_url')) {
       localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2feew5djxBI5uLkmxEyFXV5fwzrYcEIEDwoJmsrWUTzg6/exec');
@@ -2731,18 +2747,73 @@ function buildPackerBeefTable(title, items, day) {
 
 function renderDispatchSheet(day) {
   let html = '';
-  let any = false;
+  const activeCusts = [];
   CUSTOMERS.forEach(cust => {
     const custOrders = orders[day][cust.id] || {};
     const poultryItems = cust.products.map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
     const beefItems = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
     const all = [...poultryItems, ...beefItems];
     if (!all.length) return;
-    any = true;
+    activeCusts.push(cust);
     html += buildSheetTable(`🚚 ${cust.name.toUpperCase()} — DISPATCH`, all, false);
   });
-  if (!any) html = `<div class="empty-state"><div class="empty-icon">🚚</div><div class="empty-text">No orders for ${day}</div></div>`;
+  if (!activeCusts.length) html = `<div class="empty-state"><div class="empty-icon">🚚</div><div class="empty-text">No orders for ${day}</div></div>`;
   document.getElementById('dispatchSheetContent').innerHTML = html;
+  // Build per-customer print buttons
+  const btnContainer = document.getElementById('dispatchPrintBtns');
+  if (btnContainer) {
+    let btns = `<button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print All</button>`;
+    activeCusts.forEach(c => {
+      btns += `<button class="btn btn-ghost" onclick="printCustomerDispatch('${c.id}','${c.name.replace(/'/g,"\\'")}','${day}')">🖨 ${c.name}</button>`;
+    });
+    btnContainer.innerHTML = btns;
+  }
+}
+
+function printCustomerDispatch(custId, custName, day) {
+  const custOrders = orders[day][custId] || {};
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  if (!cust) return;
+  const items = [
+    ...cust.products.map(p=>({name:p.name, qty:custOrders[orderKey(p)]||0})),
+    ...(BEEF_BY_CUSTOMER[custId]||[]).map(p=>({name:p.name, qty:custOrders[orderKey(p)]||0}))
+  ].filter(i => i.qty > 0);
+  if (!items.length) { alert(custName + ' has no orders for ' + day); return; }
+  const rows = items.map(i => `<tr><td>${i.name}</td><td style="text-align:center;width:60px;font-weight:bold">${i.qty}</td><td style="width:50px;text-align:center"><span style="border:1px solid #999;width:14px;height:14px;display:inline-block"></span></td></tr>`).join('');
+  const pw = window.open('', '_blank');
+  pw.document.write(`<!DOCTYPE html><html><head><title>MH Meats — ${custName} — ${day}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:12px;margin:20px;color:#000}h1{font-size:18px;margin-bottom:4px}h2{font-size:13px;color:#555;margin-bottom:16px;font-weight:normal}table{width:100%;border-collapse:collapse}th{background:#f0f0f0;padding:6px 8px;text-align:left;border:1px solid #ccc;font-size:10px;text-transform:uppercase}td{padding:6px 8px;border:1px solid #ccc}tr:nth-child(even) td{background:#fafafa}.total{margin-top:12px;font-size:12px;color:#555}</style></head><body>
+  <h1>🚚 MH Meats — Dispatch Note</h1>
+  <h2>${custName} &nbsp;|&nbsp; ${day} &nbsp;|&nbsp; ${new Date().toLocaleDateString('en-GB')}</h2>
+  <table><thead><tr><th>Product</th><th style="text-align:center">Qty</th><th style="text-align:center">✓</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="total">Total lines: <strong>${items.length}</strong> &nbsp;|&nbsp; Total units: <strong>${items.reduce((s,i)=>s+i.qty,0)}</strong></div>
+  </body></html>`);
+  pw.document.close();
+  setTimeout(() => pw.print(), 400);
+}
+
+function printButcherSection(section) {
+  const el = document.getElementById('butcherSheetContent');
+  if (!el || !el.innerHTML.trim()) { alert('No butcher data to print.'); return; }
+  const clone = el.cloneNode(true);
+  // Hide sheet-table divs that don't match the section
+  clone.querySelectorAll('.sheet-table').forEach(div => {
+    const title = div.querySelector('.sheet-title');
+    if (!title) return;
+    const t = title.textContent.toLowerCase();
+    if (section === 'poultry' && (t.includes('beef') || t.includes('brisket') || t.includes('cholent') || t.includes('veal'))) div.style.display = 'none';
+    if (section === 'beef' && !t.includes('beef') && !t.includes('brisket') && !t.includes('cholent') && !t.includes('veal') && !t.includes('mince')) div.style.display = 'none';
+  });
+  const label = section === 'poultry' ? '🐔 Chicken' : '🥩 Beef';
+  const pw = window.open('', '_blank');
+  const activePanel = document.querySelector('.panel.active');
+  const today = new Date().toLocaleDateString('en-GB', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MH Meats — Butcher — ${label}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}.print-header{text-align:center;border-bottom:3px solid #000;padding-bottom:10px;margin-bottom:20px}.print-header h1{font-size:22px;font-weight:bold;letter-spacing:2px}.print-header h2{font-size:15px;font-weight:normal;margin-top:4px;color:#444}.sheet-table{border:1px solid #999;margin-bottom:20px;page-break-inside:avoid}.sheet-title-bar{background:#ddd;padding:6px 12px;border-bottom:1px solid #999;display:flex;align-items:center;justify-content:space-between}.sheet-title{font-size:13px;font-weight:bold}table{width:100%;border-collapse:collapse}th{background:#eee;text-align:left;padding:6px 10px;font-size:10px;font-weight:bold;text-transform:uppercase;border:1px solid #aaa}td{padding:6px 10px;border:1px solid #ccc;font-size:12px}.td-qty{font-size:14px;font-weight:bold;text-align:right;width:60px}.td-check{text-align:center;width:30px}@page{margin:1.5cm;size:A4 portrait}</style></head><body>
+  <div class="print-header"><h1>MH MEATS — BUTCHER SHEET</h1><h2>${label}</h2><div>${today}</div></div>
+  ${clone.innerHTML}</body></html>`);
+  pw.document.close();
+  setTimeout(() => pw.print(), 400);
 }
 
 
@@ -2755,6 +2826,62 @@ function renderDispatchSheet(day) {
 // ══════════════════════════════════════════════════════════════════
 function getScriptUrl() {
   try { return localStorage.getItem('mhmeats_script_url') || ''; } catch(e) { return ''; }
+}
+
+
+function renderPendingOrders(day) {
+  const results = document.getElementById('pullResults');
+  const pending = pendingOrders[day] || {};
+  const custIds = Object.keys(pending);
+  if (!custIds.length) { results.innerHTML = ''; return; }
+
+  results.innerHTML = custIds.map(cid => {
+    const cust = CUSTOMERS.find(c => c.id === cid);
+    const custName = cust ? cust.name : cid;
+    const items = Object.entries(pending[cid]).filter(([,q]) => q > 0);
+    const alreadyPosted = orders[day] && orders[day][cid] && Object.keys(orders[day][cid]).length > 0;
+    const itemRows = items.map(([k, q]) => `
+      <tr>
+        <td style="padding:4px 8px;font-size:12px;border-bottom:1px solid var(--border)">${k}</td>
+        <td style="padding:4px 8px;font-size:12px;font-weight:bold;text-align:right;width:50px;border-bottom:1px solid var(--border)">${q}</td>
+      </tr>`).join('');
+    return `
+    <div id="pending-${cid}" style="border:1px solid var(--border2);border-radius:7px;margin-bottom:12px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2)">
+        <div style="font-size:13px;font-weight:600">${custName}</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${items.length} lines</div>
+        ${alreadyPosted ? '<div style="font-size:11px;color:var(--warning);margin-left:4px">⚠ Will overwrite existing</div>' : ''}
+        <button class="btn btn-primary" style="margin-left:auto;padding:5px 14px;font-size:12px"
+          onclick="postOrder('${cid}','${day}')">✓ Post Order</button>
+        <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px"
+          onclick="discardPending('${cid}','${day}')">✕</button>
+      </div>
+      <div style="max-height:180px;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse">
+          <tbody>${itemRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function postOrder(custId, day) {
+  const pending = pendingOrders[day] && pendingOrders[day][custId];
+  if (!pending) return;
+  if (!orders[day]) orders[day] = {};
+  orders[day][custId] = { ...pending };
+  delete pendingOrders[day][custId];
+  saveToStorage();
+  updateCustomerCounts();
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  showToast(`${cust ? cust.name : custId} order posted`);
+  renderPendingOrders(day);
+}
+
+function discardPending(custId, day) {
+  if (pendingOrders[day]) delete pendingOrders[day][custId];
+  renderPendingOrders(day);
+  showToast('Order discarded');
 }
 
 function saveScriptUrl() {
@@ -2901,36 +3028,19 @@ function pullRemoteOrders() {
       return;
     }
 
-    let loaded = 0;
-    let custsSeen = new Set();
-
+    // Stage into pendingOrders — do NOT load into orders yet
+    if (!pendingOrders[day]) pendingOrders[day] = {};
     data.orders.forEach(row => {
       const { customer, productKey, quantity } = row;
-      if (!orders[day]) orders[day] = {};
-      if (!orders[day][customer]) orders[day][customer] = {};
-      orders[day][customer][productKey] = parseInt(quantity) || 0;
-      loaded++;
-      custsSeen.add(customer);
+      if (!pendingOrders[day][customer]) pendingOrders[day][customer] = {};
+      pendingOrders[day][customer][productKey] = parseInt(quantity) || 0;
     });
 
-    saveToStorage();
-    updateCustomerCounts();
-    updateSummary();
-
+    const custsSeen = Object.keys(pendingOrders[day]);
     status.style.color = 'var(--success)';
-    status.textContent = `✓ Loaded ${loaded} lines from ${custsSeen.size} customer(s).`;
-
-    results.innerHTML = Array.from(custsSeen).map(cid => {
-      const cust = CUSTOMERS.find(c => c.id === cid);
-      const count = orders[day][cid] ? Object.keys(orders[day][cid]).length : 0;
-      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
-        <span style="color:var(--success)">✓</span>
-        <strong>${cust ? cust.name : cid}</strong>
-        <span style="color:var(--muted);margin-left:auto;font-family:'DM Mono',monospace;font-size:11px">${count} items</span>
-      </div>`;
-    }).join('');
-
-    showToast(`${loaded} remote orders loaded`);
+    status.textContent = `✓ ${custsSeen.length} order(s) pulled — review and post below.`;
+    renderPendingOrders(day);
+    showToast(`${custsSeen.length} orders staged`);
   };
 
   script.onerror = function() {
