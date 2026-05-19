@@ -636,8 +636,6 @@
     <div id="dispatchSheetContent"></div>
   </div>
 
-</div><!-- /main -->
-
 
   <!-- ════════════════════════════════ CUSTOMER LINKS PANEL ════════════════════════════════ -->
   <div class="panel" id="panel-links" data-print-title="CUSTOMER LINKS">
@@ -855,6 +853,8 @@
       </div>
     </div>
   </div>
+
+</div><!-- /main -->
 
 
 <div class="toast" id="toast">✓ Saved</div>
@@ -3281,93 +3281,14 @@ function switchPanel(name) {
   if (name === 'packer') renderPackerSheet(currentDay);
   if (name === 'dispatch') renderDispatchSheet(currentDay);
   if (name === 'links') buildStaticLinksTable();
-  if (name === 'remote') { initRemotePanel(); renderRemoteOrderForm(); }
+  if (name === 'remote') { initRemotePanel(); }
   if (name === 'admin') lockAdmin();
 }
 
-function renderRemoteOrderForm() {
-  const custId = document.getElementById('remoteCustomer').value;
-  const day = document.getElementById('remoteDay').value;
-  const area = document.getElementById('remoteProductArea');
-  document.getElementById('remoteCodeOutput').style.display = 'none';
 
-  if (!custId) { area.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Select your site above to see your product list.</div>'; return; }
 
-  const cust = CUSTOMERS.find(c => c.id === custId);
-  if (!cust) return;
 
-  const rows = cust.products.map((p,i) => {
-    const qty = getQty(day, custId, p);
-    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);width:40px;flex-shrink:0">${p.plu||'—'}</span>
-      <span style="flex:1;font-size:12px;font-weight:500">${p.name}</span>
-      <input type="number" min="0" value="${qty||''}" placeholder="0"
-        style="width:56px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:5px;border-radius:4px;font-size:13px;text-align:center;font-family:'DM Mono',monospace"
-        onchange="setQty('${day}','${custId}',${JSON.stringify(p).replace(/"/g,'&quot;')},this.value)"
-        onkeydown="handleArrow(event,this)">
-    </div>`;
-  }).join('');
 
-  area.innerHTML = rows || '<div style="color:var(--muted)">No products for this customer.</div>';
-}
-
-document.addEventListener('change', function(e) {
-  if (e.target.id === 'remoteCustomer' || e.target.id === 'remoteDay') {
-    renderRemoteOrderForm();
-    document.getElementById('remoteCodeOutput').style.display = 'none';
-  }
-});
-
-function generateOrderCode() {
-  const custId = document.getElementById('remoteCustomer').value;
-  const day = document.getElementById('remoteDay').value;
-  if (!custId) { alert('Please select your site first.'); return; }
-
-  const custOrders = orders[day][custId] || {};
-  if (!Object.keys(custOrders).length) { alert('No quantities entered yet.'); return; }
-
-  const payload = { c: custId, d: day, o: custOrders, t: Date.now() };
-  const code = btoa(JSON.stringify(payload));
-  document.getElementById('remoteCodeText').value = code;
-  document.getElementById('remoteCodeOutput').style.display = 'block';
-}
-
-function copyCode() {
-  const text = document.getElementById('remoteCodeText').value;
-  navigator.clipboard.writeText(text).then(() => showToast('Code copied!')).catch(() => {
-    document.getElementById('remoteCodeText').select();
-    document.execCommand('copy');
-    showToast('Code copied!');
-  });
-}
-
-function loadOrderCode() {
-  const code = document.getElementById('incomingCode').value.trim();
-  const resultEl = document.getElementById('loadResult');
-  if (!code) { resultEl.style.color='var(--danger)'; resultEl.textContent='Paste an order code first.'; return; }
-
-  try {
-    const payload = JSON.parse(atob(code));
-    const { c: custId, d: day, o: custOrders } = payload;
-    const cust = CUSTOMERS.find(c => c.id === custId);
-    if (!cust) throw new Error('Unknown customer');
-
-    if (!orders[day]) orders[day] = {};
-    orders[day][custId] = custOrders;
-    saveToStorage();
-    updateCustomerCounts();
-    updateSummary();
-
-    const count = Object.keys(custOrders).length;
-    resultEl.style.color='var(--success)';
-    resultEl.textContent = `✓ Loaded ${count} line items for ${cust.name} — ${day}. Order is now in the system.`;
-    document.getElementById('incomingCode').value = '';
-    showToast(`${cust.name} order loaded`);
-  } catch(e) {
-    resultEl.style.color='var(--danger)';
-    resultEl.textContent = '✗ Invalid order code. Ask the customer to resend.';
-  }
-}
 
 // ── BOOT ──
 init();
