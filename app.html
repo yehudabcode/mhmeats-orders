@@ -2543,6 +2543,50 @@ function renderButcherSheet(day) {
 }
 
 function renderPackerSheet(day) {
+  // Consolidation map: variant names → canonical packer display name
+  const PACKER_CONSOLIDATE = {
+    'LEG QUARTERS-1-PACK':          'LEG QUARTERS-1-PACK',
+    'LEG QUARTERS-2-PACK':          'LEG QUARTERS-2-PACK',
+    'CHICKEN LEGS-2 PACK':          'LEG QUARTERS-2-PACK',
+    'LEG QUARTERS-4-PACK':          'LEG QUARTERS-4-PACK',
+    'CHICKEN LEGS-VALUE PACK':      'LEG QUARTERS-4-PACK',
+    'LEG QUARTERS-6-PACK':          'LEG QUARTERS-6-PACK',
+    'LEG QUARTERS IN 1/8':          'LEG QUARTERS IN 1/8-2-PACK',
+    'CHICKEN LEGS IN 1/8-2 PACK':   'LEG QUARTERS IN 1/8-2-PACK',
+    'LEG QUARTERS IN 1/8 VALUE PACK':'LEG QUARTERS IN 1/8-VALUE PACK',
+    'CHICKEN LEGS IN 1/8-VALUE PACK':'LEG QUARTERS IN 1/8-VALUE PACK',
+    'CARCASS-1-PACK':               'CARCASS-1-PACK',
+    'CARCASS-2-PACK':               'CARCASS-2-PACK',
+    'CARCASS-5-PACK':               'CARCASS-5-PACK',
+    '5-PACK CARCASSES':             'CARCASS-5-PACK',
+    'SHNITZELS-2-PACK':             'SHNITZELS-2-PACK',
+    'SHNITZELS-6-PACK':             'SHNITZELS-6-PACK',
+    'SHNITZELS-10-PACK':            'SHNITZELS-10-PACK',
+    '10-PACK CHICKEN SHNITZELS':    'SHNITZELS-10-PACK',
+    '6-PACK CHICKEN SHNITZELS':     'SHNITZELS-6-PACK',
+    'WINGS-6-PACK':                 'WINGS-6-PACK',
+    'WINGS-12-PACK':                'WINGS-12-PACK',
+    '12-PACK CHICKEN WINGS':        'WINGS-12-PACK',
+    'THIGH-2-PACK':                 'THIGH-2-PACK',
+    'THIGH-4-PACK':                 'THIGH-4-PACK',
+    'NECKS 8-PACK':                 'NECKS 8-PACK',
+    'CHICKEN NECK (8-PACK)':        'NECKS 8-PACK',
+    'GOUJONS':                      'GOUJONS',
+    'CHICKEN GOUJONS':              'GOUJONS',
+    'FILLETS':                      'FILLETS',
+    'CHICKEN FILLETS':              'FILLETS',
+    'PARGIOT':                      'PARGIOT',
+    'CHICKEN PARGIOT':              'PARGIOT',
+    'MINCED CHICKEN':               'MINCED CHICKEN',
+    'CHICKEN LIVER':                'CHICKEN LIVER',
+    'CHICKEN THIGHS':               'CHICKEN THIGHS',
+    'CHICKEN DRUMSTICKS':           'CHICKEN DRUMSTICKS',
+    'POLKIES':                      'POLKIES',
+  };
+
+  function packerKey(name) {
+    return PACKER_CONSOLIDATE[name.trim()] || name.trim();
+  }
   // PACKER sheet — consolidated totals per product across ALL customers
   // Uses RAW PACK QUANTITIES (what was ordered), not butcher amounts
   // Consolidates by product NAME so same product from different customers adds up
@@ -2558,12 +2602,12 @@ function renderPackerSheet(day) {
     cust.products.forEach(p => {
       const qty = custOrders[orderKey(p)] || 0;
       if (qty === 0) return;
-      const k = p.name.trim(); // consolidate by name
+      const k = packerKey(p.name); // consolidate by canonical packer name
       if (p.flavoured) {
-        if (!flavouredTotals[k]) flavouredTotals[k] = { name: p.name, qty: 0 };
+        if (!flavouredTotals[k]) flavouredTotals[k] = { name: k, qty: 0 };
         flavouredTotals[k].qty += qty;
       } else {
-        if (!poultryTotals[k]) poultryTotals[k] = { name: p.name, qty: 0 };
+        if (!poultryTotals[k]) poultryTotals[k] = { name: k, qty: 0 };
         poultryTotals[k].qty += qty;
       }
     });
@@ -2828,32 +2872,55 @@ function pullRemoteOrders() {
 
       // Legacy name map — old portal names → staff app canonical names
       const LEGACY_MAP = {
+        // MH Meats old portal names
+        'CARCASS':                            'CARCASS-1-PACK',
+        'CARCASS DOUBLE PACK':               'CARCASS-2-PACK',
+        'CARCASS 5-PACK':                    'CARCASS-5-PACK',
+        'FAMILY SIZE SOUP PACK':             'FAMILY SOUP PARCEL',
+        'BREAST ROASTER':                    'BREAST QUARTERS',
+        'BREAST QUARTER ROASTER':            'BREAST QUARTERS',
+        'ROASTER LEG QUARTERS':              'LEG QUARTERS-1-PACK',
+        'ROASTER LEG QUARTERS 2-PACK':       'LEG QUARTERS-2-PACK',
+        'ROASTER LEG QUARTERS 4-PACK':       'LEG QUARTERS-4-PACK',
+        'ROASTER LEG QUARTERS VALUE PACK (4)':'LEG QUARTERS-4-PACK',
+        'ROASTER LEG QUARTERS VALUE PACK (6)':'LEG QUARTERS-6-PACK',
+        'ROASTER LEG QUARTERS IN 1/8':       'LEG QUARTERS IN 1/8',
+        'ROASTER LEG QUARTERS IN 1/8 VALUE PACK':'LEG QUARTERS IN 1/8 VALUE PACK',
+        'ROASTER THIGHS 2-PACK':             'THIGH-2-PACK',
+        'ROASTER THIGHS 4-PACK':             'THIGH-4-PACK',
+        'ROASTER THIGHS':                    'THIGH-4-PACK',
+        'CAPONS (BONELESS DARKS)':           'CAPONS (BONED THIGHS)',
+        'CHICKEN WINGS 6-PACK':              'WINGS-6-PACK',
+        'CHICKEN WINGS (12 PIECES)':         'WINGS-12-PACK',
+        'CHICKEN NECKS (8-PACK)':            'NECKS 8-PACK',
+        'CHICKEN NECK 8-PACK':               'NECKS 8-PACK',
+        'SHNITZELS 2-PACK':                  'SHNITZELS-2-PACK',
+        'SHNITZELS 6-PACK':                  'SHNITZELS-6-PACK',
+        'SHNITZELS 10-PACK':                 'SHNITZELS-10-PACK',
+        'CHICKEN SHNITZEL':                  'SHNITZELS-2-PACK',
+        // KS/Halperns/Kayes old portal names
+        'KOSHERED CHICKEN LIVER':            'CHICKEN LIVER',
+        'HIGH QUALITY MINCED CHICKEN':       'MINCED CHICKEN',
+        'CHICKEN FILLET':                    'CHICKEN FILLETS',
+        'CHICKEN SHNITZEL VALUE PACK (10)':  '10-PACK CHICKEN SHNITZELS',
+        'CHICKEN SHNITZEL 6-PACK':           '6-PACK CHICKEN SHNITZELS',
+        'DARK SHNITZEL (PARGIOT)':           'PARGIOT',
+        'CHICKEN LEGS 2-PACK':               'CHICKEN LEGS-2 PACK',
+        'CHICKEN LEGS 2 PACK':               'CHICKEN LEGS-2 PACK',
+        'CHICKEN LEGS VALUE PACK':           'CHICKEN LEGS-VALUE PACK',
+        'CHICKEN LEGS IN 1/8 2-PACK':        'CHICKEN LEGS IN 1/8-2 PACK',
+        'CHICKEN LEGS IN 1/8 VALUE PACK':    'CHICKEN LEGS IN 1/8-VALUE PACK',
+        // Beef name variants
+        'WHOLE SHIN BEEF':                   'WHOLE SHIN',
+        'CRUMB COATED DARK SHNITZEL':        'CRUMB COATED DARK SHNITZELS',
         // Spelling variants
-        'ROASTER IN 1/4 SHNIZELED':           'ROASTER IN 1/4 SHNITZELED',
-        'ROASTER IN 1/8 SHNIZELED':           'ROASTER IN 1/8 SHNITZELED',
-        // Old portal poultry names
-        'ROASTER IN 1/4 SHNITZELED':          'ROASTER IN 1/4 SHNITZELED',
-        'BREAST ROASTER':                     'BREAST QUARTERS',
-        // 'CARCASS 5-PACK' handled by normalizeKey
-        'CHICKEN FILLET':                     'CHICKEN FILLETS',
-        'KOSHERED CHICKEN LIVER':             'CHICKEN LIVER',
-        'CHICKEN NECKS (8-PACK)':             'CHICKEN NECK (8-PACK)',
-        'HIGH QUALITY MINCED CHICKEN':        'MINCED CHICKEN',
-        'CHICKEN SHNITZEL VALUE PACK (10)':   '10-PACK CHICKEN SHNITZELS',
-        'CHICKEN SHNITZEL 6-PACK':            '6-PACK CHICKEN SHNITZELS',
-        'CHICKEN WINGS (12 PIECES)':          '12-PACK CHICKEN WINGS',
-        'DARK SHNITZEL (PARGIOT)':            'PARGIOT',
-        'ROASTER THIGHS':                     'CHICKEN THIGHS',
-        'ROASTER LEG QUARTERS 2-PACK':        'CHICKEN LEGS-2 PACK',
-        'ROASTER LEG QUARTERS VALUE PACK (4)':'CHICKEN LEGS-VALUE PACK',
-        'ROASTER LEG QUARTERS IN 1/8':        'CHICKEN LEGS IN 1/8-2 PACK',
-        'ROASTER LEG QUARTERS IN 1/8 VALUE PACK':'CHICKEN LEGS IN 1/8-VALUE PACK',
-        'FAMILY SIZE SOUP PACK':              'DOUBLE SOUP PACK',
-        // Dash format variants
-        'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6': 'CLASSIC 2 OUNCE BEEFBURGERS-PACK OF 6',
+        'ROASTER IN 1/4 SHNIZELED':          'ROASTER IN 1/4 SHNITZELED',
+        'ROASTER IN 1/8 SHNIZELED':          'ROASTER IN 1/8 SHNITZELED',
+        // Dash/format variants
+        'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6':'CLASSIC 2 OUNCE BEEFBURGERS-PACK OF 6',
         'MEAT BALLS - 24 PACK':              'MEAT BALLS-24 PACK',
         'MEAT BALLS - 12 PACK':              'MEAT BALLS-12 PACK',
-        // LARGE/SMALL legacy (belt-and-braces on top of normalizeKey)
+        // LARGE/SMALL legacy
         'BOLA JOINT LARGE':                  'BOLA JOINT',
         'FLAT BRISKET JOINT LARGE':          'FLAT BRISKET JOINT',
         'FLAT PICKLED JOINT LARGE':          'FLAT PICKLED JOINT',
@@ -2870,20 +2937,30 @@ function pullRemoteOrders() {
           .replace(/\s*-\s*/g, '-')
           .replace(/\s+/g, ' ');
       }
+
       const custObj = CUSTOMERS.find(c => c.id === customer);
+      const allProds = custObj ? [...custObj.products, ...(BEEF_BY_CUSTOMER[customer] || [])] : [];
       let finalKey = productKey.trim();
-      // Check legacy map first
-      const legacyResolved = LEGACY_MAP[productKey.trim()] || LEGACY_MAP[productKey.trim().toUpperCase()];
-      if (legacyResolved) {
-        finalKey = legacyResolved;
-      } else if (custObj) {
-        const allProds = [...custObj.products, ...(BEEF_BY_CUSTOMER[customer] || [])];
-        const incomingNorm = normalizeKey(productKey);
-        const match = allProds.find(p =>
-          p.name.trim() === productKey.trim() ||
-          normalizeKey(p.name) === incomingNorm
-        );
-        if (match) finalKey = match.name.trim();
+
+      // 1. Try exact match first
+      const exactMatch = allProds.find(p => p.name.trim() === productKey.trim());
+      if (exactMatch) {
+        finalKey = exactMatch.name.trim();
+      } else {
+        // 2. Try LEGACY_MAP — but verify result exists in THIS customer's products
+        const legacyResolved = LEGACY_MAP[productKey.trim()] || LEGACY_MAP[productKey.trim().toUpperCase()];
+        if (legacyResolved) {
+          const legacyValid = allProds.find(p => p.name.trim() === legacyResolved);
+          if (legacyValid) {
+            finalKey = legacyResolved;
+          }
+        }
+        // 3. If still no match, try normalizeKey fuzzy match
+        if (finalKey === productKey.trim()) {
+          const incomingNorm = normalizeKey(productKey);
+          const fuzzyMatch = allProds.find(p => normalizeKey(p.name) === incomingNorm);
+          if (fuzzyMatch) finalKey = fuzzyMatch.name.trim();
+        }
       }
       orders[day][customer][finalKey] = parseInt(quantity) || 0;
       loaded++;
