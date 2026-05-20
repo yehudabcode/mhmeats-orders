@@ -686,13 +686,13 @@
         <div class="card-header">📥 Pull Remote Orders Into System</div>
         <div class="card-body">
           <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
-            When customers submit orders via their link they go straight to your Google Sheet. Click below to pull them into the order system — no codes, no manual re-entry.
+            When customers submit orders they go straight to your Google Sheet. Select which day to assign them to in the system, then pull — regardless of when customers submitted.
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
             <select id="pullDay" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:5px;font-size:13px">
               <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option>
             </select>
-            <button class="btn btn-primary" onclick="pullRemoteOrders()">⬇️ Pull Orders for Selected Day</button>
+            <button class="btn btn-primary" onclick="pullRemoteOrders()">⬇️ Pull & Assign to Selected Day</button>
             <div id="pullStatus" style="font-size:12px;color:var(--muted)"></div>
           </div>
           <div id="pullResults" style="margin-top:12px"></div>
@@ -2903,7 +2903,21 @@ function pullRemoteOrders() {
     data.orders.forEach(row => {
       const { customer, productKey, quantity } = row;
       if (!orders[day][customer]) orders[day][customer] = {};
-      orders[day][customer][productKey] = parseInt(quantity) || 0;
+
+      // productKey from sheet is just the name — resolve to plu|name format
+      const cust = CUSTOMERS.find(c => c.id === customer);
+      let resolvedKey = productKey; // fallback
+      if (cust) {
+        const prodMatch = cust.products.find(p => p.name.trim() === productKey.trim());
+        if (prodMatch) {
+          resolvedKey = orderKey(prodMatch);
+        } else {
+          const beefMatch = (BEEF_BY_CUSTOMER[customer] || []).find(p => p.name.trim() === productKey.trim());
+          if (beefMatch) resolvedKey = orderKey(beefMatch);
+        }
+      }
+
+      orders[day][customer][resolvedKey] = parseInt(quantity) || 0;
       loaded++;
       custsSeen.add(customer);
     });
@@ -2935,7 +2949,7 @@ function pullRemoteOrders() {
     status.textContent = '✗ Failed to connect. Check your Apps Script URL.';
   };
 
-  script.src = `${scriptUrl}?action=getOrders&day=${encodeURIComponent(day)}&callback=${callbackName}`;
+  script.src = `${scriptUrl}?action=getOrders&callback=${callbackName}`;
   document.body.appendChild(script);
 }
 
