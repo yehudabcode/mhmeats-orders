@@ -631,9 +631,6 @@
     <div id="dispatchSheetContent"></div>
   </div>
 
-</div><!-- /main -->
-
-
   <!-- ════════════════════════════════ CUSTOMER LINKS PANEL ════════════════════════════════ -->
   <div class="panel" id="panel-links" data-print-title="CUSTOMER LINKS">
     <div style="max-width:900px;margin:0 auto">
@@ -851,6 +848,7 @@
     </div>
   </div>
 
+</div><!-- /main -->
 
 <div class="toast" id="toast">✓ Saved</div>
 
@@ -1456,16 +1454,16 @@ const BEEF_BY_CUSTOMER = {
     {plu:107,name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {plu:16,name:"BOLA JOINT",unit:"UNITS",mult:1},
     {plu:108,name:"BOLA STEAKS",unit:"UNITS",mult:2},
-    {plu:16,name:"CUBED CHOLENT BEEF",unit:"UNITS",mult:1},
-    {plu:15,name:"CUBED TOP RIB",unit:"UNITS",mult:1},
+    {plu:16,name:"CUBED CHOLENT BEEF",unit:"KG",mult:0.5},
+    {plu:15,name:"CUBED TOP RIB",unit:"KG",mult:0.5},
     {plu:42,name:"FAIRY STEAKS",unit:"UNITS",mult:4},
     {plu:7,name:"FLANK",unit:"UNITS",mult:1},
     {plu:2,name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
     {plu:75,name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
-    {plu:9,name:"GOULASH BEEF CUBES",unit:"UNITS",mult:1},
+    {plu:9,name:"GOULASH BEEF CUBES",unit:"KG",mult:0.5},
     {plu:29,name:"MARROW BONES",unit:"UNITS",mult:2},
     {plu:50,name:"MEAT BONES",unit:"UNITS",mult:6},
-    {plu:2,name:"MINCED STEAK",unit:"UNITS",mult:1},
+    {plu:2,name:"MINCED STEAK",unit:"KG",mult:0.5},
     {plu:75,name:"PICKLED BEEF ROLL",unit:"UNITS",mult:1},
     {plu:null,name:"POT ROAST",unit:"UNITS",mult:1},
     {plu:14,name:"PRIME CHOLENT MEAT",unit:"UNITS",mult:1},
@@ -1944,7 +1942,8 @@ const CUSTOMER_SHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',del
 // ══════════════════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════════════════
-let currentDay = 'Monday';
+const _dow = new Date().getDay();
+let currentDay = [null,'Monday','Tuesday','Wednesday','Thursday','Friday',null][_dow] || 'Monday';
 let currentCustomer = null;
 
 // orders[day][customerId][productKey] = qty
@@ -1990,7 +1989,19 @@ function init() {
   try { loadCustomProducts(); } catch(e) { console.warn('loadCustomProducts error:', e); }
   try { setDateBadge(); } catch(e) {}
   try { buildCustomerList(); } catch(e) { console.error('buildCustomerList error:', e); }
-  try { buildDayButtonSets(); } catch(e) { console.error('buildDayButtonSets error:', e); }
+  try {
+    buildDayButtonSets();
+    // Auto-activate today's day on all button sets
+    const todayShort = currentDay.slice(0,3).toUpperCase();
+    document.querySelectorAll('.day-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent.trim() === todayShort);
+    });
+    document.querySelectorAll('.sheet-day-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent.trim() === todayShort);
+    });
+    const pd = document.getElementById('pullDay');
+    if (pd) pd.value = currentDay;
+  } catch(e) { console.error('buildDayButtonSets error:', e); }
   try {
     if (!localStorage.getItem('mhmeats_script_url')) {
       localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2feew5djxBI5uLkmxEyFXV5fwzrYcEIEDwoJmsrWUTzg6/exec');
@@ -2415,8 +2426,8 @@ function renderButcherSheet(day) {
   ].filter(i=>i.qty>0);
 
   const bottomQuarters = [
-    {name:'LEG QUARTERS (ALL PACKS)', qty:['LEG QUARTERS- 1-PACK','LEG QUARTERS- 2-PACK','LEG QUARTERS- 4-PACK','LEG QUARTERS- 6-PACK','CHICKEN LEGS - 2 PACK','CHICKEN LEGS - VALUE PACK'].reduce((a,n)=>a+poultryQty(n),0)},
-    {name:'LEG QUARTERS IN 1/8 (ALL PACKS)', qty:['LEG QUARTERS IN 1/8 - 2 PACK','LEG QUARTERS IN 1/8 VALUE PACK','CHICKEN LEGS IN 1/8 - 2 PACK','CHICKEN LEGS IN 1/8 - VALUE PACK'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'LEG QUARTERS (ALL PACKS)', qty:['LEG QUARTERS- 1-PACK','LEG QUARTERS- 2-PACK','LEG QUARTERS- 4-PACK','LEG QUARTERS- 6-PACK','CHICKEN LEGS - 2 PACK','CHICKEN LEGS - VALUE PACK','CHICKEN LEGS'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'LEG QUARTERS IN 1/8 (ALL PACKS)', qty:['LEG QUARTERS IN 1/8 - 2 PACK','LEG QUARTERS IN 1/8 VALUE PACK','CHICKEN LEGS IN 1/8 - 2 PACK','CHICKEN LEGS IN 1/8 - VALUE PACK','CHICKEN LEGS IN 1/8'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'CAPONS (BONED THIGHS)', qty:poultryQty('CAPONS (BONED THIGHS)')},
     {name:'PARGIOT', qty:poultryQty('PARGIOT')+poultryQty('CHICKEN PARGIOT')},
     {name:'CHICKEN DRUMSTICKS', qty:poultryQty('CHICKEN DRUMSTICKS')},
@@ -2450,18 +2461,37 @@ function renderButcherSheet(day) {
   ].filter(i=>i.qty>0);
 
   // beefQty returns BUTCHER AMOUNT — packs × multiplier
+  // NAME_ALIASES: maps customer short names → canonical butcher category names
+  const NAME_ALIASES = {
+    'WHOLE SHIN BEEF':        'WHOLE SHIN',
+    'BOLA JOINT':             'BOLA JOINT LARGE',
+    'FLAT BRISKET JOINT':     'FLAT BRISKET JOINT LARGE',
+    'FLAT PICKLED JOINT':     'FLAT PICKLED JOINT LARGE',
+    'POT ROAST':              'POT ROAST LARGE',
+    'PICKLED BEEF ROLL':      'PICKLED BEEF ROLL LARGE',
+    'ROLLED BRISKET JOINT':   'ROLLED BRISKET JOINT LARGE',
+    'ROLLED PICKLED BRISKET': 'ROLLED PICKLED BRISKET LARGE',
+  };
+  // Reverse map: canonical → [aliases]
+  const reverseAliases = {};
+  Object.entries(NAME_ALIASES).forEach(([alias, canonical]) => {
+    if (!reverseAliases[canonical]) reverseAliases[canonical] = [];
+    reverseAliases[canonical].push(alias);
+  });
+
   function beefQty(name) {
     let total = 0;
+    const searchNames = [name.trim(), ...(reverseAliases[name.trim()] || [])];
     CUSTOMERS.forEach(cust => {
       const custOrders = orders[day][cust.id] || {};
-      const match = (BEEF_BY_CUSTOMER[cust.id]||[]).find(p=>p.name.trim()===name.trim());
-      if (match) {
-        const packs = custOrders[orderKey(match)] || 0;
-        const mult = match.mult !== undefined ? match.mult : 1;
-        total += packs * mult;
-      }
+      (BEEF_BY_CUSTOMER[cust.id]||[]).forEach(p => {
+        if (searchNames.includes(p.name.trim())) {
+          const packs = custOrders[orderKey(p)] || 0;
+          total += packs * (p.mult !== undefined ? p.mult : 1);
+        }
+      });
     });
-    return Math.round(total * 10) / 10; // round to 1dp for KG items
+    return Math.round(total * 10) / 10;
   }
 
   // Full categorised beef butcher list — exact match to DAILY BUTCHER BEEF LISTS sheet
@@ -2495,6 +2525,7 @@ function renderButcherSheet(day) {
       {name:'FLAT BRISKET JOINT LARGE',   unit:'UNITS',desc:'2-2.5KG'},
       {name:'FLAT PICKLED JOINT SMALL',   unit:'UNITS',desc:'1.5-1.8KG'},
       {name:'FLAT PICKLED JOINT LARGE',   unit:'UNITS',desc:'2-2.5KG'},
+      {name:'FLAT PICKLED BRISKET',       unit:'UNITS'},
       {name:'ROLLED PICKLED BRISKET SMALL',unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
       {name:'ROLLED PICKLED BRISKET LARGE',unit:'UNITS',desc:'2-2.5KG, netted, max diameter 12cm'},
       {name:'PICKLED BEEF ROLL SMALL',    unit:'UNITS',desc:'1.5-1.8KG'},
@@ -2502,6 +2533,7 @@ function renderButcherSheet(day) {
     ]},
     { cat:'RIBEYE', items:[
       {name:'MINUTE STEAKS',              unit:'UNITS',desc:'Thin, pre-freeze 2-3 hours'},
+      {name:'THIN SLICED GRILLING STEAK', unit:'UNITS'},
       {name:'RIB-EYE STEAKS',             unit:'UNITS',desc:'2cm thick'},
       {name:'COTE DE BOUEF',              unit:'UNITS',desc:'Marbled, chine each steak'},
       {name:'LONDON BROIL 500G',          unit:'UNITS'},
@@ -2536,6 +2568,7 @@ function renderButcherSheet(day) {
     ]},
     { cat:'FLANK', items:[
       {name:'FLANK',                      unit:'UNITS',desc:'400-500G'},
+      {name:'PRIME CHOLENT MEAT',         unit:'UNITS'},
       {name:'CUBED CHOLENT BEEF',         unit:'KG',   desc:'70/30 fat content'},
       {name:'CHOLENT PACK',               unit:'KG'},
       {name:'GALLA BONES',                unit:'UNITS'},
@@ -2641,7 +2674,7 @@ function renderPackerSheet(day) {
 
   let html = '';
   if (poultryItems.length)   html += buildPackerTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, poultryItems);
-  if (flavouredItems.length) html += buildPackerTable(`🌶 FLAVOURED PACKER LIST — ${day.toUpperCase()}`, flavouredItems);
+  // Flavoured products excluded from packer — handled by Chef sheet only
   if (beefItems.length)      html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
 
   document.getElementById('packerSheetContent').innerHTML = html;
@@ -2756,7 +2789,7 @@ const PORTAL_BASE = 'https://yehudabcode.github.io/mhmeats-orders/portal.html';
 function buildStaticLinksTable() {
   const tbody = document.getElementById('staticLinksBody');
   if (!tbody) return;
-  const remoteCustomers = CUSTOMERS.filter(c => c.id !== 'mhmeats');
+  const remoteCustomers = CUSTOMERS;
   tbody.innerHTML = remoteCustomers.map(c => {
     const link = PORTAL_BASE + '?customer=' + c.id;
     const whatsappMsg = encodeURIComponent('Hi, here is your MH Meats order link: ' + link);
@@ -3133,7 +3166,7 @@ function switchPanel(name) {
   if (name === 'packer') renderPackerSheet(currentDay);
   if (name === 'dispatch') renderDispatchSheet(currentDay);
   if (name === 'links') buildStaticLinksTable();
-  if (name === 'remote') { initRemotePanel(); renderRemoteOrderForm(); }
+  if (name === 'remote') { initRemotePanel(); }
   if (name === 'admin') lockAdmin();
 }
 
