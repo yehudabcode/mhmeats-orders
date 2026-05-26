@@ -2926,7 +2926,10 @@ function pullRemoteOrders() {
     let custsSeen = new Set();
     const custNotes = {}; // store notes per customer
 
-    orders[day] = {}; // wipe stale local data before applying remote pull
+    // Pre-scan which customers appear in pull so we only wipe those
+    const custsInPull = new Set(data.orders.filter(r => !r.status || r.status === 'active').map(r => r.customer));
+    custsInPull.forEach(cid => { orders[day][cid] = {}; });
+
     data.orders.forEach(row => {
       const { customer, productKey, quantity, notes, status } = row;
       if (status && status !== 'active') return; // skip already-imported
