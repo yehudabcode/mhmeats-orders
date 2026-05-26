@@ -868,6 +868,11 @@
 <div class="toast" id="toast">✓ Saved</div>
 
 <script>
+// ── APPS SCRIPT URL — update this when redeploying ──────────────
+// This is the fallback for every device. Change it here once,
+// re-upload to GitHub, and all devices pick it up automatically.
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2feew5djxBI5uLkmxEyFXV5fwzrYcEIEDwoJmsrWUTzg6/exec';
+
 // ══════════════════════════════════════════════════════════════════
 // DATA — extracted directly from April 2026 order form
 // ══════════════════════════════════════════════════════════════════
@@ -1972,11 +1977,6 @@ function init() {
     const pd = document.getElementById('pullDay');
     if (pd) pd.value = currentDay;
   } catch(e) { console.error('buildDayButtonSets error:', e); }
-  try {
-    if (!localStorage.getItem('mhmeats_script_url')) {
-      localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2feew5djxBI5uLkmxEyFXV5fwzrYcEIEDwoJmsrWUTzg6/exec');
-    }
-  } catch(e) {}
 }
 
 function setDateBadge() {
@@ -2854,7 +2854,7 @@ function renderDispatchSheet(day) {
 // REMOTE ORDERS — Google Sheets integration
 // ══════════════════════════════════════════════════════════════════
 function getScriptUrl() {
-  try { return localStorage.getItem('mhmeats_script_url') || ''; } catch(e) { return ''; }
+  try { return localStorage.getItem('mhmeats_script_url') || DEFAULT_SCRIPT_URL; } catch(e) { return DEFAULT_SCRIPT_URL; }
 }
 
 function saveScriptUrl() {
