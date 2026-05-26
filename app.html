@@ -2252,7 +2252,8 @@ function renderSummaryPanel() {
       <td style="padding:8px 10px;white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>${c.name}</td>
       <td style="padding:8px 10px;text-align:right;color:var(--accent);font-family:'DM Mono',monospace;font-size:16px;font-weight:600;white-space:nowrap">${lines}</td>
       <td style="padding:8px 10px;line-height:2">${preview}${more}</td>
-    </tr>`;\n  }).filter(Boolean).join('');
+    </tr>`;
+  }).filter(Boolean).join('');
 
   el.innerHTML = `
     <div class="summary-grid">${dayCards}</div>
