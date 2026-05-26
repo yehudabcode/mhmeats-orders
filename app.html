@@ -599,6 +599,7 @@
   </div>
 
   <!-- ════════════════════════════════ CHEF PANEL ════════════════════════════════ -->
+  <div class="panel" id="panel-chef" data-print-title="CHEF PRODUCTION SHEET">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="chefDayBtns"></div>
       <div class="ml-auto flex gap8">
@@ -613,7 +614,9 @@
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
       <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+        <button class="btn btn-ghost" onclick="printSection('butcher','all')" title="Print all">🖨 All</button>
+        <button class="btn btn-ghost" onclick="printSection('butcher','chicken')" title="Print chicken only">🐔 Chicken</button>
+        <button class="btn btn-ghost" onclick="printSection('butcher','beef')" title="Print beef only">🥩 Beef</button>
       </div>
     </div>
     <div id="butcherSheetContent"></div>
@@ -624,7 +627,10 @@
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
       <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+        <button class="btn btn-ghost" onclick="printSection('packer','all')" title="Print all">🖨 All</button>
+        <button class="btn btn-ghost" onclick="printSection('packer','chicken')" title="Print chicken only">🐔 Chicken</button>
+        <button class="btn btn-ghost" onclick="printSection('packer','lamb')" title="Print lamb only">🐑 Lamb</button>
+        <button class="btn btn-ghost" onclick="printSection('packer','beef')" title="Print beef only">🥩 Beef</button>
       </div>
     </div>
     <div id="packerSheetContent"></div>
@@ -635,7 +641,11 @@
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="dispatchDayBtns"></div>
       <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+        <button class="btn btn-ghost" onclick="printSection('dispatch','all')" title="Print all customers">🖨 All</button>
+        <select id="dispatchCustomerPrint" class="btn btn-ghost" style="cursor:pointer;max-width:160px">
+          <option value="">🖨 Customer…</option>
+        </select>
+        <button class="btn btn-ghost" onclick="printDispatchCustomer()" title="Print selected customer">Print</button>
       </div>
     </div>
     <div id="dispatchSheetContent"></div>
@@ -1445,7 +1455,9 @@ const BEEF_BY_CUSTOMER = {
     {name:"ROLLED TOP RIB JOINT",unit:"UNITS",mult:1},
     {name:"ROUND BOLA",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
-    {name:"SLICED SHIN",unit:"UNITS",mult:2}
+    {name:"SLICED SHIN",unit:"UNITS",mult:2},
+    {name:"PRIME CHOLENT MEAT",unit:"UNITS",mult:1},
+    {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2}
   ],
   ksmeats: [
     {name:"BEEF RIBLETS (FLANKEN)",unit:"UNITS",mult:2},
@@ -2320,7 +2332,7 @@ function renderChefSheet(day) {
 function buildSheetTable(title, items, showSources) {
   const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
   const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => {
-    const sourceTags = (showSources && item.sources && item.sources.length > 1)
+    const sourceTags = (showSources && item.sources && item.sources.length >= 1)
       ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
       : '';
     return `<tr class="${item.qty > 10 ? 'row-highlight' : ''}">
@@ -2820,6 +2832,13 @@ function renderDispatchSheet(day) {
   });
   if (!any) html = `<div class="empty-state"><div class="empty-icon">🚚</div><div class="empty-text">No orders for ${day}</div></div>`;
   document.getElementById('dispatchSheetContent').innerHTML = html;
+  // Populate customer print dropdown
+  const sel = document.getElementById('dispatchCustomerPrint');
+  if (sel) {
+    sel.innerHTML = '<option value="">🖨 Customer…</option>' +
+      CUSTOMERS.filter(c => Object.keys(orders[day][c.id]||{}).length > 0)
+        .map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  }
 }
 
 
@@ -3032,6 +3051,7 @@ function pullRemoteOrders() {
         'CHICKEN LEGS IN 1/8 VALUE PACK':    'CHICKEN LEGS IN 1/8-VALUE PACK',
         // Beef name variants
         'WHOLE SHIN BEEF':                   'WHOLE SHIN',
+        'BEEF STIR FRY':                     'BEEF STIRFRY',
         'CRUMB COATED DARK SHNITZEL':        'CRUMB COATED DARK SHNITZELS',
         // Spelling variants
         'ROASTER IN 1/4 SHNIZELED':          'ROASTER IN 1/4 SHNITZELED',
@@ -3133,24 +3153,70 @@ function pullRemoteOrders() {
 // ══════════════════════════════════════════════════════════════════
 // PRINT — opens a clean white popup with just the sheet content
 // ══════════════════════════════════════════════════════════════════
-function printActivePanel() {
-  const activePanel = document.querySelector('.panel.active');
-  if (!activePanel) return;
+// ── Section-selective print ──────────────────────────────────────
+// filter: 'all' | 'chicken' | 'beef' | 'lamb' (butcher/packer)
+function printSection(panel, filter) {
+  const contentEl = document.getElementById(panel + 'SheetContent');
+  if (!contentEl || !contentEl.innerHTML.trim()) { alert('No data to print.'); return; }
 
-  const title = activePanel.getAttribute('data-print-title') || 'MH MEATS';
-  const contentEl = activePanel.querySelector('[id$="SheetContent"]');
-  if (!contentEl || !contentEl.innerHTML.trim()) {
-    alert('No data to print — enter some orders first.');
-    return;
+  const BEEF_CATS = ['MINCE','CHUCK','BRISKET','RIBEYE','BLADE','BOLA','RIB PLATE','SHIN','FLANK','DELI'];
+  const CHICKEN_CATS = ['FULL BIRDS','BOTTOM QUARTERS','CROWNS','TURKEY'];
+
+  let tables = Array.from(contentEl.querySelectorAll('.sheet-table'));
+  if (filter !== 'all') {
+    tables = tables.filter(t => {
+      const titleEl = t.querySelector('.sheet-title');
+      if (!titleEl) return false;
+      const txt = titleEl.textContent.trim().toUpperCase();
+      if (panel === 'butcher') {
+        if (filter === 'chicken') return CHICKEN_CATS.some(c => txt.includes(c));
+        if (filter === 'beef')    return BEEF_CATS.some(c => txt.includes(c));
+      }
+      if (panel === 'packer') {
+        if (filter === 'chicken') return txt.includes('CHICKEN');
+        if (filter === 'lamb')    return txt.includes('LAMB');
+        if (filter === 'beef')    return txt.includes('BEEF');
+      }
+      return true;
+    });
   }
 
-  const today = new Date().toLocaleDateString('en-GB', {
-    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
-  });
+  if (!tables.length) { alert('No ' + filter + ' data to print.'); return; }
 
-  const printHTML = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8">
-<title>MH Meats — ${title}</title>
+  const labelMap = {all:'ALL',chicken:'CHICKEN',lamb:'LAMB',beef:'BEEF'};
+  const panelTitleMap = {butcher:'BUTCHER LISTS',packer:'PACKER LISTS',dispatch:'DISPATCH SHEETS'};
+  const title = panelTitleMap[panel] || panel.toUpperCase();
+  const subtitle = filter === 'all' ? '' : ' — ' + labelMap[filter];
+  const today = new Date().toLocaleDateString('en-GB', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const html = tables.map(t => t.outerHTML).join('');
+  openPrintWindow(title + subtitle, today, html);
+}
+
+function printDispatchCustomer() {
+  const sel = document.getElementById('dispatchCustomerPrint');
+  const custId = sel.value;
+  if (!custId) { alert('Select a customer first.'); return; }
+  const contentEl = document.getElementById('dispatchSheetContent');
+  const tables = Array.from(contentEl.querySelectorAll('.sheet-table')).filter(t => {
+    const ti = t.querySelector('.sheet-title');
+    return ti && ti.textContent.toUpperCase().includes(custId.toUpperCase());
+  });
+  // If title match fails, fall back to position-based lookup
+  const allTables = Array.from(contentEl.querySelectorAll('.sheet-table'));
+  const custObj = CUSTOMERS.find(c => c.id === custId);
+  const custName = custObj ? custObj.name.toUpperCase() : custId.toUpperCase();
+  const matched = tables.length ? tables : allTables.filter(t => {
+    const ti = t.querySelector('.sheet-title');
+    return ti && ti.textContent.toUpperCase().includes(custName.split(' ')[0]);
+  });
+  if (!matched.length) { alert('No dispatch data for that customer.'); return; }
+  const today = new Date().toLocaleDateString('en-GB', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  openPrintWindow('DISPATCH — ' + custName, today, matched.map(t=>t.outerHTML).join(''));
+}
+
+function openPrintWindow(title, date, bodyHTML) {
+  const pw = window.open('', '_blank', 'width=900,height=700');
+  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MH Meats — ${title}</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:Arial,sans-serif; font-size:12px; color:#000; background:#fff; padding:20px; }
@@ -3164,7 +3230,6 @@ function printActivePanel() {
   table { width:100%; border-collapse:collapse; }
   th { background:#eee; text-align:left; padding:6px 10px; font-size:10px; font-weight:bold; text-transform:uppercase; border:1px solid #aaa; }
   td { padding:6px 10px; border:1px solid #ccc; font-size:12px; }
-  .td-plu { color:#555; font-size:10px; width:55px; font-family:monospace; }
   .td-qty { font-size:14px; font-weight:bold; text-align:right; width:60px; }
   .td-check { text-align:center; width:30px; }
   .row-highlight td { background:#f5f5f5; }
@@ -3172,20 +3237,22 @@ function printActivePanel() {
   .cat-tag { display:inline-block; font-size:8px; font-family:monospace; padding:1px 4px; border:1px solid #aaa; border-radius:2px; margin-left:4px; color:#333; }
   tr:nth-child(even) td { background:#fafafa; }
   @page { margin:1.5cm; size:A4 portrait; }
-</style></head>
-<body>
-  <div class="print-header">
-    <h1>MH MEATS</h1>
-    <h2>${title}</h2>
-    <div class="date">${today}</div>
-  </div>
-  ${contentEl.innerHTML}
+</style></head><body>
+  <div class="print-header"><h1>MH MEATS</h1><h2>${title}</h2><div class="date">${date}</div></div>
+  ${bodyHTML}
   <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
-</body></html>`;
-
-  const pw = window.open('', '_blank', 'width=900,height=700');
-  pw.document.write(printHTML);
+</body></html>`);
   pw.document.close();
+}
+
+function printActivePanel() {
+  const activePanel = document.querySelector('.panel.active');
+  if (!activePanel) return;
+  const title = activePanel.getAttribute('data-print-title') || 'MH MEATS';
+  const contentEl = activePanel.querySelector('[id$="SheetContent"]');
+  if (!contentEl || !contentEl.innerHTML.trim()) { alert('No data to print — enter some orders first.'); return; }
+  const today = new Date().toLocaleDateString('en-GB', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  openPrintWindow(title, today, contentEl.innerHTML);
 }
 
 // ══════════════════════════════════════════════════════════════════
