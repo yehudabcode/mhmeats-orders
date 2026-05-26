@@ -3034,6 +3034,14 @@ function pullRemoteOrders() {
     saveToStorage();
     updateCustomerCounts();
     updateSummary();
+    // Sync order input day to pulled day and re-render cells
+    if (day !== currentDay) {
+      currentDay = day;
+      document.querySelectorAll('.day-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.trim() === day.slice(0,3).toUpperCase());
+      });
+    }
+    if (currentCustomer) renderProducts(currentCustomer);
 
     status.style.color = 'var(--success)';
     status.textContent = `✓ Loaded ${loaded} lines from ${custsSeen.size} customer(s).`;
