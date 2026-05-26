@@ -597,9 +597,7 @@
   <div class="panel" id="panel-chef" data-print-title="CHEF PRODUCTION SHEET">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="chefDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
-      </div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
     <div id="chefSheetContent"></div>
   </div>
@@ -608,9 +606,7 @@
   <div class="panel" id="panel-butcher" data-print-title="BUTCHER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
-      </div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
     <div id="butcherSheetContent"></div>
   </div>
@@ -619,9 +615,7 @@
   <div class="panel" id="panel-packer" data-print-title="PACKER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
-      </div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
     <div id="packerSheetContent"></div>
   </div>
@@ -630,9 +624,7 @@
   <div class="panel" id="panel-dispatch" data-print-title="DISPATCH SHEETS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="dispatchDayBtns"></div>
-      <div class="ml-auto flex gap8">
-        <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
-      </div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
     <div id="dispatchSheetContent"></div>
   </div>
@@ -2303,7 +2295,7 @@ function renderChefSheet(day) {
 function buildSheetTable(title, items, showSources) {
   const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
   const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => {
-    const sourceTags = (showSources && item.sources && item.sources.length > 1)
+    const sourceTags = (showSources && item.sources && item.sources.length >= 1)
       ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
       : '';
     return `<tr class="${item.qty > 10 ? 'row-highlight' : ''}">
@@ -2720,7 +2712,7 @@ function buildPackerTable(title, items) {
   const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
   const totalQty = items.reduce((a,b) => a + b.qty, 0);
   const rows = items.map(item => {
-    const tags = (item.sources && item.sources.length > 1)
+    const tags = (item.sources && item.sources.length >= 1)
       ? item.sources.map(s => `<span class="cat-tag">${CSHORT[s.id]||s.name.slice(0,3)}:${s.qty}</span>`).join(' ')
       : '';
     return `<tr>
@@ -2744,7 +2736,7 @@ function buildPackerTable(title, items) {
 function buildPackerBeefTable(title, items, day) {
   const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
   const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => {
-    const tags = (item.sources && item.sources.length > 1)
+    const tags = (item.sources && item.sources.length >= 1)
       ? item.sources.map(s => `<span class="cat-tag">${CSHORT[s.id]||s.name.slice(0,3)}:${s.qty}</span>`).join(' ')
       : '';
     return `<tr>
