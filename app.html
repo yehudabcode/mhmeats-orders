@@ -2928,7 +2928,8 @@ function pullRemoteOrders() {
 
     orders[day] = {}; // wipe stale local data before applying remote pull
     data.orders.forEach(row => {
-      const { customer, productKey, quantity, notes } = row;
+      const { customer, productKey, quantity, notes, status } = row;
+      if (status && status !== 'active') return; // skip already-imported
       if (!orders[day][customer]) orders[day][customer] = {};
 
       // Capture notes
