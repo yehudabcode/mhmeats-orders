@@ -2240,14 +2240,19 @@ function renderSummaryPanel() {
 
   const custRows = CUSTOMERS.map(c => {
     const dayOrders = orders[currentDay][c.id] || {};
-    const lines = Object.values(dayOrders).filter(q => q > 0).length;
+    const allProds = [...c.products, ...(BEEF_BY_CUSTOMER[c.id]||[])];
+    const ordered = allProds.filter(p => (dayOrders[orderKey(p)] || 0) > 0);
+    const lines = ordered.length;
     if (!lines) return '';
-    const items = c.products.filter(p => (dayOrders[orderKey(p)] || 0) > 0)
-      .map(p => `<span style="font-size:11px;color:var(--muted)">${p.name}: <strong style="color:var(--text)">${dayOrders[orderKey(p)]}</strong></span>`).join(' &nbsp;·&nbsp; ');
-    return `<tr><td style="padding:6px 10px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>${c.name}</td>
-      <td style="padding:6px 10px;text-align:right;color:var(--accent);font-family:'DM Mono',monospace">${lines}</td>
-      <td style="padding:6px 10px;font-size:11px;color:var(--muted)">${items}</td></tr>`;
-  }).filter(Boolean).join('');
+    const preview = ordered.slice(0,3).map(p =>
+      `<span style="font-size:11px;background:var(--surface2);border-radius:3px;padding:2px 6px;white-space:nowrap">${p.name}: <strong style="color:var(--accent)">${dayOrders[orderKey(p)]}</strong></span>`
+    ).join(' ');
+    const more = ordered.length > 3 ? `<span style="font-size:11px;color:var(--muted)"> +${ordered.length-3} more</span>` : '';
+    return `<tr>
+      <td style="padding:8px 10px;white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>${c.name}</td>
+      <td style="padding:8px 10px;text-align:right;color:var(--accent);font-family:'DM Mono',monospace;font-size:16px;font-weight:600;white-space:nowrap">${lines}</td>
+      <td style="padding:8px 10px;line-height:2">${preview}${more}</td>
+    </tr>`;\n  }).filter(Boolean).join('');
 
   el.innerHTML = `
     <div class="summary-grid">${dayCards}</div>
@@ -2736,14 +2741,18 @@ function buildPackerTable(title, items) {
 }
 
 function buildPackerBeefTable(title, items, day) {
-  // Shows pack quantities with unit label — packers are packing these exact quantities
-  const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => `
-    <tr>
-      <td>${item.name}</td>
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => {
+    const tags = (item.sources && item.sources.length > 1)
+      ? item.sources.map(s => `<span class="cat-tag">${CSHORT[s.id]||s.name.slice(0,3)}:${s.qty}</span>`).join(' ')
+      : '';
+    return `<tr>
+      <td>${item.name}${tags ? ' '+tags : ''}</td>
       <td style="width:60px;color:var(--muted);font-size:11px;text-align:center">${item.unit}</td>
       <td class="td-qty">${item.qty}</td>
       <td class="td-check">☐</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
