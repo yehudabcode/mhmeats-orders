@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MH Meats — Daily Order System</title>
+<title>MH Meats — Daily Order System v22</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
 
@@ -2218,6 +2218,20 @@ function renderChefSheet(day) {
   const totals = getTotalsForDay(day);
   const flavoured = Object.values(totals).filter(i => i.flavoured);
   const totalQty = flavoured.reduce((a,b) => a + b.qty, 0);
+
+  // mhchef non-flavoured prepared items (burgers, sausages, stuffed rolls, lamb, etc.)
+  const mhchefOrders = orders[day]['mhchef'] || {};
+  const mhchefPrepared = [];
+  const mhchef = CUSTOMERS.find(c => c.id === 'mhchef');
+  if (mhchef) {
+    mhchef.products.forEach(p => {
+      if (!p.flavoured) {
+        const qty = mhchefOrders[orderKey(p)] || 0;
+        if (qty > 0) mhchefPrepared.push({ name: p.name, qty, sources: [{name:'MH Meats Chef', qty}] });
+      }
+    });
+  }
+
   let html = `<div class="summary-grid">
     <div class="summary-card"><div class="summary-label">Flavoured Lines</div><div class="summary-value">${flavoured.length}</div><div class="summary-sub">for ${day}</div></div>
     <div class="summary-card"><div class="summary-label">Total Units</div><div class="summary-value">${totalQty}</div><div class="summary-sub">flavoured products</div></div>
@@ -2226,6 +2240,9 @@ function renderChefSheet(day) {
     html += `<div class="empty-state"><div class="empty-icon">🌶</div><div class="empty-text">No flavoured product orders for ${day}</div></div>`;
   } else {
     html += buildSheetTable(`🌶 FLAVOURED PRODUCTS — ${day.toUpperCase()}`, flavoured, true);
+  }
+  if (mhchefPrepared.length) {
+    html += buildSheetTable(`👨‍🍳 CHEF PREPARED ITEMS — ${day.toUpperCase()}`, mhchefPrepared, false);
   }
   document.getElementById('chefSheetContent').innerHTML = html;
 }
@@ -2317,7 +2334,7 @@ function renderButcherSheet(day) {
     '10-PACK CHICKEN SHNITZELS':  10,
     '6-PACK CHICKEN SHNITZELS':   6,
     '5-PACK CARCASSES':           5,
-    '12-PACK CHICKEN WINGS':      8,
+    '12-PACK CHICKEN WINGS':      12,
     'BREAST QUARTER ROASTER':     1,
     'CHICKEN DRUMSTICKS':         6,
     'CHICKEN FILLETS':            6,
@@ -2334,6 +2351,12 @@ function renderButcherSheet(day) {
     'CHICKEN STIR FRY':           0.5,
     'CHICKEN SHWARMA':            1,
     'CHICKEN DIPPERS':            1,
+    // Deli products
+    'CHICKEN WINGS':              6,
+    'BONELESS TURKEY THIGHS':     1,
+    'TURKEY DRUMSTICKS':          1,
+    'TURKEY WINGS':               1,
+    'TURKEY FILLETS':             1,
     // Caterer/wholesale — ordered direct, no pack conversion
     'SHNITZELS':                  1,
     'CARCASSES':                  1,
@@ -2389,7 +2412,7 @@ function renderButcherSheet(day) {
     {name:'CARCASS (ALL PACKS)', qty:['CARCASS-1-PACK','CARCASS-2-PACK','CARCASS-5-PACK','5-PACK CARCASSES','CARCASSES'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'SOUP PACKS (ALL)', qty:['SOUP PACK','DOUBLE SOUP PACK','FAMILY SOUP PARCEL'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'SHNITZELS (TOTAL INDIVIDUAL)', qty:['SHNITZELS-2-PACK','SHNITZELS-6-PACK','SHNITZELS-10-PACK','10-PACK CHICKEN SHNITZELS','6-PACK CHICKEN SHNITZELS','SHNITZELS','BREADED SHNITZELS'].reduce((a,n)=>a+poultryQty(n),0)},
-    {name:'WINGS (ALL PACKS)', qty:['WINGS-6-PACK','WINGS-12-PACK','12-PACK CHICKEN WINGS','WINGS'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'WINGS (ALL PACKS)', qty:['WINGS-6-PACK','WINGS-12-PACK','12-PACK CHICKEN WINGS','WINGS','CHICKEN WINGS'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'NECKS 8-PACK', qty:poultryQty('NECKS 8-PACK')+poultryQty('CHICKEN NECK (8-PACK)')},
     {name:'CHICKEN LIVER', qty:poultryQty('CHICKEN LIVER')},
     {name:'PUPICKS', qty:poultryQty('PUPICKS')},
@@ -2498,12 +2521,14 @@ function renderButcherSheet(day) {
     { cat:'DELI', items:[
       {name:'BACK OF RIB',                unit:'KG'},
       {name:'CHUCK',                      unit:'KG'},
-      {name:'DELI FLANK',                 unit:'KG'},
+      {name:'FLANK',                      unit:'KG'},
       {name:'FLAT BRISKET FAT ON',        unit:'KG'},
       {name:'FLAT BRISKET',               unit:'KG'},
       {name:'BRISKET FLAP FAT ON',        unit:'KG'},
       {name:'BOLA',                       unit:'KG',   desc:'No silver skin 1.5-1.8KG'},
       {name:'RIBEYE',                     unit:'UNITS'},
+      {name:'BEEF LIVER',                 unit:'KG'},
+      {name:'LONDON BROIL',              unit:'KG'},
       {name:'MINCED STEAK 90/10',         unit:'KG'},
       {name:'MINCED BEEF 70/30',          unit:'KG'},
       {name:'ECONOMY MINCE 60/40',        unit:'KG'},
@@ -2591,14 +2616,16 @@ function renderPackerSheet(day) {
   // Uses RAW PACK QUANTITIES (what was ordered), not butcher amounts
   // Consolidates by product NAME so same product from different customers adds up
 
-  const poultryTotals = {};   // key = product name
+  const chickenTotals = {};   // key = product name
+  const lambTotals   = {};   // key = product name
   const flavouredTotals = {}; // key = product name
   const beefTotals = {};      // key = product name
 
   CUSTOMERS.forEach(cust => {
+    if (cust.id === 'mhchef') return; // mhchef items are chef-prepared, not packer products
     const custOrders = orders[day][cust.id] || {};
 
-    // Poultry products
+    // Poultry/Lamb products
     cust.products.forEach(p => {
       const qty = custOrders[orderKey(p)] || 0;
       if (qty === 0) return;
@@ -2606,9 +2633,14 @@ function renderPackerSheet(day) {
       if (p.flavoured) {
         if (!flavouredTotals[k]) flavouredTotals[k] = { name: k, qty: 0 };
         flavouredTotals[k].qty += qty;
+      } else if (p.section === 'LAMB') {
+        if (!lambTotals[k]) lambTotals[k] = { name: k, qty: 0, sources: [] };
+        lambTotals[k].qty += qty;
+        lambTotals[k].sources.push({ name: cust.name, qty });
       } else {
-        if (!poultryTotals[k]) poultryTotals[k] = { name: k, qty: 0 };
-        poultryTotals[k].qty += qty;
+        if (!chickenTotals[k]) chickenTotals[k] = { name: k, qty: 0, sources: [] };
+        chickenTotals[k].qty += qty;
+        chickenTotals[k].sources.push({ name: cust.name, qty });
       }
     });
 
@@ -2617,19 +2649,21 @@ function renderPackerSheet(day) {
       const qty = custOrders[orderKey(p)] || 0;
       if (qty === 0) return;
       const k = p.name.trim();
-      if (!beefTotals[k]) beefTotals[k] = { name: p.name, qty: 0, unit: p.unit || 'UNITS' };
+      if (!beefTotals[k]) beefTotals[k] = { name: p.name, qty: 0, unit: p.unit || 'UNITS', sources: [] };
       beefTotals[k].qty += qty;
+      beefTotals[k].sources.push({ name: cust.name, qty });
     });
   });
 
   // Sort by name
   const sort = items => items.sort((a,b) => a.name.localeCompare(b.name));
 
-  const poultryItems  = sort(Object.values(poultryTotals));
+  const chickenItems  = sort(Object.values(chickenTotals));
+  const lambItems     = sort(Object.values(lambTotals));
   const flavouredItems = sort(Object.values(flavouredTotals));
   const beefItems     = sort(Object.values(beefTotals));
 
-  const any = poultryItems.length || flavouredItems.length || beefItems.length;
+  const any = chickenItems.length || lambItems.length || flavouredItems.length || beefItems.length;
   if (!any) {
     document.getElementById('packerSheetContent').innerHTML =
       `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No orders for ${day}</div></div>`;
@@ -2637,7 +2671,8 @@ function renderPackerSheet(day) {
   }
 
   let html = '';
-  if (poultryItems.length)   html += buildPackerTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, poultryItems);
+  if (chickenItems.length)   html += buildPackerTable(`🐔 CHICKEN PACKER LIST — ${day.toUpperCase()}`, chickenItems);
+  if (lambItems.length)      html += buildPackerTable(`🐑 LAMB PACKER LIST — ${day.toUpperCase()}`, lambItems);
   // Flavoured products excluded from packer — handled by Chef sheet only
   if (beefItems.length)      html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
 
@@ -2645,13 +2680,19 @@ function renderPackerSheet(day) {
 }
 
 function buildPackerTable(title, items) {
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
   const totalQty = items.reduce((a,b) => a + b.qty, 0);
-  const rows = items.map(item => `
+  const rows = items.map(item => {
+    const tags = (item.sources && item.sources.length > 1)
+      ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
+      : '';
+    return `
     <tr>
-      <td>${item.name}</td>
+      <td>${item.name}${tags ? ' '+tags : ''}</td>
       <td class="td-qty">${item.qty}</td>
       <td class="td-check">☐</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
@@ -2666,13 +2707,19 @@ function buildPackerTable(title, items) {
 
 function buildPackerBeefTable(title, items, day) {
   // Shows pack quantities with unit label — packers are packing these exact quantities
-  const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => `
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => {
+    const tags = (item.sources && item.sources.length > 1)
+      ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
+      : '';
+    return `
     <tr>
-      <td>${item.name}</td>
+      <td>${item.name}${tags ? ' '+tags : ''}</td>
       <td style="width:60px;color:var(--muted);font-size:11px;text-align:center">${item.unit}</td>
       <td class="td-qty">${item.qty}</td>
       <td class="td-check">☐</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
@@ -2864,7 +2911,9 @@ function pullRemoteOrders() {
 
     orders[day] = {}; // wipe stale local data before applying remote pull
     data.orders.forEach(row => {
-      const { customer, productKey, quantity, notes } = row;
+      const { customer, productKey, quantity, notes, day: rowDay } = row;
+      // Only import rows whose delivery day matches the selected day
+      if (rowDay && rowDay.trim().toUpperCase() !== day.trim().toUpperCase()) return;
       if (!orders[day][customer]) orders[day][customer] = {};
 
       // Capture notes
@@ -3052,7 +3101,7 @@ function printActivePanel() {
     <div class="date">${today}</div>
   </div>
   ${contentEl.innerHTML}
-  window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body></html>`;
 
   const pw = window.open('', '_blank', 'width=900,height=700');
