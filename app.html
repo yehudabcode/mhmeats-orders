@@ -530,6 +530,7 @@
 
 <div class="nav">
   <div class="nav-tab active" onclick="switchPanel('order')">📋 Order Input</div>
+  <div class="nav-tab" onclick="switchPanel('summary')">📊 Summary</div>
   <div class="nav-tab" onclick="switchPanel('chef')">👨‍🍳 Chef Sheet</div>
   <div class="nav-tab" onclick="switchPanel('butcher')">🔪 Butcher Lists</div>
   <div class="nav-tab" onclick="switchPanel('packer')">📦 Packer Lists</div>
@@ -588,7 +589,16 @@
   </div>
 
   <!-- ════════════════════════════════ CHEF SHEET PANEL ════════════════════════════════ -->
-  <div class="panel" id="panel-chef" data-print-title="CHEF PRODUCTION SHEET">
+  <!-- ════════════════════════════════ SUMMARY PANEL ════════════════════════════════ -->
+  <div class="panel" id="panel-summary" data-print-title="DAY SUMMARY">
+    <div class="sheet-controls no-print">
+      <div class="sheet-day-btns" id="summaryDayBtns"></div>
+      <button class="btn btn-ghost" onclick="printActivePanel()">🖨 Print</button>
+    </div>
+    <div id="summarySheetContent"></div>
+  </div>
+
+  <!-- ════════════════════════════════ CHEF PANEL ════════════════════════════════ -->
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="chefDayBtns"></div>
       <div class="ml-auto flex gap8">
@@ -1972,7 +1982,7 @@ function buildCustomerList() {
 }
 
 function buildDayButtonSets() {
-  ['chef','butcher','packer','dispatch'].forEach(panel => {
+  ['chef','butcher','packer','dispatch','summary'].forEach(panel => {
     const el = document.getElementById(`${panel}DayBtns`);
     el.innerHTML = DAYS.map((d,i) => `
       <div class="sheet-day-btn ${i===0?'active':''}" onclick="selectSheetDay('${panel}','${d}',this)">${d.slice(0,3).toUpperCase()}</div>
@@ -2187,6 +2197,7 @@ function selectSheetDay(panel, day, btn) {
   if (panel === 'butcher') renderButcherSheet(day);
   if (panel === 'packer') renderPackerSheet(day);
   if (panel === 'dispatch') renderDispatchSheet(day);
+  if (panel === 'summary') renderSummarySheet(day);
 }
 
 function getTotalsForDay(day) {
@@ -2212,6 +2223,65 @@ function getTotalsForDay(day) {
     });
   });
   return totals;
+}
+
+function renderSummarySheet(day) {
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  let html = '';
+  let grandTotal = 0;
+  let grandLines = 0;
+  let anyOrders = false;
+
+  // Per-customer breakdown tables
+  CUSTOMERS.forEach(cust => {
+    const custOrders = orders[day][cust.id] || {};
+    const poultryItems = cust.products
+      .map(p => ({ name: p.name, qty: custOrders[p.name.trim()] || 0, flavoured: !!p.flavoured, section: p.section || 'CHICKEN' }))
+      .filter(p => p.qty > 0);
+    const beefItems = (BEEF_BY_CUSTOMER[cust.id] || [])
+      .map(p => ({ name: p.name, qty: custOrders[p.name.trim()] || 0, unit: p.unit || 'UNITS' }))
+      .filter(p => p.qty > 0);
+    const all = [...poultryItems, ...beefItems];
+    if (!all.length) return;
+    anyOrders = true;
+
+    const custTotal = all.reduce((a,b) => a + b.qty, 0);
+    grandTotal += custTotal;
+    grandLines += all.length;
+
+    const rows = all.sort((a,b) => a.name.localeCompare(b.name)).map(item => `
+      <tr>
+        <td>${item.name}${item.flavoured ? ' <span class="cat-tag" style="background:rgba(200,100,0,0.15);border-color:rgba(200,100,0,0.4);color:#c86400">FLAV</span>' : ''}</td>
+        <td class="td-qty">${item.qty}</td>
+        <td class="td-check">☐</td>
+      </tr>`).join('');
+
+    html += `<div class="sheet-table" style="margin-bottom:16px">
+      <div class="sheet-title-bar">
+        <div class="sheet-title" style="color:var(--accent)">${cust.name.toUpperCase()}</div>
+        <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${all.length} lines / ${custTotal} units</div>
+      </div>
+      <table><thead><tr>
+        <th>PRODUCT</th><th style="text-align:right">QTY</th><th>✓</th>
+      </tr></thead>
+      <tbody>${rows}</tbody></table>
+    </div>`;
+  });
+
+  if (!anyOrders) {
+    document.getElementById('summarySheetContent').innerHTML =
+      `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">No orders for ${day}</div></div>`;
+    return;
+  }
+
+  // Grand totals header
+  const header = `<div class="summary-grid" style="margin-bottom:16px">
+    <div class="summary-card"><div class="summary-label">Customers</div><div class="summary-value">${CUSTOMERS.filter(c=>Object.keys(orders[day][c.id]||{}).length>0).length}</div><div class="summary-sub">with orders</div></div>
+    <div class="summary-card"><div class="summary-label">Line Items</div><div class="summary-value">${grandLines}</div><div class="summary-sub">total lines for ${day}</div></div>
+    <div class="summary-card"><div class="summary-label">Total Units</div><div class="summary-value">${grandTotal}</div><div class="summary-sub">across all customers</div></div>
+  </div>`;
+
+  document.getElementById('summarySheetContent').innerHTML = header + html;
 }
 
 function renderChefSheet(day) {
@@ -2911,9 +2981,7 @@ function pullRemoteOrders() {
 
     orders[day] = {}; // wipe stale local data before applying remote pull
     data.orders.forEach(row => {
-      const { customer, productKey, quantity, notes, day: rowDay } = row;
-      // Only import rows whose delivery day matches the selected day
-      if (rowDay && rowDay.trim().toUpperCase() !== day.trim().toUpperCase()) return;
+      const { customer, productKey, quantity, notes } = row;
       if (!orders[day][customer]) orders[day][customer] = {};
 
       // Capture notes
@@ -3037,6 +3105,14 @@ function pullRemoteOrders() {
     }).join('');
 
     showToast(`${loaded} remote orders loaded`);
+
+    // Mark all imported rows in the sheet so they don't re-appear on next pull
+    const markCb = 'mhMark_' + Date.now();
+    const markScript = document.createElement('script');
+    window[markCb] = function(r) { delete window[markCb]; document.body.removeChild(markScript); };
+    markScript.onerror = function() { delete window[markCb]; document.body.removeChild(markScript); };
+    markScript.src = `${scriptUrl}?action=markImported&callback=${markCb}`;
+    document.body.appendChild(markScript);
   };
 
   script.onerror = function() {
@@ -3275,6 +3351,7 @@ function switchPanel(name) {
   if (name === 'butcher') renderButcherSheet(currentDay);
   if (name === 'packer') renderPackerSheet(currentDay);
   if (name === 'dispatch') renderDispatchSheet(currentDay);
+  if (name === 'summary') renderSummarySheet(currentDay);
   if (name === 'links') buildStaticLinksTable();
   if (name === 'remote') { initRemotePanel(); }
   if (name === 'admin') lockAdmin();
