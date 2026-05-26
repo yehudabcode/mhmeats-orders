@@ -1954,7 +1954,7 @@ function init() {
   } catch(e) { console.error('buildDayButtonSets error:', e); }
   try {
     if (!localStorage.getItem('mhmeats_script_url')) {
-      localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbwNWNxFTB2L0kzPvnhv1AJfgcRIuYmZHiZuRKYGkavHUIKAdt_MfGsx5udQTjhdLdVK/exec');
+      localStorage.setItem('mhmeats_script_url', 'https://script.google.com/macros/s/AKfycbwfE5OSR40u7kwUqmZk0THMsBEQbZy6_jZip6zHNZq0vX6LmXsb64eWBZdXrLLD46qm/exec');
     }
   } catch(e) {}
 }
@@ -2775,7 +2775,7 @@ function renderDispatchSheet(day) {
 // REMOTE ORDERS — Google Sheets integration
 // ══════════════════════════════════════════════════════════════════
 function getScriptUrl() {
-  try { return localStorage.getItem('mhmeats_script_url') || 'https://script.google.com/macros/s/AKfycbwNWNxFTB2L0kzPvnhv1AJfgcRIuYmZHiZuRKYGkavHUIKAdt_MfGsx5udQTjhdLdVK/exec'; } catch(e) { return 'https://script.google.com/macros/s/AKfycbwNWNxFTB2L0kzPvnhv1AJfgcRIuYmZHiZuRKYGkavHUIKAdt_MfGsx5udQTjhdLdVK/exec'; }
+  try { return localStorage.getItem('mhmeats_script_url') || 'https://script.google.com/macros/s/AKfycbwfE5OSR40u7kwUqmZk0THMsBEQbZy6_jZip6zHNZq0vX6LmXsb64eWBZdXrLLD46qm/exec'; } catch(e) { return 'https://script.google.com/macros/s/AKfycbwfE5OSR40u7kwUqmZk0THMsBEQbZy6_jZip6zHNZq0vX6LmXsb64eWBZdXrLLD46qm/exec'; }
 }
 
 function saveScriptUrl() {
