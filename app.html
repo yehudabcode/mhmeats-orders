@@ -2247,16 +2247,50 @@ function renderSummaryPanel() {
     </tr>`;
   }).filter(Boolean).join('');
 
+  // — Product breakdown by category for currentDay —
+  const allChicken = {}, allBeef = {}, allFlavoured = {};
+  CUSTOMERS.forEach(c => {
+    const dayOrders = orders[currentDay][c.id] || {};
+    c.products.forEach(p => {
+      const qty = dayOrders[orderKey(p)] || 0;
+      if (!qty) return;
+      if (p.flavoured) { allFlavoured[p.name] = (allFlavoured[p.name]||0) + qty; }
+      else             { allChicken[p.name]   = (allChicken[p.name]||0)   + qty; }
+    });
+    (BEEF_BY_CUSTOMER[c.id]||[]).forEach(p => {
+      const qty = dayOrders[orderKey(p)] || 0;
+      if (qty) allBeef[p.name] = (allBeef[p.name]||0) + qty;
+    });
+  });
+  function prodRows(map) {
+    return Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0])).map(([name,qty])=>
+      `<tr><td style="padding:5px 10px;font-size:12px">${name}</td><td style="padding:5px 10px;text-align:right;font-family:'DM Mono',monospace;font-weight:700;color:var(--accent)">${qty}</td></tr>`
+    ).join('');
+  }
+  function prodSection(label, emoji, map) {
+    const rows = prodRows(map);
+    if (!rows) return '';
+    return `<div style="margin-bottom:16px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 6px">${emoji} ${label}</div>
+      <table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:7px;overflow:hidden">
+        <thead><tr style="border-bottom:1px solid var(--border2)">
+          <th style="padding:5px 10px;text-align:left;font-size:10px;color:var(--muted)">PRODUCT</th>
+          <th style="padding:5px 10px;text-align:right;font-size:10px;color:var(--muted)">QTY</th>
+        </tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  const breakdownHTML = prodSection('CHICKEN','🐔',allChicken) + prodSection('BEEF','🥩',allBeef) + prodSection('FLAVOURED','🌶',allFlavoured);
+
   el.innerHTML = `
     <div class="summary-grid">${dayCards}</div>
     <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 8px">${currentDay.toUpperCase()} — CUSTOMER BREAKDOWN</h3>
-    ${custRows ? `<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:7px;overflow:hidden">
+    ${custRows ? `<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:7px;overflow:hidden;margin-bottom:20px">
       <thead><tr style="border-bottom:1px solid var(--border2)">
         <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">CUSTOMER</th>
         <th style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">LINES</th>
         <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">ITEMS</th>
       </tr></thead><tbody>${custRows}</tbody></table>`
-    : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders entered for ${currentDay}</div></div>`}`;
+    : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders entered for ${currentDay}</div></div>`}
+    ${breakdownHTML ? `<h3 style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 10px">${currentDay.toUpperCase()} — FULL PRODUCT BREAKDOWN</h3>${breakdownHTML}` : ''}`;
 }
 
 function playAlertSound() {
@@ -2759,20 +2793,66 @@ function buildPackerBeefTable(title, items, day) {
   </table></div>`;
 }
 
+// ██ LOCKED — renderDispatchSheet: split chicken/beef/flavoured per customer, per-customer print button
 function renderDispatchSheet(day) {
   let html = '';
   let any = false;
   CUSTOMERS.forEach(cust => {
     const custOrders = orders[day][cust.id] || {};
-    const poultryItems = cust.products.map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const beefItems = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const all = [...poultryItems, ...beefItems];
-    if (!all.length) return;
+    const chickenItems   = cust.products.filter(p => !p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const flavouredItems = cust.products.filter(p =>  p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const beefItems      = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    if (!chickenItems.length && !beefItems.length && !flavouredItems.length) return;
     any = true;
-    html += buildSheetTable(`🚚 ${cust.name.toUpperCase()} — DISPATCH`, all, false);
+    html += `<div class="dispatch-customer-block" id="dispatch-cust-${cust.id}">`;
+    html += `<div class="no-print" style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 6px;padding:8px 14px;background:var(--surface2);border-radius:7px;border-left:4px solid ${cust.color}">`;
+    html += `<span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px">🚚 ${cust.name.toUpperCase()}</span>`;
+    html += `<button class="btn btn-primary" onclick="printCustomerDispatch('${cust.id}','${day}')">🖨 Print ${cust.name}</button>`;
+    html += `</div>`;
+    if (chickenItems.length)   html += buildSheetTable(`🐔 ${cust.name.toUpperCase()} — CHICKEN`, chickenItems, false);
+    if (beefItems.length)      html += buildSheetTable(`🥩 ${cust.name.toUpperCase()} — BEEF`, beefItems, false);
+    if (flavouredItems.length) html += buildSheetTable(`🌶 ${cust.name.toUpperCase()} — FLAVOURED`, flavouredItems, false);
+    html += `</div>`;
   });
   if (!any) html = `<div class="empty-state"><div class="empty-icon">🚚</div><div class="empty-text">No orders for ${day}</div></div>`;
   document.getElementById('dispatchSheetContent').innerHTML = html;
+}
+
+// ██ LOCKED — printCustomerDispatch: prints single customer dispatch with chicken/beef/flavoured split
+function printCustomerDispatch(custId, day) {
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  if (!cust) return;
+  const custOrders = orders[day][cust.id] || {};
+  const chickenItems   = cust.products.filter(p => !p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+  const flavouredItems = cust.products.filter(p =>  p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+  const beefItems      = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+  if (!chickenItems.length && !beefItems.length && !flavouredItems.length) { alert('No orders for ' + cust.name); return; }
+  let body = '';
+  if (chickenItems.length)   body += buildSheetTable('🐔 CHICKEN', chickenItems, false);
+  if (beefItems.length)      body += buildSheetTable('🥩 BEEF', beefItems, false);
+  if (flavouredItems.length) body += buildSheetTable('🌶 FLAVOURED', flavouredItems, false);
+  const today = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  const pw = window.open('', '_blank', 'width=900,height=700');
+  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MH Meats — ${cust.name} Dispatch</title><style>
+    *{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
+    .print-header{text-align:center;border-bottom:3px solid #000;padding-bottom:10px;margin-bottom:20px}
+    .print-header h1{font-size:22px;font-weight:bold;letter-spacing:2px}.print-header h2{font-size:15px;font-weight:normal;margin-top:4px;color:#444}
+    .print-header .date{font-size:12px;color:#666;margin-top:4px}
+    .sheet-table{border:1px solid #999;margin-bottom:20px;page-break-inside:avoid}
+    .sheet-title-bar{background:#ddd;padding:6px 12px;border-bottom:1px solid #999;display:flex;align-items:center;justify-content:space-between}
+    .sheet-title{font-size:13px;font-weight:bold}table{width:100%;border-collapse:collapse}
+    th{background:#eee;text-align:left;padding:6px 10px;font-size:10px;font-weight:bold;text-transform:uppercase;border:1px solid #aaa}
+    td{padding:6px 10px;border:1px solid #ccc;font-size:12px}.td-plu{color:#555;font-size:10px;width:55px;font-family:monospace}
+    .td-qty{font-size:14px;font-weight:bold;text-align:right;width:60px}.td-check{text-align:center;width:30px}
+    .row-highlight td{background:#f5f5f5}.cat-tag{display:inline-block;font-size:8px;font-family:monospace;padding:1px 4px;border:1px solid #aaa;border-radius:2px;margin-left:4px;color:#333}
+    tr:nth-child(even) td{background:#fafafa}@page{margin:1.5cm;size:A4 portrait}
+  </style></head><body>
+  <div class="print-header"><h1>MH MEATS</h1><h2>${cust.name.toUpperCase()} — DISPATCH SHEET</h2>
+  <div class="date">${day.toUpperCase()} &nbsp;|&nbsp; ${today}</div></div>
+  ${body}
+  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+  </body></html>`);
+  pw.document.close();
 }
 
 
@@ -3129,6 +3209,7 @@ function printActivePanel() {
   .td-check { text-align:center; width:30px; }
   .row-highlight td { background:#f5f5f5; }
   .summary-grid { display:none; }
+  .no-print { display:none; }
   .cat-tag { display:inline-block; font-size:8px; font-family:monospace; padding:1px 4px; border:1px solid #aaa; border-radius:2px; margin-left:4px; color:#333; }
   tr:nth-child(even) td { background:#fafafa; }
   @page { margin:1.5cm; size:A4 portrait; }
