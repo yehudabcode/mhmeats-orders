@@ -590,6 +590,7 @@
 
   <!-- ════════════════════════════════ SUMMARY PANEL ════════════════════════════════ -->
   <div class="panel" id="panel-summary" data-print-title="ORDER SUMMARY">
+    <div class="sheet-controls no-print"><div class="sheet-day-btns" id="summaryDayBtns"></div></div>
     <div id="summaryPanelContent" style="padding:8px 0"></div>
   </div>
 
@@ -1972,7 +1973,7 @@ function buildCustomerList() {
 }
 
 function buildDayButtonSets() {
-  ['chef','butcher','packer','dispatch'].forEach(panel => {
+  ['summary','chef','butcher','packer','dispatch'].forEach(panel => {
     const el = document.getElementById(`${panel}DayBtns`);
     el.innerHTML = DAYS.map((d,i) => `
       <div class="sheet-day-btn ${i===0?'active':''}" onclick="selectSheetDay('${panel}','${d}',this)">${d.slice(0,3).toUpperCase()}</div>
@@ -2187,6 +2188,7 @@ function selectSheetDay(panel, day, btn) {
   if (panel === 'butcher') renderButcherSheet(day);
   if (panel === 'packer') renderPackerSheet(day);
   if (panel === 'dispatch') renderDispatchSheet(day);
+  if (panel === 'summary') { currentDay = day; renderSummaryPanel(); }
 }
 
 function getTotalsForDay(day) {
