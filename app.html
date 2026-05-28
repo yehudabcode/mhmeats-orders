@@ -2284,6 +2284,8 @@ function getTotalsForDay(day) {
 function renderSummaryPanel() {
   const el = document.getElementById('summaryPanelContent');
   if (!el) return;
+
+  // ── Day overview cards ──────────────────────────────────────────
   const dayCards = DAYS.map(day => {
     let totalLines = 0, custWithOrders = 0;
     CUSTOMERS.forEach(c => {
@@ -2292,40 +2294,56 @@ function renderSummaryPanel() {
       if (lines) { totalLines += lines; custWithOrders++; }
     });
     const isToday = day === currentDay;
-    return `<div class="summary-card" style="${isToday ? 'border-color:var(--accent)' : ''}">
+    return `<div class="summary-card" style="${isToday ? 'border-color:var(--accent)' : ''};cursor:pointer" onclick="selectDay('${day}',event.currentTarget)">
       <div class="summary-label">${day}${isToday ? ' ★' : ''}</div>
       <div class="summary-value">${totalLines}</div>
       <div class="summary-sub">${custWithOrders} customer${custWithOrders !== 1 ? 's' : ''}</div>
     </div>`;
   }).join('');
 
-  const custRows = CUSTOMERS.map(c => {
+  // ── Per-customer cards: full product list split by species ──────
+  const custCards = CUSTOMERS.map(c => {
     const dayOrders = orders[currentDay][c.id] || {};
-    const allProds = [...c.products, ...(BEEF_BY_CUSTOMER[c.id]||[])];
-    const ordered = allProds.filter(p => (dayOrders[orderKey(p)] || 0) > 0);
-    const lines = ordered.length;
-    if (!lines) return '';
-    const preview = ordered.slice(0,3).map(p =>
-      `<span style="font-size:11px;background:var(--surface2);border-radius:3px;padding:2px 6px;white-space:nowrap">${p.name}: <strong style="color:var(--accent)">${dayOrders[orderKey(p)]}</strong></span>`
-    ).join(' ');
-    const more = ordered.length > 3 ? `<span style="font-size:11px;color:var(--muted)"> +${ordered.length-3} more</span>` : '';
-    return `<tr>
-      <td style="padding:8px 10px;white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>${c.name}</td>
-      <td style="padding:8px 10px;text-align:right;color:var(--accent);font-family:'DM Mono',monospace;font-size:16px;font-weight:600;white-space:nowrap">${lines}</td>
-      <td style="padding:8px 10px;line-height:2">${preview}${more}</td>
-    </tr>`;
+    const beefList   = (BEEF_BY_CUSTOMER[c.id] || []).filter(p => (dayOrders[orderKey(p)] || 0) > 0);
+    const poultry    = c.products.filter(p => !p.flavoured && (dayOrders[orderKey(p)] || 0) > 0);
+    const flavoured  = c.products.filter(p =>  p.flavoured && (dayOrders[orderKey(p)] || 0) > 0);
+    const total = beefList.length + poultry.length + flavoured.length;
+    if (!total) return '';
+
+    function section(icon, label, items, color) {
+      if (!items.length) return '';
+      const rows = items.map(p => `
+        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:12px;color:var(--text)">${p.name}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--accent)">${dayOrders[orderKey(p)]}</span>
+        </div>`).join('');
+      return `<div style="margin-bottom:10px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:${color};padding:3px 0;margin-bottom:2px;border-bottom:1px solid ${color}40">${icon} ${label}</div>
+        ${rows}
+      </div>`;
+    }
+
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;break-inside:avoid">
+      <div style="padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${c.color};display:inline-block;flex-shrink:0"></span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:0.5px">${c.name}</span>
+        <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">${total} lines</span>
+      </div>
+      <div style="padding:10px 12px">
+        ${section('🥩','BEEF',    beefList,  '#e08888')}
+        ${section('🐔','POULTRY', poultry,   '#6dbf99')}
+        ${section('🌶','FLAVOURED',flavoured,'#b89fcc')}
+      </div>
+    </div>`;
   }).filter(Boolean).join('');
 
   el.innerHTML = `
-    <div class="summary-grid">${dayCards}</div>
-    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 8px">${currentDay.toUpperCase()} — CUSTOMER BREAKDOWN</h3>
-    ${custRows ? `<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:7px;overflow:hidden">
-      <thead><tr style="border-bottom:1px solid var(--border2)">
-        <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">CUSTOMER</th>
-        <th style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">LINES</th>
-        <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">ITEMS</th>
-      </tr></thead><tbody>${custRows}</tbody></table>`
-    : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders entered for ${currentDay}</div></div>`}`;
+    <div class="summary-grid" style="margin-bottom:20px">${dayCards}</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 12px">${currentDay.toUpperCase()} — FULL ORDER BREAKDOWN</div>
+    ${custCards
+      ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">${custCards}</div>`
+      : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders for ${currentDay}</div></div>`
+    }`;
 }
 
 function playAlertSound() {
