@@ -590,7 +590,6 @@
 
   <!-- ════════════════════════════════ SUMMARY PANEL ════════════════════════════════ -->
   <div class="panel" id="panel-summary" data-print-title="ORDER SUMMARY">
-    <div class="sheet-controls no-print"><div class="sheet-day-btns" id="summaryDayBtns"></div></div>
     <div id="summaryPanelContent" style="padding:8px 0"></div>
   </div>
 
@@ -607,8 +606,7 @@
   <div class="panel" id="panel-butcher" data-print-title="BUTCHER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="printButcherSection('poultry')">🖨 Print Poultry</button>
-      <button class="btn btn-primary" onclick="printButcherSection('beef')">🖨 Print Beef</button>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
     <div id="butcherSheetContent"></div>
   </div>
@@ -617,8 +615,7 @@
   <div class="panel" id="panel-packer" data-print-title="PACKER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="printPackerSection('poultry')">🖨 Print Poultry</button>
-      <button class="btn btn-primary" onclick="printPackerSection('beef')">🖨 Print Beef</button>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
     <div id="packerSheetContent"></div>
   </div>
@@ -1973,7 +1970,7 @@ function buildCustomerList() {
 }
 
 function buildDayButtonSets() {
-  ['summary','chef','butcher','packer','dispatch'].forEach(panel => {
+  ['chef','butcher','packer','dispatch'].forEach(panel => {
     const el = document.getElementById(`${panel}DayBtns`);
     el.innerHTML = DAYS.map((d,i) => `
       <div class="sheet-day-btn ${i===0?'active':''}" onclick="selectSheetDay('${panel}','${d}',this)">${d.slice(0,3).toUpperCase()}</div>
@@ -2188,7 +2185,6 @@ function selectSheetDay(panel, day, btn) {
   if (panel === 'butcher') renderButcherSheet(day);
   if (panel === 'packer') renderPackerSheet(day);
   if (panel === 'dispatch') renderDispatchSheet(day);
-  if (panel === 'summary') { currentDay = day; renderSummaryPanel(); }
 }
 
 function getTotalsForDay(day) {
@@ -2234,48 +2230,33 @@ function renderSummaryPanel() {
     </div>`;
   }).join('');
 
-  // — Per-customer side-by-side cards with full product lists split by category —
-  function custCatTable(label, emoji, items, dayOrders) {
-    const rows = items.filter(p => (dayOrders[orderKey(p)]||0) > 0)
-      .map(p => `<tr>
-        <td style="padding:4px 8px;font-size:12px;border-bottom:1px solid var(--border2)">${p.name}</td>
-        <td style="padding:4px 8px;text-align:right;font-family:'DM Mono',monospace;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border2)">${dayOrders[orderKey(p)]}</td>
-      </tr>`).join('');
-    if (!rows) return '';
-    return `<div style="margin-bottom:10px">
-      <div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;color:var(--muted);padding:4px 8px;background:var(--surface2);border-radius:4px 4px 0 0">${emoji} ${label}</div>
-      <table style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table>
-    </div>`;
-  }
-
-  const custCards = CUSTOMERS.map(c => {
+  const custRows = CUSTOMERS.map(c => {
     const dayOrders = orders[currentDay][c.id] || {};
-    const chicken   = c.products.filter(p => !p.flavoured);
-    const flavoured = c.products.filter(p =>  p.flavoured);
-    const beef      = BEEF_BY_CUSTOMER[c.id] || [];
-    const totalLines = [...chicken, ...flavoured, ...beef].filter(p => (dayOrders[orderKey(p)]||0) > 0).length;
-    if (!totalLines) return '';
-    const chickenHTML   = custCatTable('CHICKEN',  '🐔', chicken,   dayOrders);
-    const beefHTML      = custCatTable('BEEF',     '🥩', beef,      dayOrders);
-    const flavouredHTML = custCatTable('FLAVOURED','🌶', flavoured, dayOrders);
-    return `<div style="flex:1;min-width:260px;max-width:420px;background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border2)">
-      <div style="padding:10px 12px;background:var(--surface2);border-bottom:3px solid ${c.color};display:flex;align-items:center;justify-content:space-between">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px">
-          <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:6px;vertical-align:middle"></span>${c.name.toUpperCase()}
-        </span>
-        <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--accent)">${totalLines}</span>
-      </div>
-      <div style="padding:10px 4px">${chickenHTML}${beefHTML}${flavouredHTML}</div>
-    </div>`;
+    const allProds = [...c.products, ...(BEEF_BY_CUSTOMER[c.id]||[])];
+    const ordered = allProds.filter(p => (dayOrders[orderKey(p)] || 0) > 0);
+    const lines = ordered.length;
+    if (!lines) return '';
+    const preview = ordered.slice(0,3).map(p =>
+      `<span style="font-size:11px;background:var(--surface2);border-radius:3px;padding:2px 6px;white-space:nowrap">${p.name}: <strong style="color:var(--accent)">${dayOrders[orderKey(p)]}</strong></span>`
+    ).join(' ');
+    const more = ordered.length > 3 ? `<span style="font-size:11px;color:var(--muted)"> +${ordered.length-3} more</span>` : '';
+    return `<tr>
+      <td style="padding:8px 10px;white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>${c.name}</td>
+      <td style="padding:8px 10px;text-align:right;color:var(--accent);font-family:'DM Mono',monospace;font-size:16px;font-weight:600;white-space:nowrap">${lines}</td>
+      <td style="padding:8px 10px;line-height:2">${preview}${more}</td>
+    </tr>`;
   }).filter(Boolean).join('');
 
   el.innerHTML = `
     <div class="summary-grid">${dayCards}</div>
-    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 10px">${currentDay.toUpperCase()} — ORDER SUMMARY</h3>
-    ${custCards
-      ? `<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">${custCards}</div>`
-      : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders entered for ${currentDay}</div></div>`
-    }`;
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 8px">${currentDay.toUpperCase()} — CUSTOMER BREAKDOWN</h3>
+    ${custRows ? `<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:7px;overflow:hidden">
+      <thead><tr style="border-bottom:1px solid var(--border2)">
+        <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">CUSTOMER</th>
+        <th style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">LINES</th>
+        <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">ITEMS</th>
+      </tr></thead><tbody>${custRows}</tbody></table>`
+    : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders entered for ${currentDay}</div></div>`}`;
 }
 
 function playAlertSound() {
@@ -2609,16 +2590,18 @@ function renderButcherSheet(day) {
     document.getElementById('butcherSheetContent').innerHTML = `<div class="empty-state"><div class="empty-icon">🔪</div><div class="empty-text">No orders for ${day}</div></div>`;
     return;
   }
-  let poultryHtml = '';
+  let html = '';
   const totalRoasters = fullBirds.reduce((a,b)=>a+b.qty,0);
-  if (fullBirds.length)       poultryHtml += buildCategoryTable('FULL BIRDS', fullBirds, day, totalRoasters);
-  if (bottomQuarters.length)  poultryHtml += buildCategoryTable('BOTTOM QUARTERS', bottomQuarters, day);
-  if (crowns.length)          poultryHtml += buildCategoryTable('CROWNS', crowns, day);
-  if (turkey.length)          poultryHtml += buildCategoryTable('TURKEY', turkey, day);
-  let beefHtml = '';
-  if (beefItems.length) beefItems.forEach(cat => { beefHtml += buildCategoryTable(cat.cat, cat.items, day); });
-  document.getElementById('butcherSheetContent').innerHTML =
-    `<div id="butcherPoultryContent">${poultryHtml}</div><div id="butcherBeefContent">${beefHtml}</div>`;
+  if (fullBirds.length) html += buildCategoryTable('FULL BIRDS', fullBirds, day, totalRoasters);
+  if (bottomQuarters.length) html += buildCategoryTable('BOTTOM QUARTERS', bottomQuarters, day);
+  if (crowns.length) html += buildCategoryTable('CROWNS', crowns, day);
+  if (turkey.length) html += buildCategoryTable('TURKEY', turkey, day);
+  if (beefItems.length) {
+    beefItems.forEach(cat => {
+      html += buildCategoryTable(cat.cat, cat.items, day);
+    });
+  }
+  document.getElementById('butcherSheetContent').innerHTML = html;
 }
 
 function renderPackerSheet(day) {
@@ -2717,12 +2700,12 @@ function renderPackerSheet(day) {
     return;
   }
 
-  const poultryHTML = poultryItems.length ? buildPackerTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, poultryItems) : '';
+  let html = '';
+  if (poultryItems.length)   html += buildPackerTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, poultryItems);
   // Flavoured products excluded from packer — handled by Chef sheet only
-  const beefHTML    = beefItems.length    ? buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day) : '';
+  if (beefItems.length)      html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
 
-  document.getElementById('packerSheetContent').innerHTML =
-    `<div id="packerPoultryContent">${poultryHTML}</div><div id="packerBeefContent">${beefHTML}</div>`;
+  document.getElementById('packerSheetContent').innerHTML = html;
 }
 
 function buildPackerTable(title, items) {
@@ -2776,122 +2759,20 @@ function buildPackerBeefTable(title, items, day) {
   </table></div>`;
 }
 
-// ██ LOCKED — printButcherSection: prints poultry or beef butcher list only
-function printButcherSection(type) {
-  const elId = type === 'beef' ? 'butcherBeefContent' : 'butcherPoultryContent';
-  const el = document.getElementById(elId);
-  if (!el || !el.innerHTML.trim()) { alert('No ' + type + ' butcher data to print.'); return; }
-  const label = type === 'beef' ? '🥩 BEEF BUTCHER LIST' : '🔪 POULTRY BUTCHER LIST';
-  const today = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
-  const pw = window.open('', '_blank', 'width=900,height=700');
-  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MH Meats — ${label}</title><style>
-    *{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
-    .print-header{text-align:center;border-bottom:3px solid #000;padding-bottom:10px;margin-bottom:20px}
-    .print-header h1{font-size:22px;font-weight:bold;letter-spacing:2px}.print-header h2{font-size:15px;font-weight:normal;margin-top:4px;color:#444}
-    .print-header .date{font-size:12px;color:#666;margin-top:4px}
-    .sheet-table{border:1px solid #999;margin-bottom:20px;page-break-inside:avoid}
-    .sheet-title-bar{background:#ddd;padding:6px 12px;border-bottom:1px solid #999;display:flex;align-items:center;justify-content:space-between}
-    .sheet-title{font-size:13px;font-weight:bold}table{width:100%;border-collapse:collapse}
-    th{background:#eee;text-align:left;padding:6px 10px;font-size:10px;font-weight:bold;text-transform:uppercase;border:1px solid #aaa}
-    td{padding:6px 10px;border:1px solid #ccc;font-size:12px}.td-qty{font-size:14px;font-weight:bold;text-align:right;width:60px}
-    .td-check{text-align:center;width:30px}.cat-tag{display:inline-block;font-size:8px;font-family:monospace;padding:1px 4px;border:1px solid #aaa;border-radius:2px;margin-left:4px;color:#333}
-    tr:nth-child(even) td{background:#fafafa}.no-print{display:none}@page{margin:1.5cm;size:A4 portrait}
-  </style></head><body>
-  <div class="print-header"><h1>MH MEATS</h1><h2>${label}</h2><div class="date">${today}</div></div>
-  ${el.innerHTML}
-  <script>window.onload=function(){window.onafterprint=function(){window.close();};window.print();};<\/script>
-  </body></html>`);
-  pw.document.close();
-}
-
-// ██ LOCKED — printPackerSection: prints poultry or beef packer list only
-function printPackerSection(type) {
-  const elId = type === 'beef' ? 'packerBeefContent' : 'packerPoultryContent';
-  const el = document.getElementById(elId);
-  if (!el || !el.innerHTML.trim()) { alert('No ' + type + ' packer data to print.'); return; }
-  const label = type === 'beef' ? '🥩 BEEF PACKER LIST' : '📦 POULTRY PACKER LIST';
-  const today = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
-  const pw = window.open('', '_blank', 'width=900,height=700');
-  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MH Meats — ${label}</title><style>
-    *{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
-    .print-header{text-align:center;border-bottom:3px solid #000;padding-bottom:10px;margin-bottom:20px}
-    .print-header h1{font-size:22px;font-weight:bold;letter-spacing:2px}.print-header h2{font-size:15px;font-weight:normal;margin-top:4px;color:#444}
-    .print-header .date{font-size:12px;color:#666;margin-top:4px}
-    .sheet-table{border:1px solid #999;margin-bottom:20px;page-break-inside:avoid}
-    .sheet-title-bar{background:#ddd;padding:6px 12px;border-bottom:1px solid #999;display:flex;align-items:center;justify-content:space-between}
-    .sheet-title{font-size:13px;font-weight:bold}table{width:100%;border-collapse:collapse}
-    th{background:#eee;text-align:left;padding:6px 10px;font-size:10px;font-weight:bold;text-transform:uppercase;border:1px solid #aaa}
-    td{padding:6px 10px;border:1px solid #ccc;font-size:12px}.td-qty{font-size:14px;font-weight:bold;text-align:right;width:60px}
-    .td-check{text-align:center;width:30px}.cat-tag{display:inline-block;font-size:8px;font-family:monospace;padding:1px 4px;border:1px solid #aaa;border-radius:2px;margin-left:4px;color:#333}
-    tr:nth-child(even) td{background:#fafafa}.no-print{display:none}@page{margin:1.5cm;size:A4 portrait}
-  </style></head><body>
-  <div class="print-header"><h1>MH MEATS</h1><h2>${label}</h2><div class="date">${today}</div></div>
-  ${el.innerHTML}
-  <script>window.onload=function(){window.onafterprint=function(){window.close();};window.print();};<\/script>
-  </body></html>`);
-  pw.document.close();
-}
-
-// ██ LOCKED — renderDispatchSheet: split chicken/beef/flavoured per customer, per-customer print button
 function renderDispatchSheet(day) {
   let html = '';
   let any = false;
   CUSTOMERS.forEach(cust => {
     const custOrders = orders[day][cust.id] || {};
-    const chickenItems   = cust.products.filter(p => !p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const flavouredItems = cust.products.filter(p =>  p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const beefItems      = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    if (!chickenItems.length && !beefItems.length && !flavouredItems.length) return;
+    const poultryItems = cust.products.map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const beefItems = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const all = [...poultryItems, ...beefItems];
+    if (!all.length) return;
     any = true;
-    html += `<div class="dispatch-customer-block" id="dispatch-cust-${cust.id}">`;
-    html += `<div class="no-print" style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 6px;padding:8px 14px;background:var(--surface2);border-radius:7px;border-left:4px solid ${cust.color}">`;
-    html += `<span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px">🚚 ${cust.name.toUpperCase()}</span>`;
-    html += `<button class="btn btn-primary" onclick="printCustomerDispatch('${cust.id}','${day}')">🖨 Print ${cust.name}</button>`;
-    html += `</div>`;
-    if (chickenItems.length)   html += buildSheetTable(`🐔 ${cust.name.toUpperCase()} — CHICKEN`, chickenItems, false);
-    if (beefItems.length)      html += buildSheetTable(`🥩 ${cust.name.toUpperCase()} — BEEF`, beefItems, false);
-    if (flavouredItems.length) html += buildSheetTable(`🌶 ${cust.name.toUpperCase()} — FLAVOURED`, flavouredItems, false);
-    html += `</div>`;
+    html += buildSheetTable(`🚚 ${cust.name.toUpperCase()} — DISPATCH`, all, false);
   });
   if (!any) html = `<div class="empty-state"><div class="empty-icon">🚚</div><div class="empty-text">No orders for ${day}</div></div>`;
   document.getElementById('dispatchSheetContent').innerHTML = html;
-}
-
-// ██ LOCKED — printCustomerDispatch: prints single customer dispatch with chicken/beef/flavoured split
-function printCustomerDispatch(custId, day) {
-  const cust = CUSTOMERS.find(c => c.id === custId);
-  if (!cust) return;
-  const custOrders = orders[day][cust.id] || {};
-  const chickenItems   = cust.products.filter(p => !p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-  const flavouredItems = cust.products.filter(p =>  p.flavoured).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-  const beefItems      = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p, qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-  if (!chickenItems.length && !beefItems.length && !flavouredItems.length) { alert('No orders for ' + cust.name); return; }
-  let body = '';
-  if (chickenItems.length)   body += buildSheetTable('🐔 CHICKEN', chickenItems, false);
-  if (beefItems.length)      body += buildSheetTable('🥩 BEEF', beefItems, false);
-  if (flavouredItems.length) body += buildSheetTable('🌶 FLAVOURED', flavouredItems, false);
-  const today = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
-  const pw = window.open('', '_blank', 'width=900,height=700');
-  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MH Meats — ${cust.name} Dispatch</title><style>
-    *{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
-    .print-header{text-align:center;border-bottom:3px solid #000;padding-bottom:10px;margin-bottom:20px}
-    .print-header h1{font-size:22px;font-weight:bold;letter-spacing:2px}.print-header h2{font-size:15px;font-weight:normal;margin-top:4px;color:#444}
-    .print-header .date{font-size:12px;color:#666;margin-top:4px}
-    .sheet-table{border:1px solid #999;margin-bottom:20px;page-break-inside:avoid}
-    .sheet-title-bar{background:#ddd;padding:6px 12px;border-bottom:1px solid #999;display:flex;align-items:center;justify-content:space-between}
-    .sheet-title{font-size:13px;font-weight:bold}table{width:100%;border-collapse:collapse}
-    th{background:#eee;text-align:left;padding:6px 10px;font-size:10px;font-weight:bold;text-transform:uppercase;border:1px solid #aaa}
-    td{padding:6px 10px;border:1px solid #ccc;font-size:12px}.td-plu{color:#555;font-size:10px;width:55px;font-family:monospace}
-    .td-qty{font-size:14px;font-weight:bold;text-align:right;width:60px}.td-check{text-align:center;width:30px}
-    .row-highlight td{background:#f5f5f5}.cat-tag{display:inline-block;font-size:8px;font-family:monospace;padding:1px 4px;border:1px solid #aaa;border-radius:2px;margin-left:4px;color:#333}
-    tr:nth-child(even) td{background:#fafafa}@page{margin:1.5cm;size:A4 portrait}
-  </style></head><body>
-  <div class="print-header"><h1>MH MEATS</h1><h2>${cust.name.toUpperCase()} — DISPATCH SHEET</h2>
-  <div class="date">${day.toUpperCase()} &nbsp;|&nbsp; ${today}</div></div>
-  ${body}
-  <script>window.onload=function(){window.onafterprint=function(){window.close();};window.print();};<\/script>
-  </body></html>`);
-  pw.document.close();
 }
 
 
@@ -3147,10 +3028,29 @@ function pullRemoteOrders() {
       } else {
         // 2. Try LEGACY_MAP — but verify result exists in THIS customer's products
         const legacyResolved = LEGACY_MAP[productKey.trim()] || LEGACY_MAP[productKey.trim().toUpperCase()];
+        // Secondary map: KS/Halperns/Kayes use different canonical names for same products
+        const SECONDARY_MAP = {
+          'CARCASS-5-PACK':              '5-PACK CARCASSES',
+          'FAMILY SOUP PARCEL':          'DOUBLE SOUP PACK',
+          'LEG QUARTERS-2-PACK':         'CHICKEN LEGS-2 PACK',
+          'LEG QUARTERS-4-PACK':         'CHICKEN LEGS-VALUE PACK',
+          'LEG QUARTERS-6-PACK':         'CHICKEN LEGS-VALUE PACK',
+          'LEG QUARTERS IN 1/8':         'CHICKEN LEGS IN 1/8-2 PACK',
+          'LEG QUARTERS IN 1/8 VALUE PACK': 'CHICKEN LEGS IN 1/8-VALUE PACK',
+          'BREAST QUARTERS':             'BREAST QUARTER ROASTER',
+          'WINGS-12-PACK':               '12-PACK CHICKEN WINGS',
+        };
         if (legacyResolved) {
           const legacyValid = allProds.find(p => p.name.trim() === legacyResolved);
           if (legacyValid) {
             finalKey = legacyResolved;
+          } else {
+            // 2b. Try secondary map — handles KS/Halperns/Kayes name variants
+            const altResolved = SECONDARY_MAP[legacyResolved];
+            if (altResolved) {
+              const altValid = allProds.find(p => p.name.trim() === altResolved);
+              if (altValid) finalKey = altResolved;
+            }
           }
         }
         // 3. If still no match, try normalizeKey fuzzy match
@@ -3160,7 +3060,7 @@ function pullRemoteOrders() {
           if (fuzzyMatch) finalKey = fuzzyMatch.name.trim();
         }
       }
-      orders[day][customer][finalKey] = parseInt(quantity) || 0;
+      orders[day][customer][finalKey] = (orders[day][customer][finalKey] || 0) + (parseInt(quantity) || 0);
       loaded++;
       custsSeen.add(customer);
     });
@@ -3248,7 +3148,6 @@ function printActivePanel() {
   .td-check { text-align:center; width:30px; }
   .row-highlight td { background:#f5f5f5; }
   .summary-grid { display:none; }
-  .no-print { display:none; }
   .cat-tag { display:inline-block; font-size:8px; font-family:monospace; padding:1px 4px; border:1px solid #aaa; border-radius:2px; margin-left:4px; color:#333; }
   tr:nth-child(even) td { background:#fafafa; }
   @page { margin:1.5cm; size:A4 portrait; }
@@ -3260,7 +3159,7 @@ function printActivePanel() {
     <div class="date">${today}</div>
   </div>
   ${contentEl.innerHTML}
-  <script>window.onload=function(){window.onafterprint=function(){window.close();};window.print();};<\/script>
+  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body></html>`;
 
   const pw = window.open('', '_blank', 'width=900,height=700');
