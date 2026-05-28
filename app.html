@@ -597,8 +597,8 @@
   <div class="panel" id="panel-chef" data-print-title="CHEF PRODUCTION SHEET">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="chefDayBtns"></div>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
+    <button class="btn btn-primary no-print" style="position:fixed;top:64px;right:24px;z-index:99" onclick="printActivePanel()">🖨 Print</button>
     <div id="chefSheetContent"></div>
   </div>
 
@@ -606,8 +606,8 @@
   <div class="panel" id="panel-butcher" data-print-title="BUTCHER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
+    <button class="btn btn-primary no-print" style="position:fixed;top:64px;right:24px;z-index:99" onclick="printActivePanel()">🖨 Print</button>
     <div id="butcherSheetContent"></div>
   </div>
 
@@ -615,8 +615,8 @@
   <div class="panel" id="panel-packer" data-print-title="PACKER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
+    <button class="btn btn-primary no-print" style="position:fixed;top:64px;right:24px;z-index:99" onclick="printActivePanel()">🖨 Print</button>
     <div id="packerSheetContent"></div>
   </div>
 
@@ -624,8 +624,8 @@
   <div class="panel" id="panel-dispatch" data-print-title="DISPATCH SHEETS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="dispatchDayBtns"></div>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
+    <button class="btn btn-primary no-print" style="position:fixed;top:64px;right:24px;z-index:99" onclick="printActivePanel()">🖨 Print</button>
     <div id="dispatchSheetContent"></div>
   </div>
 
@@ -1208,7 +1208,6 @@ const CUSTOMERS = [
     {name:"PUPICKS"},
     {name:"4-PACK 4OZ BURGERS"},
     {name:"CUMBERLAND SAUSAGES"},
-,
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1258,7 +1257,6 @@ const CUSTOMERS = [
     {name:"PUPICKS"},
     {name:"4-PACK 4OZ BURGERS"},
     {name:"CUMBERLAND SAUSAGES"},
-,
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1308,7 +1306,6 @@ const CUSTOMERS = [
     {name:"PUPICKS"},
     {name:"4-PACK 4OZ BURGERS"},
     {name:"CUMBERLAND SAUSAGES"},
-,
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1358,7 +1355,6 @@ const CUSTOMERS = [
     {name:"PUPICKS"},
     {name:"4-PACK 4OZ BURGERS"},
     {name:"CUMBERLAND SAUSAGES"},
-,
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1408,7 +1404,6 @@ const CUSTOMERS = [
     {name:"PUPICKS"},
     {name:"4-PACK 4OZ BURGERS"},
     {name:"CUMBERLAND SAUSAGES"},
-,
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1535,7 +1530,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2}
   ],
   halperns: [
-    {name:"SLICED SHIN",unit:"UNITS",mult:1},
     {name:"BEEF RIBLETS (FLANKEN)",unit:"UNITS",mult:2},
     {name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
@@ -1548,7 +1542,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"FLANK",unit:"UNITS",mult:1},
     {name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
-    {name:"FLAT PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"GOULASH BEEF CUBES",unit:"UNITS",mult:0.5},
     {name:"MARROW BONES",unit:"UNITS",mult:2},
     {name:"MEAT BONES",unit:"UNITS",mult:5},
@@ -1558,13 +1551,13 @@ const BEEF_BY_CUSTOMER = {
     {name:"POT ROAST",unit:"UNITS",mult:1},
     {name:"PRIME CHOLENT MEAT",unit:"UNITS",mult:1},
     {name:"RIB-EYE STEAKS",unit:"UNITS",mult:2},
+    {name:"RIB ON BONE",unit:"UNITS",mult:1},
     {name:"ROLLED BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"ROLLED PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
     {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2}
   ],
   kayes: [
-    {name:"SLICED SHIN",unit:"UNITS",mult:1},
     {name:"BEEF RIBLETS (FLANKEN)",unit:"UNITS",mult:2},
     {name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
@@ -1577,7 +1570,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"FLANK",unit:"UNITS",mult:1},
     {name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
-    {name:"FLAT PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"GOULASH BEEF CUBES",unit:"UNITS",mult:0.5},
     {name:"MARROW BONES",unit:"UNITS",mult:2},
     {name:"MEAT BONES",unit:"UNITS",mult:5},
@@ -1587,6 +1579,7 @@ const BEEF_BY_CUSTOMER = {
     {name:"POT ROAST",unit:"UNITS",mult:1},
     {name:"PRIME CHOLENT MEAT",unit:"UNITS",mult:1},
     {name:"RIB-EYE STEAKS",unit:"UNITS",mult:2},
+    {name:"RIB ON BONE",unit:"UNITS",mult:1},
     {name:"ROLLED BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"ROLLED PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
@@ -3066,6 +3059,8 @@ function pullRemoteOrders() {
         '24-PACK MEAT BALLS':                'MEAT BALLS-24 PACK',
         '6-PACK 2OZ BURGERS':                'CLASSIC 2 OUNCE BEEFBURGERS-PACK OF 6',
         'BEEF GRILLSTICKS':                  'TASTY BEEF SKEWERS',
+        'BEEF STIR FRY':                     'BEEF STIRFRY',
+        'CHICKEN STIR FRY':                  'CHICKEN STIRFRY',
         'BREADED SHNITZELS':                 'CRUMB COATED SHNITZELS',
         'LAMB BURGERS 4-PACK':               'LAMB BURGERS-4-PACK',
         '4OZ CHORIZO BURGER - 4 PACK':       '4OZ CHORIZO BURGER-4-PACK',
