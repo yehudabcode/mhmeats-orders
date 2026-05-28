@@ -597,8 +597,8 @@
   <div class="panel" id="panel-chef" data-print-title="CHEF PRODUCTION SHEET">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="chefDayBtns"></div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
-    <button class="btn btn-primary no-print" style="position:fixed;top:64px;right:24px;z-index:99" onclick="printActivePanel()">🖨 Print</button>
     <div id="chefSheetContent"></div>
   </div>
 
@@ -606,8 +606,10 @@
   <div class="panel" id="panel-butcher" data-print-title="BUTCHER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
+      <button class="btn btn-ghost" style="margin-left:auto" onclick="printSpecies('butcherSheetContent','poultry','BUTCHER — POULTRY')">🐔 Print Poultry</button>
+      <button class="btn btn-ghost" onclick="printSpecies('butcherSheetContent','beef','BUTCHER — BEEF')">🥩 Print Beef</button>
+      <button class="btn btn-primary" onclick="printActivePanel()">🖨 Print All</button>
     </div>
-    <button class="btn btn-primary no-print" style="position:fixed;top:64px;right:24px;z-index:99" onclick="printActivePanel()">🖨 Print</button>
     <div id="butcherSheetContent"></div>
   </div>
 
@@ -615,8 +617,10 @@
   <div class="panel" id="panel-packer" data-print-title="PACKER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
+      <button class="btn btn-ghost" style="margin-left:auto" onclick="printSpecies('packerSheetContent','poultry','PACKER — POULTRY')">🐔 Print Poultry</button>
+      <button class="btn btn-ghost" onclick="printSpecies('packerSheetContent','beef','PACKER — BEEF')">🥩 Print Beef</button>
+      <button class="btn btn-primary" onclick="printActivePanel()">🖨 Print All</button>
     </div>
-    <button class="btn btn-primary no-print" style="position:fixed;top:64px;right:24px;z-index:99" onclick="printActivePanel()">🖨 Print</button>
     <div id="packerSheetContent"></div>
   </div>
 
@@ -624,8 +628,8 @@
   <div class="panel" id="panel-dispatch" data-print-title="DISPATCH SHEETS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="dispatchDayBtns"></div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
-    <button class="btn btn-primary no-print" style="position:fixed;top:64px;right:24px;z-index:99" onclick="printActivePanel()">🖨 Print</button>
     <div id="dispatchSheetContent"></div>
   </div>
 
@@ -2284,6 +2288,8 @@ function getTotalsForDay(day) {
 function renderSummaryPanel() {
   const el = document.getElementById('summaryPanelContent');
   if (!el) return;
+
+  // ── Day overview cards ──────────────────────────────────────────
   const dayCards = DAYS.map(day => {
     let totalLines = 0, custWithOrders = 0;
     CUSTOMERS.forEach(c => {
@@ -2292,40 +2298,56 @@ function renderSummaryPanel() {
       if (lines) { totalLines += lines; custWithOrders++; }
     });
     const isToday = day === currentDay;
-    return `<div class="summary-card" style="${isToday ? 'border-color:var(--accent)' : ''}">
+    return `<div class="summary-card" style="${isToday ? 'border-color:var(--accent)' : ''};cursor:pointer" onclick="selectDay('${day}',event.currentTarget)">
       <div class="summary-label">${day}${isToday ? ' ★' : ''}</div>
       <div class="summary-value">${totalLines}</div>
       <div class="summary-sub">${custWithOrders} customer${custWithOrders !== 1 ? 's' : ''}</div>
     </div>`;
   }).join('');
 
-  const custRows = CUSTOMERS.map(c => {
+  // ── Per-customer cards: full product list split by species ──────
+  const custCards = CUSTOMERS.map(c => {
     const dayOrders = orders[currentDay][c.id] || {};
-    const allProds = [...c.products, ...(BEEF_BY_CUSTOMER[c.id]||[])];
-    const ordered = allProds.filter(p => (dayOrders[orderKey(p)] || 0) > 0);
-    const lines = ordered.length;
-    if (!lines) return '';
-    const preview = ordered.slice(0,3).map(p =>
-      `<span style="font-size:11px;background:var(--surface2);border-radius:3px;padding:2px 6px;white-space:nowrap">${p.name}: <strong style="color:var(--accent)">${dayOrders[orderKey(p)]}</strong></span>`
-    ).join(' ');
-    const more = ordered.length > 3 ? `<span style="font-size:11px;color:var(--muted)"> +${ordered.length-3} more</span>` : '';
-    return `<tr>
-      <td style="padding:8px 10px;white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>${c.name}</td>
-      <td style="padding:8px 10px;text-align:right;color:var(--accent);font-family:'DM Mono',monospace;font-size:16px;font-weight:600;white-space:nowrap">${lines}</td>
-      <td style="padding:8px 10px;line-height:2">${preview}${more}</td>
-    </tr>`;
+    const beefList   = (BEEF_BY_CUSTOMER[c.id] || []).filter(p => (dayOrders[orderKey(p)] || 0) > 0);
+    const poultry    = c.products.filter(p => !p.flavoured && (dayOrders[orderKey(p)] || 0) > 0);
+    const flavoured  = c.products.filter(p =>  p.flavoured && (dayOrders[orderKey(p)] || 0) > 0);
+    const total = beefList.length + poultry.length + flavoured.length;
+    if (!total) return '';
+
+    function section(icon, label, items, color) {
+      if (!items.length) return '';
+      const rows = items.map(p => `
+        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:12px;color:var(--text)">${p.name}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--accent)">${dayOrders[orderKey(p)]}</span>
+        </div>`).join('');
+      return `<div style="margin-bottom:10px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:${color};padding:3px 0;margin-bottom:2px;border-bottom:1px solid ${color}40">${icon} ${label}</div>
+        ${rows}
+      </div>`;
+    }
+
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;break-inside:avoid">
+      <div style="padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${c.color};display:inline-block;flex-shrink:0"></span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:0.5px">${c.name}</span>
+        <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">${total} lines</span>
+      </div>
+      <div style="padding:10px 12px">
+        ${section('🥩','BEEF',    beefList,  '#e08888')}
+        ${section('🐔','POULTRY', poultry,   '#6dbf99')}
+        ${section('🌶','FLAVOURED',flavoured,'#b89fcc')}
+      </div>
+    </div>`;
   }).filter(Boolean).join('');
 
   el.innerHTML = `
-    <div class="summary-grid">${dayCards}</div>
-    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 8px">${currentDay.toUpperCase()} — CUSTOMER BREAKDOWN</h3>
-    ${custRows ? `<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:7px;overflow:hidden">
-      <thead><tr style="border-bottom:1px solid var(--border2)">
-        <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">CUSTOMER</th>
-        <th style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">LINES</th>
-        <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">ITEMS</th>
-      </tr></thead><tbody>${custRows}</tbody></table>`
-    : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders entered for ${currentDay}</div></div>`}`;
+    <div class="summary-grid" style="margin-bottom:20px">${dayCards}</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 12px">${currentDay.toUpperCase()} — FULL ORDER BREAKDOWN</div>
+    ${custCards
+      ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">${custCards}</div>`
+      : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders for ${currentDay}</div></div>`
+    }`;
 }
 
 function playAlertSound() {
@@ -2384,6 +2406,8 @@ function buildSheetTable(title, items, showSources) {
 }
 
 function buildCategoryTable(category, items, day, extraTotal) {
+  const BEEF_CATS = ['MINCE','CHUCK','BRISKET','RIBEYE','BLADE','BOLA','RIB PLATE','SHIN','FLANK','DELI'];
+  const speciesAttr = BEEF_CATS.includes(category) ? 'data-species="beef"' : 'data-species="poultry"';
   const totalQty = items.reduce((a,b) => a+b.qty, 0);
   const rows = items.map(item => `<tr>
     <td class="td-qty">${item.qty}</td>
@@ -2394,7 +2418,7 @@ function buildCategoryTable(category, items, day, extraTotal) {
   const totalRow = extraTotal !== undefined
     ? `<tr style="background:rgba(200,168,75,0.1)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">TOTAL ${category} = ${totalQty} &nbsp;|&nbsp; TOTAL ROASTERS NEEDED = ${extraTotal}</td></tr>`
     : `<tr style="background:rgba(255,255,255,0.03)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">TOTAL = ${totalQty}</td></tr>`;
-  return `<div class="sheet-table" style="margin-bottom:16px">
+  return `<div class="sheet-table" style="margin-bottom:16px" ${speciesAttr}>
     <div class="sheet-title-bar">
       <div class="sheet-title">${category}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${day.toUpperCase()}</div>
@@ -2790,7 +2814,7 @@ function buildPackerTable(title, items) {
       <td class="td-check">☐</td>
     </tr>`;
   }).join('');
-  return `<div class="sheet-table" style="margin-bottom:16px">
+  return `<div class="sheet-table" style="margin-bottom:16px" data-species="poultry">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${items.length} lines / ${totalQty} total</div>
@@ -2815,7 +2839,7 @@ function buildPackerBeefTable(title, items, day) {
       <td class="td-check">☐</td>
     </tr>`;
   }).join('');
-  return `<div class="sheet-table" style="margin-bottom:16px">
+  return `<div class="sheet-table" style="margin-bottom:16px" data-species="beef">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${items.length} lines</div>
@@ -3204,6 +3228,49 @@ function pullRemoteOrders() {
 // ══════════════════════════════════════════════════════════════════
 // PRINT — opens a clean white popup with just the sheet content
 // ══════════════════════════════════════════════════════════════════
+function printSpecies(contentId, species, title) {
+  const contentEl = document.getElementById(contentId);
+  if (!contentEl) return;
+  const tables = contentEl.querySelectorAll(`[data-species="${species}"]`);
+  if (!tables.length) { alert(`No ${species} data to print.`); return; }
+
+  const today = new Date().toLocaleDateString('en-GB', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const innerHtml = Array.from(tables).map(t => t.outerHTML).join('');
+
+  const printHTML = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>MH Meats — ${title}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Arial,sans-serif; font-size:12px; color:#000; background:#fff; padding:20px; }
+  .print-header { text-align:center; border-bottom:3px solid #000; padding-bottom:10px; margin-bottom:20px; }
+  .print-header h1 { font-size:22px; font-weight:bold; letter-spacing:2px; }
+  .print-header h2 { font-size:15px; font-weight:normal; margin-top:4px; color:#444; }
+  .print-header .date { font-size:12px; color:#666; margin-top:4px; }
+  .sheet-table { border:1px solid #999; margin-bottom:20px; page-break-inside:avoid; }
+  .sheet-title-bar { background:#ddd; padding:6px 12px; border-bottom:1px solid #999; display:flex; align-items:center; justify-content:space-between; }
+  .sheet-title { font-size:13px; font-weight:bold; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:#eee; text-align:left; padding:6px 10px; font-size:10px; font-weight:bold; text-transform:uppercase; border:1px solid #aaa; }
+  td { padding:6px 10px; border:1px solid #ccc; font-size:12px; }
+  .td-qty { font-size:14px; font-weight:bold; text-align:right; width:60px; }
+  .td-check { text-align:center; width:30px; }
+  .row-highlight td { background:#f5f5f5; }
+  .cat-tag { display:inline-block; font-size:8px; font-family:monospace; padding:1px 4px; border:1px solid #aaa; border-radius:2px; margin-left:4px; color:#333; }
+  @page { margin:1.5cm; size:A4 portrait; }
+</style></head>
+<body>
+  <div class="print-header">
+    <h1>MH MEATS</h1><h2>${title}</h2><div class="date">${today}</div>
+  </div>
+  ${innerHtml}
+  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+</body></html>`;
+
+  const pw = window.open('','_blank','width=900,height=700');
+  pw.document.write(printHTML);
+  pw.document.close();
+}
+
 function printActivePanel() {
   const activePanel = document.querySelector('.panel.active');
   if (!activePanel) return;
