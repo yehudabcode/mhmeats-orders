@@ -606,9 +606,7 @@
   <div class="panel" id="panel-butcher" data-print-title="BUTCHER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
-      <button class="btn btn-ghost" style="margin-left:auto" onclick="printSpecies('butcherSheetContent','poultry','BUTCHER — POULTRY')">🐔 Print Poultry</button>
-      <button class="btn btn-ghost" onclick="printSpecies('butcherSheetContent','beef','BUTCHER — BEEF')">🥩 Print Beef</button>
-      <button class="btn btn-primary" onclick="printActivePanel()">🖨 Print All</button>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
     <div id="butcherSheetContent"></div>
   </div>
@@ -617,9 +615,7 @@
   <div class="panel" id="panel-packer" data-print-title="PACKER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
-      <button class="btn btn-ghost" style="margin-left:auto" onclick="printSpecies('packerSheetContent','poultry','PACKER — POULTRY')">🐔 Print Poultry</button>
-      <button class="btn btn-ghost" onclick="printSpecies('packerSheetContent','beef','PACKER — BEEF')">🥩 Print Beef</button>
-      <button class="btn btn-primary" onclick="printActivePanel()">🖨 Print All</button>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
     </div>
     <div id="packerSheetContent"></div>
   </div>
@@ -888,8 +884,6 @@ const CUSTOMERS = [
     {name:"SHNITZELS-6-PACK"},
     {name:"SHNITZELS-10-PACK"},
     {name:"PARGIOT"},
-    {name:"PUPICKS"},
-    {name:"CHICKEN LIVER"},
     {name:"MINCED CHICKEN"},
     {name:"CHICKEN STIRFRY"}
   ]},
@@ -948,7 +942,6 @@ const CUSTOMERS = [
   ]},
   { id:"halperns", name:"Halpern's",        color:"#7b2d8b", products:[
     {name:"10-PACK CHICKEN SHNITZELS"},
-    {name:"CHICKEN FILLETS"},
     {name:"5-PACK CARCASSES"},
     {name:"6-PACK CHICKEN SHNITZELS"},
     {name:"12-PACK CHICKEN WINGS"},
@@ -1000,7 +993,6 @@ const CUSTOMERS = [
   ]},
   { id:"kayes",    name:"Kaye's Kosher",    color:"#b5451b", products:[
     {name:"10-PACK CHICKEN SHNITZELS"},
-    {name:"CHICKEN FILLETS"},
     {name:"5-PACK CARCASSES"},
     {name:"6-PACK CHICKEN SHNITZELS"},
     {name:"12-PACK CHICKEN WINGS"},
@@ -1098,8 +1090,6 @@ const CUSTOMERS = [
     {name:"GRILLING CHICKEN AND SAUSAGE KEBAB",    section:"CHICKEN"},
     {name:"CHICKEN BURGERS",                       section:"CHICKEN"},
     {name:"CHICKEN LOLLIPOPS",                     section:"CHICKEN"},
-    {name:"ROASTER IN 1/4 SHNITZELED",            section:"CHICKEN"},
-    {name:"ROASTER IN 1/8 SHNITZELED",            section:"CHICKEN"},
     {name:"DELI-STYLE WHOLE ROASTER",              section:"CHICKEN"},
     {name:"ROSEMARY WHOLE CHICKEN",                section:"CHICKEN"},
     {name:"SWEET AND SOUR WHOLE ROASTER",          section:"CHICKEN"},
@@ -1153,16 +1143,6 @@ const CUSTOMERS = [
     {name:"SHNITZELS"},
     {name:"CARCASSES"},
     {name:"WINGS"},
-    {name:"WHOLE ROASTER"},
-    {name:"ROASTER IN 1/4"},
-    {name:"ROASTER IN 1/8"},
-    {name:"ROASTER IN 1/4 SHNITZELED"},
-    {name:"ROASTER IN 1/8 SHNITZELED"},
-    {name:"CHICKEN DRUMSTICKS"},
-    {name:"DOUBLE SOUP PACK"},
-    {name:"PUPICKS"},
-    {name:"4-PACK 4OZ BURGERS"},
-    {name:"CUMBERLAND SAUSAGES"},
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1202,16 +1182,6 @@ const CUSTOMERS = [
     {name:"SHNITZELS"},
     {name:"CARCASSES"},
     {name:"WINGS"},
-    {name:"WHOLE ROASTER"},
-    {name:"ROASTER IN 1/4"},
-    {name:"ROASTER IN 1/8"},
-    {name:"ROASTER IN 1/4 SHNITZELED"},
-    {name:"ROASTER IN 1/8 SHNITZELED"},
-    {name:"CHICKEN DRUMSTICKS"},
-    {name:"DOUBLE SOUP PACK"},
-    {name:"PUPICKS"},
-    {name:"4-PACK 4OZ BURGERS"},
-    {name:"CUMBERLAND SAUSAGES"},
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1251,16 +1221,6 @@ const CUSTOMERS = [
     {name:"SHNITZELS"},
     {name:"CARCASSES"},
     {name:"WINGS"},
-    {name:"WHOLE ROASTER"},
-    {name:"ROASTER IN 1/4"},
-    {name:"ROASTER IN 1/8"},
-    {name:"ROASTER IN 1/4 SHNITZELED"},
-    {name:"ROASTER IN 1/8 SHNITZELED"},
-    {name:"CHICKEN DRUMSTICKS"},
-    {name:"DOUBLE SOUP PACK"},
-    {name:"PUPICKS"},
-    {name:"4-PACK 4OZ BURGERS"},
-    {name:"CUMBERLAND SAUSAGES"},
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1300,16 +1260,6 @@ const CUSTOMERS = [
     {name:"SHNITZELS"},
     {name:"CARCASSES"},
     {name:"WINGS"},
-    {name:"WHOLE ROASTER"},
-    {name:"ROASTER IN 1/4"},
-    {name:"ROASTER IN 1/8"},
-    {name:"ROASTER IN 1/4 SHNITZELED"},
-    {name:"ROASTER IN 1/8 SHNITZELED"},
-    {name:"CHICKEN DRUMSTICKS"},
-    {name:"DOUBLE SOUP PACK"},
-    {name:"PUPICKS"},
-    {name:"4-PACK 4OZ BURGERS"},
-    {name:"CUMBERLAND SAUSAGES"},
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1349,16 +1299,6 @@ const CUSTOMERS = [
     {name:"SHNITZELS"},
     {name:"CARCASSES"},
     {name:"WINGS"},
-    {name:"WHOLE ROASTER"},
-    {name:"ROASTER IN 1/4"},
-    {name:"ROASTER IN 1/8"},
-    {name:"ROASTER IN 1/4 SHNITZELED"},
-    {name:"ROASTER IN 1/8 SHNITZELED"},
-    {name:"CHICKEN DRUMSTICKS"},
-    {name:"DOUBLE SOUP PACK"},
-    {name:"PUPICKS"},
-    {name:"4-PACK 4OZ BURGERS"},
-    {name:"CUMBERLAND SAUSAGES"},
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1398,16 +1338,6 @@ const CUSTOMERS = [
     {name:"SHNITZELS"},
     {name:"CARCASSES"},
     {name:"WINGS"},
-    {name:"WHOLE ROASTER"},
-    {name:"ROASTER IN 1/4"},
-    {name:"ROASTER IN 1/8"},
-    {name:"ROASTER IN 1/4 SHNITZELED"},
-    {name:"ROASTER IN 1/8 SHNITZELED"},
-    {name:"CHICKEN DRUMSTICKS"},
-    {name:"DOUBLE SOUP PACK"},
-    {name:"PUPICKS"},
-    {name:"4-PACK 4OZ BURGERS"},
-    {name:"CUMBERLAND SAUSAGES"},
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
     {name:"CHICKEN LEGS"},
@@ -1506,9 +1436,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"SLICED SHIN",unit:"UNITS",mult:2}
   ],
   ksmeats: [
-    {name:"BRAISING STEAK",unit:"UNITS",mult:4},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
-    {name:"MINCED BEEF",unit:"UNITS",mult:0.5},
     {name:"BEEF RIBLETS (FLANKEN)",unit:"UNITS",mult:2},
     {name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
@@ -1538,7 +1465,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:4},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"UNITS",mult:0.5},
     {name:"CUBED TOP RIB",unit:"UNITS",mult:0.5},
     {name:"FAIRY STEAKS",unit:"UNITS",mult:6},
@@ -1546,6 +1472,7 @@ const BEEF_BY_CUSTOMER = {
     {name:"FLANK",unit:"UNITS",mult:1},
     {name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
+    {name:"FLAT PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"GOULASH BEEF CUBES",unit:"UNITS",mult:0.5},
     {name:"MARROW BONES",unit:"UNITS",mult:2},
     {name:"MEAT BONES",unit:"UNITS",mult:5},
@@ -1555,7 +1482,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"POT ROAST",unit:"UNITS",mult:1},
     {name:"PRIME CHOLENT MEAT",unit:"UNITS",mult:1},
     {name:"RIB-EYE STEAKS",unit:"UNITS",mult:2},
-    {name:"RIB ON BONE",unit:"UNITS",mult:1},
     {name:"ROLLED BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"ROLLED PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
@@ -1566,7 +1492,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:4},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"UNITS",mult:0.5},
     {name:"CUBED TOP RIB",unit:"UNITS",mult:0.5},
     {name:"FAIRY STEAKS",unit:"UNITS",mult:6},
@@ -1574,6 +1499,7 @@ const BEEF_BY_CUSTOMER = {
     {name:"FLANK",unit:"UNITS",mult:1},
     {name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
+    {name:"FLAT PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"GOULASH BEEF CUBES",unit:"UNITS",mult:0.5},
     {name:"MARROW BONES",unit:"UNITS",mult:2},
     {name:"MEAT BONES",unit:"UNITS",mult:5},
@@ -1583,7 +1509,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"POT ROAST",unit:"UNITS",mult:1},
     {name:"PRIME CHOLENT MEAT",unit:"UNITS",mult:1},
     {name:"RIB-EYE STEAKS",unit:"UNITS",mult:2},
-    {name:"RIB ON BONE",unit:"UNITS",mult:1},
     {name:"ROLLED BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"ROLLED PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
@@ -1616,7 +1541,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BONELESS SHORT RIB",unit:"UNITS",mult:1},
     {name:"CHUCK EYE STEAKS",unit:"UNITS",mult:1},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:1},
     {name:"COTE DE BOUEF",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
@@ -1673,7 +1597,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BONELESS SHORT RIB",unit:"UNITS",mult:1},
     {name:"CHUCK EYE STEAKS",unit:"UNITS",mult:1},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:1},
     {name:"COTE DE BOUEF",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
@@ -1730,7 +1653,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BONELESS SHORT RIB",unit:"UNITS",mult:1},
     {name:"CHUCK EYE STEAKS",unit:"UNITS",mult:1},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:1},
     {name:"COTE DE BOUEF",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
@@ -1787,7 +1709,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BONELESS SHORT RIB",unit:"UNITS",mult:1},
     {name:"CHUCK EYE STEAKS",unit:"UNITS",mult:1},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:1},
     {name:"COTE DE BOUEF",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
@@ -1844,7 +1765,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BONELESS SHORT RIB",unit:"UNITS",mult:1},
     {name:"CHUCK EYE STEAKS",unit:"UNITS",mult:1},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:1},
     {name:"COTE DE BOUEF",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
@@ -1901,7 +1821,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BONELESS SHORT RIB",unit:"UNITS",mult:1},
     {name:"CHUCK EYE STEAKS",unit:"UNITS",mult:1},
-    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:1},
     {name:"COTE DE BOUEF",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
@@ -1964,6 +1883,9 @@ let currentCustomer = null;
 // orders[day][customerId][productKey] = qty
 let orders = {};
 DAYS.forEach(d => { orders[d] = {}; });
+// Manual adjustments for butcher sheet only — do NOT flow to packer/other sheets
+let butcherAdjustments = {};
+DAYS.forEach(d => { butcherAdjustments[d] = {}; });
 
 function orderKey(prod) {
   return prod.name.trim();
@@ -2288,8 +2210,6 @@ function getTotalsForDay(day) {
 function renderSummaryPanel() {
   const el = document.getElementById('summaryPanelContent');
   if (!el) return;
-
-  // ── Day overview cards ──────────────────────────────────────────
   const dayCards = DAYS.map(day => {
     let totalLines = 0, custWithOrders = 0;
     CUSTOMERS.forEach(c => {
@@ -2298,56 +2218,40 @@ function renderSummaryPanel() {
       if (lines) { totalLines += lines; custWithOrders++; }
     });
     const isToday = day === currentDay;
-    return `<div class="summary-card" style="${isToday ? 'border-color:var(--accent)' : ''};cursor:pointer" onclick="selectDay('${day}',event.currentTarget)">
+    return `<div class="summary-card" style="${isToday ? 'border-color:var(--accent)' : ''}">
       <div class="summary-label">${day}${isToday ? ' ★' : ''}</div>
       <div class="summary-value">${totalLines}</div>
       <div class="summary-sub">${custWithOrders} customer${custWithOrders !== 1 ? 's' : ''}</div>
     </div>`;
   }).join('');
 
-  // ── Per-customer cards: full product list split by species ──────
-  const custCards = CUSTOMERS.map(c => {
+  const custRows = CUSTOMERS.map(c => {
     const dayOrders = orders[currentDay][c.id] || {};
-    const beefList   = (BEEF_BY_CUSTOMER[c.id] || []).filter(p => (dayOrders[orderKey(p)] || 0) > 0);
-    const poultry    = c.products.filter(p => !p.flavoured && (dayOrders[orderKey(p)] || 0) > 0);
-    const flavoured  = c.products.filter(p =>  p.flavoured && (dayOrders[orderKey(p)] || 0) > 0);
-    const total = beefList.length + poultry.length + flavoured.length;
-    if (!total) return '';
-
-    function section(icon, label, items, color) {
-      if (!items.length) return '';
-      const rows = items.map(p => `
-        <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)">
-          <span style="font-size:12px;color:var(--text)">${p.name}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--accent)">${dayOrders[orderKey(p)]}</span>
-        </div>`).join('');
-      return `<div style="margin-bottom:10px">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:${color};padding:3px 0;margin-bottom:2px;border-bottom:1px solid ${color}40">${icon} ${label}</div>
-        ${rows}
-      </div>`;
-    }
-
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;break-inside:avoid">
-      <div style="padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
-        <span style="width:10px;height:10px;border-radius:50%;background:${c.color};display:inline-block;flex-shrink:0"></span>
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:0.5px">${c.name}</span>
-        <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">${total} lines</span>
-      </div>
-      <div style="padding:10px 12px">
-        ${section('🥩','BEEF',    beefList,  '#e08888')}
-        ${section('🐔','POULTRY', poultry,   '#6dbf99')}
-        ${section('🌶','FLAVOURED',flavoured,'#b89fcc')}
-      </div>
-    </div>`;
+    const allProds = [...c.products, ...(BEEF_BY_CUSTOMER[c.id]||[])];
+    const ordered = allProds.filter(p => (dayOrders[orderKey(p)] || 0) > 0);
+    const lines = ordered.length;
+    if (!lines) return '';
+    const preview = ordered.slice(0,3).map(p =>
+      `<span style="font-size:11px;background:var(--surface2);border-radius:3px;padding:2px 6px;white-space:nowrap">${p.name}: <strong style="color:var(--accent)">${dayOrders[orderKey(p)]}</strong></span>`
+    ).join(' ');
+    const more = ordered.length > 3 ? `<span style="font-size:11px;color:var(--muted)"> +${ordered.length-3} more</span>` : '';
+    return `<tr>
+      <td style="padding:8px 10px;white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:8px;vertical-align:middle"></span>${c.name}</td>
+      <td style="padding:8px 10px;text-align:right;color:var(--accent);font-family:'DM Mono',monospace;font-size:16px;font-weight:600;white-space:nowrap">${lines}</td>
+      <td style="padding:8px 10px;line-height:2">${preview}${more}</td>
+    </tr>`;
   }).filter(Boolean).join('');
 
   el.innerHTML = `
-    <div class="summary-grid" style="margin-bottom:20px">${dayCards}</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 12px">${currentDay.toUpperCase()} — FULL ORDER BREAKDOWN</div>
-    ${custCards
-      ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">${custCards}</div>`
-      : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders for ${currentDay}</div></div>`
-    }`;
+    <div class="summary-grid">${dayCards}</div>
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted);margin:0 0 8px">${currentDay.toUpperCase()} — CUSTOMER BREAKDOWN</h3>
+    ${custRows ? `<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:7px;overflow:hidden">
+      <thead><tr style="border-bottom:1px solid var(--border2)">
+        <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">CUSTOMER</th>
+        <th style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">LINES</th>
+        <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--muted)">ITEMS</th>
+      </tr></thead><tbody>${custRows}</tbody></table>`
+    : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders entered for ${currentDay}</div></div>`}`;
 }
 
 function playAlertSound() {
@@ -2405,9 +2309,63 @@ function buildSheetTable(title, items, showSources) {
   </div>`;
 }
 
+// Butcher-sheet-only beef table with editable qty inputs.
+// Adjustments stored in butcherAdjustments[day][name] — isolated from all other sheets.
+function buildButcherBeefCategoryTable(category, items, day) {
+  const rows = items.map(item => {
+    const adjKey = `${day}__${item.name}`;
+    const hasAdj = butcherAdjustments[day] && butcherAdjustments[day][item.name] !== undefined;
+    const displayQty = hasAdj ? butcherAdjustments[day][item.name] : item.qty;
+    const isEmpty = displayQty === 0 && !hasAdj;
+    const rowStyle = isEmpty ? 'opacity:0.45;' : '';
+    return `<tr style="${rowStyle}">
+    <td class="td-qty"><input type="number" min="0" step="0.5"
+      value="${displayQty}"
+      data-day="${day}" data-name="${item.name.replace(/"/g,'&quot;')}" data-base="${item.qty}"
+      onchange="butcherAdjust(this)"
+      style="width:58px;background:${hasAdj?'rgba(200,168,75,0.18)':'transparent'};border:1px solid ${hasAdj?'var(--accent)':'rgba(255,255,255,0.12)'};border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;text-align:right;padding:2px 4px;"></td>
+    <td style="width:60px;color:var(--muted);font-size:11px">${item.unit||'UNITS'}</td>
+    <td>${item.name}${item.desc?`<span style="font-size:10px;color:var(--muted);margin-left:6px">${item.desc}</span>`:''}</td>
+    <td class="td-check">☐</td>
+  </tr>`;
+  }).join('');
+  const totalQty = items.reduce((a,b) => {
+    const adj = butcherAdjustments[day] && butcherAdjustments[day][b.name] !== undefined ? butcherAdjustments[day][b.name] : b.qty;
+    return a + adj;
+  }, 0);
+  const totalRow = `<tr style="background:rgba(255,255,255,0.03)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">TOTAL = ${Math.round(totalQty*10)/10}</td></tr>`;
+  return `<div class="sheet-table" style="margin-bottom:16px">
+    <div class="sheet-title-bar">
+      <div class="sheet-title">${category}</div>
+      <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${day.toUpperCase()} <span style="color:var(--accent);margin-left:8px;font-size:10px">BUTCHER ONLY</span></div>
+    </div>
+    <table><thead><tr><th style="width:70px;text-align:right">AMT</th><th style="width:60px">UNIT</th><th>PRODUCT</th><th style="width:30px">✓</th></tr></thead>
+    <tbody>${rows}${totalRow}</tbody></table>
+  </div>`;
+}
+
+function butcherAdjust(input) {
+  const day = input.dataset.day;
+  const name = input.dataset.name;
+  const base = parseFloat(input.dataset.base) || 0;
+  const val = parseFloat(input.value) || 0;
+  if (!butcherAdjustments[day]) butcherAdjustments[day] = {};
+  if (val === base) {
+    // Matches base order — remove adjustment to restore default
+    delete butcherAdjustments[day][name];
+    input.style.background = 'transparent';
+    input.style.borderColor = 'rgba(255,255,255,0.12)';
+    const row = input.closest('tr');
+    if (base === 0) row.style.opacity = '0.45';
+  } else {
+    butcherAdjustments[day][name] = val;
+    input.style.background = 'rgba(200,168,75,0.18)';
+    input.style.borderColor = 'var(--accent)';
+    input.closest('tr').style.opacity = '1';
+  }
+}
+
 function buildCategoryTable(category, items, day, extraTotal) {
-  const BEEF_CATS = ['MINCE','CHUCK','BRISKET','RIBEYE','BLADE','BOLA','RIB PLATE','SHIN','FLANK','DELI'];
-  const speciesAttr = BEEF_CATS.includes(category) ? 'data-species="beef"' : 'data-species="poultry"';
   const totalQty = items.reduce((a,b) => a+b.qty, 0);
   const rows = items.map(item => `<tr>
     <td class="td-qty">${item.qty}</td>
@@ -2418,7 +2376,7 @@ function buildCategoryTable(category, items, day, extraTotal) {
   const totalRow = extraTotal !== undefined
     ? `<tr style="background:rgba(200,168,75,0.1)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">TOTAL ${category} = ${totalQty} &nbsp;|&nbsp; TOTAL ROASTERS NEEDED = ${extraTotal}</td></tr>`
     : `<tr style="background:rgba(255,255,255,0.03)"><td colspan="4" style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">TOTAL = ${totalQty}</td></tr>`;
-  return `<div class="sheet-table" style="margin-bottom:16px" ${speciesAttr}>
+  return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${category}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${day.toUpperCase()}</div>
@@ -2673,16 +2631,14 @@ function renderButcherSheet(day) {
     items: cat.items.map(item => ({
       ...item,
       qty: beefQty(item.name)
-    })).filter(i => i.qty > 0)
-  })).filter(cat => cat.items.length > 0);
+    }))
+  }));
 
   const beefItems = beefCategoryItems; // used below
 
-  const any = fullBirds.length||bottomQuarters.length||crowns.length||turkey.length||beefItems.length;
-  if (!any) {
-    document.getElementById('butcherSheetContent').innerHTML = `<div class="empty-state"><div class="empty-icon">🔪</div><div class="empty-text">No orders for ${day}</div></div>`;
-    return;
-  }
+  // Beef section always renders to allow manual entry; empty state only if no poultry AND no beef orders
+  const anyPoultry = fullBirds.length||bottomQuarters.length||crowns.length||turkey.length;
+  const anyBeefOrders = beefItems.some(cat => cat.items.some(i => i.qty > 0));
   let html = '';
   const totalRoasters = fullBirds.reduce((a,b)=>a+b.qty,0);
   if (fullBirds.length) html += buildCategoryTable('FULL BIRDS', fullBirds, day, totalRoasters);
@@ -2691,7 +2647,7 @@ function renderButcherSheet(day) {
   if (turkey.length) html += buildCategoryTable('TURKEY', turkey, day);
   if (beefItems.length) {
     beefItems.forEach(cat => {
-      html += buildCategoryTable(cat.cat, cat.items, day);
+      html += buildButcherBeefCategoryTable(cat.cat, cat.items, day);
     });
   }
   document.getElementById('butcherSheetContent').innerHTML = html;
@@ -2814,7 +2770,7 @@ function buildPackerTable(title, items) {
       <td class="td-check">☐</td>
     </tr>`;
   }).join('');
-  return `<div class="sheet-table" style="margin-bottom:16px" data-species="poultry">
+  return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${items.length} lines / ${totalQty} total</div>
@@ -2839,7 +2795,7 @@ function buildPackerBeefTable(title, items, day) {
       <td class="td-check">☐</td>
     </tr>`;
   }).join('');
-  return `<div class="sheet-table" style="margin-bottom:16px" data-species="beef">
+  return `<div class="sheet-table" style="margin-bottom:16px">
     <div class="sheet-title-bar">
       <div class="sheet-title">${title}</div>
       <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${items.length} lines</div>
@@ -3077,17 +3033,6 @@ function pullRemoteOrders() {
         'CHICKEN SHNITZEL VALUE PACK (10)':  '10-PACK CHICKEN SHNITZELS',
         'CHICKEN SHNITZEL 6-PACK':           '6-PACK CHICKEN SHNITZELS',
         'DARK SHNITZEL (PARGIOT)':           'PARGIOT',
-        'CHICKEN GOUJONS':                   'GOUJONS',
-        'PRIME CHOLENT MEAT':                'WHOLE TOP RIB',
-        'THIN SLICED GRILLING STEAK':        'MINUTE STEAKS',
-        '24-PACK MEAT BALLS':                'MEAT BALLS-24 PACK',
-        '6-PACK 2OZ BURGERS':                'CLASSIC 2 OUNCE BEEFBURGERS-PACK OF 6',
-        'BEEF GRILLSTICKS':                  'TASTY BEEF SKEWERS',
-        'BEEF STIR FRY':                     'BEEF STIRFRY',
-        'CHICKEN STIR FRY':                  'CHICKEN STIRFRY',
-        'BREADED SHNITZELS':                 'CRUMB COATED SHNITZELS',
-        'LAMB BURGERS 4-PACK':               'LAMB BURGERS-4-PACK',
-        '4OZ CHORIZO BURGER - 4 PACK':       '4OZ CHORIZO BURGER-4-PACK',
         'CHICKEN LEGS 2-PACK':               'CHICKEN LEGS-2 PACK',
         'CHICKEN LEGS 2 PACK':               'CHICKEN LEGS-2 PACK',
         'CHICKEN LEGS VALUE PACK':           'CHICKEN LEGS-VALUE PACK',
@@ -3132,41 +3077,10 @@ function pullRemoteOrders() {
       } else {
         // 2. Try LEGACY_MAP — but verify result exists in THIS customer's products
         const legacyResolved = LEGACY_MAP[productKey.trim()] || LEGACY_MAP[productKey.trim().toUpperCase()];
-        // Secondary map: KS/Halperns/Kayes use different canonical names for same products
-        const SECONDARY_MAP = {
-          'CARCASS-5-PACK':                  ['5-PACK CARCASSES','CARCASSES'],
-          'FAMILY SOUP PARCEL':              ['DOUBLE SOUP PACK'],
-          'LEG QUARTERS-2-PACK':             ['CHICKEN LEGS-2 PACK','CHICKEN LEGS'],
-          'LEG QUARTERS-4-PACK':             ['CHICKEN LEGS-VALUE PACK','CHICKEN LEGS'],
-          'LEG QUARTERS-6-PACK':             ['CHICKEN LEGS-VALUE PACK','CHICKEN LEGS'],
-          'LEG QUARTERS IN 1/8':             ['CHICKEN LEGS IN 1/8-2 PACK','CHICKEN LEGS IN 1/8'],
-          'LEG QUARTERS IN 1/8 VALUE PACK':  ['CHICKEN LEGS IN 1/8-VALUE PACK','CHICKEN LEGS IN 1/8'],
-          'BREAST QUARTERS':                 ['BREAST QUARTER ROASTER'],
-          'WINGS-12-PACK':                   ['12-PACK CHICKEN WINGS','WINGS','CHICKEN WINGS'],
-          'CHICKEN FILLETS':                 ['FILLETS'],
-          '6-PACK CHICKEN SHNITZELS':        ['SHNITZELS-6-PACK','SHNITZELS'],
-          '10-PACK CHICKEN SHNITZELS':       ['SHNITZELS-10-PACK','SHNITZELS'],
-          'NECKS 8-PACK':                    ['CHICKEN NECK (8-PACK)'],
-          'THIGH-4-PACK':                    ['CHICKEN THIGHS'],
-          'PARGIOT':                         ['CHICKEN PARGIOT'],
-          'MEAT BALLS-24 PACK':              ['MEAT BALLS-24 PACK'],
-          'CLASSIC 2 OUNCE BEEFBURGERS-PACK OF 6': ['CLASSIC 2 OUNCE BEEFBURGERS-PACK OF 6'],
-          'WHOLE TOP RIB':                   ['WHOLE TOP RIB'],
-          'MINUTE STEAKS':                   ['MINUTE STEAKS'],
-        };
         if (legacyResolved) {
           const legacyValid = allProds.find(p => p.name.trim() === legacyResolved);
           if (legacyValid) {
             finalKey = legacyResolved;
-          } else {
-            // 2b. Try secondary map — array of fallback names tried in order
-            const altOptions = SECONDARY_MAP[legacyResolved];
-            if (altOptions) {
-              for (const alt of altOptions) {
-                const altValid = allProds.find(p => p.name.trim() === alt);
-                if (altValid) { finalKey = alt; break; }
-              }
-            }
           }
         }
         // 3. If still no match, try normalizeKey fuzzy match
@@ -3176,7 +3090,7 @@ function pullRemoteOrders() {
           if (fuzzyMatch) finalKey = fuzzyMatch.name.trim();
         }
       }
-      orders[day][customer][finalKey] = (orders[day][customer][finalKey] || 0) + (parseInt(quantity) || 0);
+      orders[day][customer][finalKey] = parseInt(quantity) || 0;
       loaded++;
       custsSeen.add(customer);
     });
@@ -3228,49 +3142,6 @@ function pullRemoteOrders() {
 // ══════════════════════════════════════════════════════════════════
 // PRINT — opens a clean white popup with just the sheet content
 // ══════════════════════════════════════════════════════════════════
-function printSpecies(contentId, species, title) {
-  const contentEl = document.getElementById(contentId);
-  if (!contentEl) return;
-  const tables = contentEl.querySelectorAll(`[data-species="${species}"]`);
-  if (!tables.length) { alert(`No ${species} data to print.`); return; }
-
-  const today = new Date().toLocaleDateString('en-GB', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-  const innerHtml = Array.from(tables).map(t => t.outerHTML).join('');
-
-  const printHTML = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>MH Meats — ${title}</title>
-<style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:Arial,sans-serif; font-size:12px; color:#000; background:#fff; padding:20px; }
-  .print-header { text-align:center; border-bottom:3px solid #000; padding-bottom:10px; margin-bottom:20px; }
-  .print-header h1 { font-size:22px; font-weight:bold; letter-spacing:2px; }
-  .print-header h2 { font-size:15px; font-weight:normal; margin-top:4px; color:#444; }
-  .print-header .date { font-size:12px; color:#666; margin-top:4px; }
-  .sheet-table { border:1px solid #999; margin-bottom:20px; page-break-inside:avoid; }
-  .sheet-title-bar { background:#ddd; padding:6px 12px; border-bottom:1px solid #999; display:flex; align-items:center; justify-content:space-between; }
-  .sheet-title { font-size:13px; font-weight:bold; }
-  table { width:100%; border-collapse:collapse; }
-  th { background:#eee; text-align:left; padding:6px 10px; font-size:10px; font-weight:bold; text-transform:uppercase; border:1px solid #aaa; }
-  td { padding:6px 10px; border:1px solid #ccc; font-size:12px; }
-  .td-qty { font-size:14px; font-weight:bold; text-align:right; width:60px; }
-  .td-check { text-align:center; width:30px; }
-  .row-highlight td { background:#f5f5f5; }
-  .cat-tag { display:inline-block; font-size:8px; font-family:monospace; padding:1px 4px; border:1px solid #aaa; border-radius:2px; margin-left:4px; color:#333; }
-  @page { margin:1.5cm; size:A4 portrait; }
-</style></head>
-<body>
-  <div class="print-header">
-    <h1>MH MEATS</h1><h2>${title}</h2><div class="date">${today}</div>
-  </div>
-  ${innerHtml}
-  <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
-</body></html>`;
-
-  const pw = window.open('','_blank','width=900,height=700');
-  pw.document.write(printHTML);
-  pw.document.close();
-}
-
 function printActivePanel() {
   const activePanel = document.querySelector('.panel.active');
   if (!activePanel) return;
@@ -3281,6 +3152,16 @@ function printActivePanel() {
     alert('No data to print — enter some orders first.');
     return;
   }
+
+  // Clone content and replace all inputs with their current live values (reliable cross-browser)
+  const clone = contentEl.cloneNode(true);
+  clone.querySelectorAll('input[type="number"]').forEach((inp, i) => {
+    const liveVal = contentEl.querySelectorAll('input[type="number"]')[i].value;
+    const span = document.createElement('strong');
+    span.textContent = liveVal;
+    inp.parentNode.replaceChild(span, inp);
+  });
+  const printContent = clone.innerHTML;
 
   const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
@@ -3317,7 +3198,7 @@ function printActivePanel() {
     <h2>${title}</h2>
     <div class="date">${today}</div>
   </div>
-  ${contentEl.innerHTML}
+  ${printContent}
   <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body></html>`;
 
