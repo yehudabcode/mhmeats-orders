@@ -3072,8 +3072,8 @@ function pullRemoteOrders() {
         'KOSHERED CHICKEN LIVER':            'CHICKEN LIVER',
         'HIGH QUALITY MINCED CHICKEN':       'MINCED CHICKEN',
         'CHICKEN FILLET':                    'CHICKEN FILLETS',
-        'CHICKEN SHNITZEL VALUE PACK (10)':  '10-PACK CHICKEN SHNITZELS',
-        'CHICKEN SHNITZEL 6-PACK':           '6-PACK CHICKEN SHNITZELS',
+        'CHICKEN SHNITZEL VALUE PACK (10)':  'SHNITZELS-10-PACK',
+        'CHICKEN SHNITZEL 6-PACK':           'SHNITZELS-6-PACK',
         'DARK SHNITZEL (PARGIOT)':           'PARGIOT',
         'CHICKEN LEGS 2-PACK':               'CHICKEN LEGS-2 PACK',
         'CHICKEN LEGS 2 PACK':               'CHICKEN LEGS-2 PACK',
@@ -3125,6 +3125,20 @@ function pullRemoteOrders() {
           const legacyValid = allProds.find(p => p.name.trim() === legacyResolved);
           if (legacyValid) {
             finalKey = legacyResolved;
+          } else {
+            // 2b. LEGACY resolved to MH Meats name — try customer-specific equivalents
+            const EQUIV = {
+              'SHNITZELS-6-PACK':   ['6-PACK CHICKEN SHNITZELS','SHNITZELS'],
+              'SHNITZELS-10-PACK':  ['10-PACK CHICKEN SHNITZELS','SHNITZELS'],
+              'SHNITZELS-2-PACK':   ['SHNITZELS'],
+              'CARCASS-5-PACK':     ['5-PACK CARCASSES','CARCASSES'],
+              'WINGS-12-PACK':      ['12-PACK CHICKEN WINGS','WINGS'],
+            };
+            const alts = EQUIV[legacyResolved] || [];
+            for (const alt of alts) {
+              const altValid = allProds.find(p => p.name.trim() === alt);
+              if (altValid) { finalKey = alt; break; }
+            }
           }
         }
         // 3. If still no match, try normalizeKey fuzzy match
