@@ -19,12 +19,7 @@
   .cust-badge{background:rgba(200,168,75,0.12);border:1px solid rgba(200,168,75,0.3);color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.5px;padding:4px 12px;border-radius:4px;}
   .day-badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface2);padding:4px 10px;border-radius:4px;border:1px solid var(--border);}
   .main{max-width:680px;margin:0 auto;padding:20px 14px 100px;}
-  .day-section{margin-bottom:18px;}
   .section-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-  .day-btns{display:flex;gap:6px;flex-wrap:wrap;}
-  .day-btn{padding:8px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.15s;}
-  .day-btn:hover{border-color:var(--accent);color:var(--text);}
-  .day-btn.active{background:var(--accent);border-color:var(--accent);color:#000;}
   .product-section{margin-bottom:14px;}
   /* BEEF SECTION — prominent header */
   .beef-divider{background:rgba(123,32,32,0.15);border:1px solid rgba(123,32,32,0.4);border-radius:6px 6px 0 0;padding:10px 14px;display:flex;align-items:center;gap:8px;}
@@ -109,7 +104,6 @@ const CUSTOMERS = [
     {plu:2801, name:"CARCASS 5-PACK"},
     {plu:282,  name:"SOUP PACK"},
     {plu:283,  name:"FAMILY SIZE SOUP PACK"},
-    {plu:285,  name:"BREAST ROASTER"},
     {plu:285,  name:"BREAST QUARTERS"},
     {plu:288,  name:"ROASTER LEG QUARTERS"},
     {plu:288,  name:"ROASTER LEG QUARTERS 2-PACK"},
@@ -170,7 +164,6 @@ const CUSTOMERS = [
     {plu:417,  name:"ROASTER IN 1/8"},
     {plu:419,  name:"ROASTER IN 1/4 SHNITZELED"},
     {plu:420,  name:"ROASTER IN 1/8 SHNITZELED"},
-    {plu:500,  name:"BREAST ROASTER"},
     {plu:604,  name:"CARCASS 5-PACK"},
     {plu:607,  name:"FAMILY SIZE SOUP PACK"},
     {plu:450,  name:"ROASTER LEG QUARTERS 2-PACK"},
@@ -224,7 +217,6 @@ const CUSTOMERS = [
     {plu:417,  name:"ROASTER IN 1/8"},
     {plu:419,  name:"ROASTER IN 1/4 SHNITZELED"},
     {plu:420,  name:"ROASTER IN 1/8 SHNITZELED"},
-    {plu:500,  name:"BREAST ROASTER"},
     {plu:604,  name:"CARCASS 5-PACK"},
     {plu:607,  name:"FAMILY SIZE SOUP PACK"},
     {plu:450,  name:"ROASTER LEG QUARTERS 2-PACK"},
@@ -277,7 +269,6 @@ const CUSTOMERS = [
     {plu:417,  name:"ROASTER IN 1/8"},
     {plu:419,  name:"ROASTER IN 1/4 SHNITZELED"},
     {plu:420,  name:"ROASTER IN 1/8 SHNITZELED"},
-    {plu:500,  name:"BREAST ROASTER"},
     {plu:604,  name:"CARCASS 5-PACK"},
     {plu:607,  name:"FAMILY SIZE SOUP PACK"},
     {plu:450,  name:"ROASTER LEG QUARTERS 2-PACK"},
@@ -625,118 +616,118 @@ const BEEF_BY_CUSTOMER = {
   ],
   ksmeats:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
     {plu:16, name:"CHOLENT PACK"},{plu:16, name:"CUBED CHOLENT BEEF"},
     {plu:15, name:"CUBED TOP RIB"},{plu:42, name:"FAIRY STEAKS"},
     {plu:65, name:"BRAISING STEAK"},{plu:50, name:"FLANK"},
-    {plu:2,  name:"FLAT BRISKET JOINT LARGE"},{plu:75,name:"FLAT PICKLED JOINT LARGE"},
-    {plu:9,  name:"GOULASH BEEF CUBES"},{plu:62, name:"MARROW BONES"},
-    {plu:66, name:"MEAT BONES"},{plu:66, name:"MINCED BEEF"},
-    {plu:19, name:"MINCED STEAK"},{plu:null,name:"PICKLED BEEF ROLL LARGE"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"RIB ON BONE"},
-    {plu:null,name:"ROLLED BRISKET JOINT LARGE"},{plu:null,name:"ROLLED PICKLED BRISKET LARGE"},
-    {plu:19, name:"WHOLE SHIN"},{plu:63, name:"THIN SLICED GRILLING STEAK"},
-  ],
-  halperns:[
-    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
-    {plu:16, name:"CHOLENT PACK"},{plu:16, name:"CUBED CHOLENT BEEF"},
-    {plu:15, name:"CUBED TOP RIB"},{plu:42, name:"FAIRY STEAKS"},
-    {plu:65, name:"BRAISING STEAK"},{plu:50, name:"FLANK"},
-    {plu:2,  name:"FLAT BRISKET JOINT LARGE"},{plu:75,name:"FLAT PICKLED JOINT LARGE"},
-    {plu:9,  name:"GOULASH BEEF CUBES"},{plu:62, name:"MARROW BONES"},
-    {plu:66, name:"MEAT BONES"},{plu:66, name:"MINCED BEEF"},
-    {plu:19, name:"MINCED STEAK"},{plu:null,name:"PICKLED BEEF ROLL LARGE"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
-    {plu:null,name:"ROLLED PICKLED BRISKET LARGE"},{plu:19, name:"SLICED SHIN"},
+    {plu:2,  name:"FLAT BRISKET JOINT"},{plu:75,name:"FLAT PICKLED JOINT"},
+    {plu:9,  name:"GOULASH BEEF CUBES"},{plu:14, name:"LEAN SANDWICH STEAKS"},
+    {plu:62, name:"MARROW BONES"},{plu:66, name:"MEAT BONES"},
+    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
+    {plu:null,name:"PICKLED BEEF ROLL"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"RIB ON BONE"},{plu:null,name:"ROLLED BRISKET JOINT"},
+    {plu:null,name:"ROLLED PICKLED BRISKET"},{plu:19, name:"WHOLE SHIN"},
     {plu:63, name:"THIN SLICED GRILLING STEAK"},
+  ],
+    {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"CHOLENT PACK"},{plu:16, name:"CUBED CHOLENT BEEF"},
+    {plu:15, name:"CUBED TOP RIB"},{plu:42, name:"FAIRY STEAKS"},
+    {plu:65, name:"BRAISING STEAK"},{plu:50, name:"FLANK"},
+    {plu:2,  name:"FLAT BRISKET JOINT"},{plu:75,name:"FLAT PICKLED JOINT"},
+    {plu:9,  name:"GOULASH BEEF CUBES"},{plu:14, name:"LEAN SANDWICH STEAKS"},
+    {plu:62, name:"MARROW BONES"},{plu:66, name:"MEAT BONES"},
+    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
+    {plu:null,name:"PICKLED BEEF ROLL"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:null,name:"ROLLED PICKLED BRISKET"},
+    {plu:19, name:"SLICED SHIN"},
   ],
   kayes:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
     {plu:16, name:"CHOLENT PACK"},{plu:16, name:"CUBED CHOLENT BEEF"},
     {plu:15, name:"CUBED TOP RIB"},{plu:42, name:"FAIRY STEAKS"},
     {plu:65, name:"BRAISING STEAK"},{plu:50, name:"FLANK"},
-    {plu:2,  name:"FLAT BRISKET JOINT LARGE"},{plu:75,name:"FLAT PICKLED JOINT LARGE"},
-    {plu:9,  name:"GOULASH BEEF CUBES"},{plu:62, name:"MARROW BONES"},
-    {plu:66, name:"MEAT BONES"},{plu:66, name:"MINCED BEEF"},
-    {plu:19, name:"MINCED STEAK"},{plu:null,name:"PICKLED BEEF ROLL LARGE"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
-    {plu:null,name:"ROLLED PICKLED BRISKET LARGE"},{plu:19, name:"SLICED SHIN"},
-    {plu:63, name:"THIN SLICED GRILLING STEAK"},
+    {plu:2,  name:"FLAT BRISKET JOINT"},{plu:75,name:"FLAT PICKLED JOINT"},
+    {plu:9,  name:"GOULASH BEEF CUBES"},{plu:14, name:"LEAN SANDWICH STEAKS"},
+    {plu:62, name:"MARROW BONES"},{plu:66, name:"MEAT BONES"},
+    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
+    {plu:null,name:"PICKLED BEEF ROLL"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:null,name:"ROLLED PICKLED BRISKET"},
+    {plu:19, name:"SLICED SHIN"},
   ],
   yoels:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
     {plu:16, name:"CUBED CHOLENT BEEF"},{plu:15, name:"CUBED TOP RIB"},
     {plu:42, name:"FAIRY STEAKS"},{plu:65, name:"BRAISING STEAK"},
-    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT LARGE"},
-    {plu:75, name:"FLAT PICKLED JOINT LARGE"},{plu:9, name:"GOULASH BEEF CUBES"},
-    {plu:62, name:"MARROW BONES"},{plu:66, name:"MEAT BONES"},
-    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
-    {plu:19, name:"SLICED SHIN"},{plu:63, name:"THIN SLICED GRILLING STEAK"},
+    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT"},
+    {plu:75, name:"FLAT PICKLED JOINT"},{plu:9, name:"GOULASH BEEF CUBES"},
+    {plu:14, name:"LEAN SANDWICH STEAKS"},{plu:62, name:"MARROW BONES"},
+    {plu:66, name:"MEAT BONES"},{plu:66, name:"MINCED BEEF"},
+    {plu:19, name:"MINCED STEAK"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:19, name:"SLICED SHIN"},
   ],
   craft:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
     {plu:16, name:"CUBED CHOLENT BEEF"},{plu:15, name:"CUBED TOP RIB"},
     {plu:42, name:"FAIRY STEAKS"},{plu:65, name:"BRAISING STEAK"},
-    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT LARGE"},
-    {plu:75, name:"FLAT PICKLED JOINT LARGE"},{plu:9, name:"GOULASH BEEF CUBES"},
-    {plu:62, name:"MARROW BONES"},{plu:66, name:"MEAT BONES"},
-    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
-    {plu:19, name:"SLICED SHIN"},{plu:63, name:"THIN SLICED GRILLING STEAK"},
+    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT"},
+    {plu:75, name:"FLAT PICKLED JOINT"},{plu:9, name:"GOULASH BEEF CUBES"},
+    {plu:14, name:"LEAN SANDWICH STEAKS"},{plu:62, name:"MARROW BONES"},
+    {plu:66, name:"MEAT BONES"},{plu:66, name:"MINCED BEEF"},
+    {plu:19, name:"MINCED STEAK"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:19, name:"SLICED SHIN"},
   ],
   mottis:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
     {plu:16, name:"CUBED CHOLENT BEEF"},{plu:15, name:"CUBED TOP RIB"},
-    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT LARGE"},
-    {plu:75, name:"FLAT PICKLED JOINT LARGE"},{plu:9, name:"GOULASH BEEF CUBES"},
-    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
-    {plu:19, name:"SLICED SHIN"},{plu:63, name:"THIN SLICED GRILLING STEAK"},
+    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT"},
+    {plu:75, name:"FLAT PICKLED JOINT"},{plu:9, name:"GOULASH BEEF CUBES"},
+    {plu:14, name:"LEAN SANDWICH STEAKS"},{plu:66, name:"MINCED BEEF"},
+    {plu:19, name:"MINCED STEAK"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:19, name:"SLICED SHIN"},
   ],
   freilich:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
     {plu:16, name:"CUBED CHOLENT BEEF"},{plu:15, name:"CUBED TOP RIB"},
-    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT LARGE"},
-    {plu:75, name:"FLAT PICKLED JOINT LARGE"},{plu:9, name:"GOULASH BEEF CUBES"},
-    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
-    {plu:19, name:"SLICED SHIN"},{plu:63, name:"THIN SLICED GRILLING STEAK"},
+    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT"},
+    {plu:75, name:"FLAT PICKLED JOINT"},{plu:9, name:"GOULASH BEEF CUBES"},
+    {plu:14, name:"LEAN SANDWICH STEAKS"},{plu:66, name:"MINCED BEEF"},
+    {plu:19, name:"MINCED STEAK"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:19, name:"SLICED SHIN"},
   ],
   bsssem:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
     {plu:16, name:"CUBED CHOLENT BEEF"},{plu:15, name:"CUBED TOP RIB"},
-    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT LARGE"},
-    {plu:75, name:"FLAT PICKLED JOINT LARGE"},{plu:9, name:"GOULASH BEEF CUBES"},
-    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
-    {plu:19, name:"SLICED SHIN"},{plu:63, name:"THIN SLICED GRILLING STEAK"},
+    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT"},
+    {plu:75, name:"FLAT PICKLED JOINT"},{plu:9, name:"GOULASH BEEF CUBES"},
+    {plu:14, name:"LEAN SANDWICH STEAKS"},{plu:66, name:"MINCED BEEF"},
+    {plu:19, name:"MINCED STEAK"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:19, name:"SLICED SHIN"},
   ],
   ushis:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
-    {plu:16, name:"BOLA JOINT LARGE"},{plu:14, name:"BOLA STEAKS"},
+    {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
     {plu:16, name:"CUBED CHOLENT BEEF"},{plu:15, name:"CUBED TOP RIB"},
-    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT LARGE"},
-    {plu:75, name:"FLAT PICKLED JOINT LARGE"},{plu:9, name:"GOULASH BEEF CUBES"},
-    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
-    {plu:null,name:"POT ROAST LARGE"},{plu:14, name:"PRIME CHOLENT MEAT"},
-    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT LARGE"},
-    {plu:19, name:"SLICED SHIN"},{plu:63, name:"THIN SLICED GRILLING STEAK"},
+    {plu:50, name:"FLANK"},{plu:2, name:"FLAT BRISKET JOINT"},
+    {plu:75, name:"FLAT PICKLED JOINT"},{plu:9, name:"GOULASH BEEF CUBES"},
+    {plu:14, name:"LEAN SANDWICH STEAKS"},{plu:66, name:"MINCED BEEF"},
+    {plu:19, name:"MINCED STEAK"},{plu:null,name:"POT ROAST"},
+    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
+    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:19, name:"SLICED SHIN"},
   ],
 };
 
@@ -775,13 +766,6 @@ function renderForm() {
   const main = document.getElementById('mainArea');
   let html = '';
 
-  // Day selector
-  html += `<div class="day-section">
-    <div class="section-label">📅 Select Day</div>
-    <div class="day-btns">
-      ${DAYS.map(d => `<div class="day-btn${d===currentDay?' active':''}" onclick="selectDay('${d}',this)">${d.slice(0,3).toUpperCase()}</div>`).join('')}
-    </div>
-  </div>`;
 
   html += `<div class="last-order-banner" id="lastOrderBanner">
     <span style="color:var(--accent);font-weight:600">📋 Last order found</span> — click <strong style="color:var(--text)">Last Order</strong> below to pre-fill this form, then edit as needed.
@@ -841,11 +825,6 @@ function buildSection(title, products, isBeef) {
   </div>`;
 }
 
-function selectDay(day, btn) {
-  currentDay = day;
-  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  updateFooter();
 }
 
 function setQty(key, val, input) {
