@@ -590,6 +590,10 @@
 
   <!-- ════════════════════════════════ SUMMARY PANEL ════════════════════════════════ -->
   <div class="panel" id="panel-summary" data-print-title="ORDER SUMMARY">
+    <div class="sheet-controls no-print">
+      <div class="sheet-day-btns" id="summaryDayBtns"></div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
+    </div>
     <div id="summaryPanelContent" style="padding:8px 0"></div>
   </div>
 
@@ -606,7 +610,9 @@
   <div class="panel" id="panel-butcher" data-print-title="BUTCHER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
+      <button class="btn btn-ghost" style="margin-left:auto" onclick="printSpecies('butcherSheetContent','poultry','BUTCHER — POULTRY')">🐔 Print Poultry</button>
+      <button class="btn btn-ghost" onclick="printSpecies('butcherSheetContent','beef','BUTCHER — BEEF')">🥩 Print Beef</button>
+      <button class="btn btn-primary" onclick="printActivePanel()">🖨 Print All</button>
     </div>
     <div id="butcherSheetContent"></div>
   </div>
@@ -615,7 +621,9 @@
   <div class="panel" id="panel-packer" data-print-title="PACKER LISTS">
     <div class="sheet-controls no-print">
       <div class="sheet-day-btns" id="packerDayBtns"></div>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="printActivePanel()">🖨 Print</button>
+      <button class="btn btn-ghost" style="margin-left:auto" onclick="printSpecies('packerSheetContent','poultry','PACKER — POULTRY')">🐔 Print Poultry</button>
+      <button class="btn btn-ghost" onclick="printSpecies('packerSheetContent','beef','PACKER — BEEF')">🥩 Print Beef</button>
+      <button class="btn btn-primary" onclick="printActivePanel()">🖨 Print All</button>
     </div>
     <div id="packerSheetContent"></div>
   </div>
@@ -862,6 +870,7 @@ const CUSTOMERS = [
     {name:"CARCASS-5-PACK"},
     {name:"SOUP PACK"},
     {name:"DOUBLE SOUP PACK"},
+    {name:"FAMILY SIZE SOUP PACK"},
     {name:"BREAST QUARTERS"},
     {name:"LEG QUARTERS-1-PACK"},
     {name:"LEG QUARTERS-2-PACK"},
@@ -891,7 +900,6 @@ const CUSTOMERS = [
     {name:"5-PACK CARCASSES"},
     {name:"6-PACK CHICKEN SHNITZELS"},
     {name:"12-PACK CHICKEN WINGS"},
-    {name:"BREAST QUARTER ROASTER"},
     {name:"CHICKEN DRUMSTICKS"},
     {name:"CHICKEN FILLETS"},
     {name:"CHICKEN GOUJONS"},
@@ -1439,6 +1447,8 @@ const BEEF_BY_CUSTOMER = {
     {name:"BLADE STEAKS",unit:"UNITS",mult:4},
     {name:"BOLA JOINT",unit:"UNITS",mult:1},
     {name:"BOLA STEAKS",unit:"UNITS",mult:2},
+    {name:"BRAISING STEAK",unit:"UNITS",mult:4},
+    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
     {name:"CUBED CHOLENT BEEF",unit:"UNITS",mult:0.5},
     {name:"CUBED TOP RIB",unit:"UNITS",mult:0.5},
     {name:"FAIRY STEAKS",unit:"UNITS",mult:4},
@@ -1446,8 +1456,10 @@ const BEEF_BY_CUSTOMER = {
     {name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
     {name:"GOULASH BEEF CUBES",unit:"UNITS",mult:0.5},
+    {name:"LEAN SANDWICH STEAKS",unit:"UNITS",mult:2},
     {name:"MARROW BONES",unit:"UNITS",mult:2},
     {name:"MEAT BONES",unit:"UNITS",mult:6},
+    {name:"MINCED BEEF",unit:"UNITS",mult:0.5},
     {name:"MINCED STEAK",unit:"UNITS",mult:0.5},
     {name:"PICKLED BEEF ROLL",unit:"UNITS",mult:1},
     {name:"POT ROAST",unit:"UNITS",mult:1},
@@ -1457,7 +1469,7 @@ const BEEF_BY_CUSTOMER = {
     {name:"ROLLED BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"ROLLED PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
-    {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2}
+    {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2},
   ],
   halperns: [
     {name:"BEEF RIBLETS (FLANKEN)",unit:"UNITS",mult:2},
@@ -1473,6 +1485,7 @@ const BEEF_BY_CUSTOMER = {
     {name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
     {name:"FLAT PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"GOULASH BEEF CUBES",unit:"UNITS",mult:0.5},
+    {name:"LEAN SANDWICH STEAKS",unit:"UNITS",mult:2},
     {name:"MARROW BONES",unit:"UNITS",mult:2},
     {name:"MEAT BONES",unit:"UNITS",mult:5},
     {name:"MINCED BEEF",unit:"UNITS",mult:0.5},
@@ -1484,7 +1497,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"ROLLED BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"ROLLED PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
-    {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2}
   ],
   kayes: [
     {name:"BEEF RIBLETS (FLANKEN)",unit:"UNITS",mult:2},
@@ -1500,6 +1512,7 @@ const BEEF_BY_CUSTOMER = {
     {name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
     {name:"FLAT PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"GOULASH BEEF CUBES",unit:"UNITS",mult:0.5},
+    {name:"LEAN SANDWICH STEAKS",unit:"UNITS",mult:2},
     {name:"MARROW BONES",unit:"UNITS",mult:2},
     {name:"MEAT BONES",unit:"UNITS",mult:5},
     {name:"MINCED BEEF",unit:"UNITS",mult:0.5},
@@ -1511,7 +1524,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"ROLLED BRISKET JOINT",unit:"UNITS",mult:1},
     {name:"ROLLED PICKLED BRISKET",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
-    {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2}
   ],
   deli: [
     {name:"BACK OF RIB",unit:"KG",mult:1},
@@ -1964,7 +1976,7 @@ function buildCustomerList() {
 }
 
 function buildDayButtonSets() {
-  ['chef','butcher','packer','dispatch'].forEach(panel => {
+  ['summary','chef','butcher','packer','dispatch'].forEach(panel => {
     const el = document.getElementById(`${panel}DayBtns`);
     el.innerHTML = DAYS.map((d,i) => `
       <div class="sheet-day-btn ${i===0?'active':''}" onclick="selectSheetDay('${panel}','${d}',this)">${d.slice(0,3).toUpperCase()}</div>
@@ -2175,6 +2187,7 @@ function showToast(msg) {
 function selectSheetDay(panel, day, btn) {
   btn.closest('.sheet-day-btns').querySelectorAll('.sheet-day-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  if (panel === 'summary') { currentDay = day; renderSummaryPanel(); }
   if (panel === 'chef') renderChefSheet(day);
   if (panel === 'butcher') renderButcherSheet(day);
   if (panel === 'packer') renderPackerSheet(day);
@@ -2206,6 +2219,15 @@ function getTotalsForDay(day) {
   return totals;
 }
 
+function selectSummaryDay(day) {
+  currentDay = day;
+  // Sync the summary day buttons
+  document.querySelectorAll('#summaryDayBtns .sheet-day-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === day.slice(0,3).toUpperCase());
+  });
+  renderSummaryPanel();
+}
+
 function renderSummaryPanel() {
   const el = document.getElementById('summaryPanelContent');
   if (!el) return;
@@ -2219,7 +2241,7 @@ function renderSummaryPanel() {
       if (lines) { totalLines += lines; custWithOrders++; }
     });
     const isToday = day === currentDay;
-    return `<div class="summary-card" style="${isToday ? 'border-color:var(--accent)' : ''}">
+    return `<div class="summary-card" style="${isToday ? 'border-color:var(--accent)' : ''};cursor:pointer" onclick="selectSummaryDay('${day}')">
       <div class="summary-label">${day}${isToday ? ' ★' : ''}</div>
       <div class="summary-value">${totalLines}</div>
       <div class="summary-sub">${custWithOrders} customer${custWithOrders !== 1 ? 's' : ''}</div>
@@ -2419,6 +2441,7 @@ function renderButcherSheet(day) {
     'CARCASS-5-PACK':             5,
     'SOUP PACK':                  1,
     'DOUBLE SOUP PACK':           1,
+    'FAMILY SIZE SOUP PACK':      2,
     'BREAST QUARTERS':            1,
     'LEG QUARTERS-1-PACK':       1,
     'LEG QUARTERS-2-PACK':       2,
@@ -2447,7 +2470,6 @@ function renderButcherSheet(day) {
     '6-PACK CHICKEN SHNITZELS':   6,
     '5-PACK CARCASSES':           5,
     '12-PACK CHICKEN WINGS':      8,
-    'BREAST QUARTER ROASTER':     1,
     'CHICKEN DRUMSTICKS':         6,
     'CHICKEN FILLETS':            6,
     'CHICKEN GOUJONS':            12,
@@ -2501,8 +2523,7 @@ function renderButcherSheet(day) {
     {name:'LEG QUARTERS IN 1/8 (ALL PACKS)', qty:['LEG QUARTERS IN 1/8','LEG QUARTERS IN 1/8 VALUE PACK','CHICKEN LEGS IN 1/8-2 PACK','CHICKEN LEGS IN 1/8-VALUE PACK','CHICKEN LEGS IN 1/8'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'CAPONS (BONED THIGHS)', qty:poultryQty('CAPONS (BONED THIGHS)')},
     {name:'PARGIOT', qty:poultryQty('PARGIOT')+poultryQty('CHICKEN PARGIOT')},
-    {name:'CHICKEN DRUMSTICKS', qty:poultryQty('CHICKEN DRUMSTICKS')},
-    {name:'POLKIES', qty:poultryQty('POLKIES')},
+    {name:'CHICKEN DRUMSTICKS / POLKIES', qty:poultryQty('CHICKEN DRUMSTICKS')+poultryQty('POLKIES')},
     {name:'THIGH-2-PACK', qty:poultryQty('THIGH-2-PACK')},
     {name:'THIGH-4-PACK', qty:poultryQty('THIGH-4-PACK')},
     {name:'CHICKEN THIGHS', qty:poultryQty('CHICKEN THIGHS')},
@@ -2516,7 +2537,7 @@ function renderButcherSheet(day) {
     {name:'GOUJONS / CHICKEN GOUJONS', qty:poultryQty('GOUJONS')+poultryQty('CHICKEN GOUJONS')},
     {name:'FILLETS / CHICKEN FILLETS', qty:poultryQty('FILLETS')+poultryQty('CHICKEN FILLETS')},
     {name:'CARCASS (ALL PACKS)', qty:['CARCASS-1-PACK','CARCASS-2-PACK','CARCASS-5-PACK','5-PACK CARCASSES','CARCASSES'].reduce((a,n)=>a+poultryQty(n),0)},
-    {name:'SOUP PACKS (ALL)', qty:['SOUP PACK','DOUBLE SOUP PACK'].reduce((a,n)=>a+poultryQty(n),0)},
+    {name:'SOUP PACKS (ALL)', qty:['SOUP PACK','DOUBLE SOUP PACK','FAMILY SIZE SOUP PACK'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'SHNITZELS (TOTAL INDIVIDUAL)', qty:['SHNITZELS-2-PACK','SHNITZELS-6-PACK','SHNITZELS-10-PACK','10-PACK CHICKEN SHNITZELS','6-PACK CHICKEN SHNITZELS','SHNITZELS','BREADED SHNITZELS'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'WINGS (ALL PACKS)', qty:['WINGS-6-PACK','WINGS-12-PACK','12-PACK CHICKEN WINGS','WINGS'].reduce((a,n)=>a+poultryQty(n),0)},
     {name:'NECKS 8-PACK', qty:poultryQty('NECKS 8-PACK')+poultryQty('CHICKEN NECK (8-PACK)')},
@@ -2533,7 +2554,10 @@ function renderButcherSheet(day) {
 
   // beefQty returns BUTCHER AMOUNT — packs × multiplier
   // NAME_ALIASES removed — LARGE/SMALL stripped from all product names, exact match now works
-  const reverseAliases = {};
+  const reverseAliases = {
+    'WHOLE TOP RIB / PRIME CHOLENT MEAT': ['WHOLE TOP RIB', 'PRIME CHOLENT MEAT'],
+    'CHICKEN DRUMSTICKS / POLKIES': ['CHICKEN DRUMSTICKS', 'POLKIES'],
+  };
 
   function beefQty(name) {
     let total = 0;
@@ -2562,7 +2586,7 @@ function renderButcherSheet(day) {
       {name:'POT ROAST',            unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
       {name:'ROLLED TOP RIB JOINT',       unit:'UNITS',desc:'1.5-1.8KG, netted, max diameter 12cm'},
       {name:'DOUBLE TOP RIB',             unit:'UNITS'},
-      {name:'WHOLE TOP RIB',              unit:'UNITS',desc:'400-500G'},
+      {name:'WHOLE TOP RIB / PRIME CHOLENT MEAT',              unit:'UNITS',desc:'400-500G'},
       {name:'CUBED TOP RIB',             unit:'KG'},
       {name:'TOP RIB ON BONE',            unit:'KG'},
       {name:'FALSHE FILLET MIGNON',       unit:'UNITS'},
@@ -2617,7 +2641,6 @@ function renderButcherSheet(day) {
     ]},
     { cat:'FLANK', items:[
       {name:'FLANK',                      unit:'UNITS',desc:'400-500G'},
-      {name:'PRIME CHOLENT MEAT',         unit:'UNITS'},
       {name:'CUBED CHOLENT BEEF',         unit:'KG',   desc:'70/30 fat content'},
       {name:'CHOLENT PACK',               unit:'KG'},
       {name:'GALLA BONES',                unit:'UNITS'},
@@ -2672,6 +2695,8 @@ function renderButcherSheet(day) {
 function renderPackerSheet(day) {
   // Consolidation map: variant names → canonical packer display name
   const PACKER_CONSOLIDATE = {
+    'DOUBLE SOUP PACK':             'DOUBLE / FAMILY SIZE SOUP PACK',
+    'FAMILY SIZE SOUP PACK':        'DOUBLE / FAMILY SIZE SOUP PACK',
     'LEG QUARTERS-1-PACK':          'LEG QUARTERS-1-PACK',
     'LEG QUARTERS-2-PACK':          'LEG QUARTERS-2-PACK',
     'CHICKEN LEGS-2 PACK':          'LEG QUARTERS-2-PACK',
@@ -3020,6 +3045,8 @@ function pullRemoteOrders() {
         'CARCASS':                            'CARCASS-1-PACK',
         'CARCASS DOUBLE PACK':               'CARCASS-2-PACK',
         'CARCASS 5-PACK':                    'CARCASS-5-PACK',
+        'FAMILY SOUP PARCEL':                'FAMILY SIZE SOUP PACK',
+        'PRIME CHOLENT MEAT':                'WHOLE TOP RIB',
         'BREAST ROASTER':                    'BREAST QUARTERS',
         'BREAST QUARTER ROASTER':            'BREAST QUARTERS',
         'ROASTER LEG QUARTERS':              'LEG QUARTERS-1-PACK',
