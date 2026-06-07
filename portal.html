@@ -21,7 +21,6 @@
   .main{max-width:680px;margin:0 auto;padding:20px 14px 100px;}
   .section-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
   .product-section{margin-bottom:14px;}
-  /* BEEF SECTION — prominent header */
   .beef-divider{background:rgba(123,32,32,0.15);border:1px solid rgba(123,32,32,0.4);border-radius:6px 6px 0 0;padding:10px 14px;display:flex;align-items:center;gap:8px;}
   .beef-divider-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:#eb5757;letter-spacing:0.5px;}
   .section-header{background:var(--surface2);border:1px solid var(--border);border-radius:6px 6px 0 0;padding:9px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.5px;color:var(--muted);display:flex;align-items:center;gap:8px;}
@@ -88,9 +87,6 @@
 <div id="voiceStatus">🎤 Listening...</div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-// PRODUCT DATA — names EXACTLY match app.html for clean import
-// ══════════════════════════════════════════════════════════════════
 const CUSTOMERS = [
   { id:"mhmeats", name:"MH Meats", color:"#c8a84b", products:[
     {plu:251,  name:"WHOLE ROASTER"},
@@ -129,7 +125,6 @@ const CUSTOMERS = [
     {plu:3411, name:"CHICKEN STIR FRY"},
     {plu:721,  name:"KOSHERED CHICKEN LIVER"},
     {plu:611,  name:"PUPICKS"},
-    // Flavoured
     {plu:null, name:"MEAT BALLS - 24 PACK",         flavoured:true},
     {plu:null, name:"CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6", flavoured:true},
     {plu:null, name:"TASTY BEEF SKEWERS",            flavoured:true},
@@ -182,7 +177,6 @@ const CUSTOMERS = [
     {plu:651,  name:"CHICKEN WINGS (12 PIECES)"},
     {plu:456,  name:"DARK SHNITZEL (PARGIOT)"},
     {plu:611,  name:"PUPICKS"},
-    // Flavoured — full MH list to match app.html
     {plu:null, name:"MEAT BALLS - 24 PACK",         flavoured:true},
     {plu:null, name:"CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6", flavoured:true},
     {plu:null, name:"TASTY BEEF SKEWERS",            flavoured:true},
@@ -326,7 +320,6 @@ const CUSTOMERS = [
     {plu:null, name:"TURKEY FILLETS"},
   ]},
   { id:"mhchef", name:"MH Meats Chef", color:"#c0392b", products:[
-    // BEEF
     {plu:2,   name:"MEAT BALLS - 12 PACK",                    section:"BEEF"},
     {plu:3,   name:"MEAT BALLS - 24 PACK",                    section:"BEEF"},
     {plu:72,  name:"4 OUNCE BEEFBURGERS",                     section:"BEEF"},
@@ -355,7 +348,6 @@ const CUSTOMERS = [
     {plu:389, name:"BEEF TOMATO SAUSAGES",                    section:"BEEF"},
     {plu:501, name:"MH SCOTCH EGGS",                          section:"BEEF"},
     {plu:880, name:"BEEF PINWHEELS",                          section:"BEEF"},
-    // CHICKEN
     {plu:3871,name:"JUMBO CHICKEN SAUSAGES",                  section:"CHICKEN"},
     {plu:125, name:"GRILLING CHICKEN AND SAUSAGE KEBAB",      section:"CHICKEN"},
     {plu:346, name:"CHICKEN BURGERS",                         section:"CHICKEN"},
@@ -402,7 +394,6 @@ const CUSTOMERS = [
     {plu:359, name:"CHICKEN SHWARMA",                         section:"CHICKEN",flavoured:true},
     {plu:360, name:"CHICKEN SHISHLIK",                        section:"CHICKEN",flavoured:true},
     {plu:1342,name:"CHICKEN FAJITA",                          section:"CHICKEN",flavoured:true},
-    // LAMB
     {plu:191, name:"LAMB SHWARMA",              section:"LAMB"},
     {plu:192, name:"LAMB SHISHLIK",             section:"LAMB"},
     {plu:198, name:"LAMB BURGERS - 2 PACK",     section:"LAMB"},
@@ -432,6 +423,14 @@ const CUSTOMERS = [
     {plu:721,  name:"KOSHERED CHICKEN LIVER"},
     {plu:456,  name:"DARK SHNITZEL (PARGIOT)"},
     {plu:611,  name:"PUPICKS"},
+    {plu:null, name:"SWEET AND SOUR SHNITZELS",      flavoured:true},
+    {plu:null, name:"BBQ SHNITZELS",                 flavoured:true},
+    {plu:null, name:"TERIYAKI CHICKEN SHNITZELS",    flavoured:true},
+    {plu:null, name:"CRUMB COATED SHNITZELS",        flavoured:true},
+    {plu:null, name:"CRUMB COATED DARK SHNITZEL",    flavoured:true},
+    {plu:null, name:"SWEET AND SOUR DARK SHNITZELS", flavoured:true},
+    {plu:null, name:"DELI STYLE DARK SHNITZELS",     flavoured:true},
+    {plu:null, name:"BBQ DARK SHNITZELS",            flavoured:true},
     {plu:null, name:"BREADED SHNITZELS",             flavoured:true},
     {plu:null, name:"BEEF GRILLSTICKS",              flavoured:true},
     {plu:null, name:"24-PACK MEAT BALLS",            flavoured:true},
@@ -461,6 +460,14 @@ const CUSTOMERS = [
     {plu:721,  name:"KOSHERED CHICKEN LIVER"},
     {plu:456,  name:"DARK SHNITZEL (PARGIOT)"},
     {plu:611,  name:"PUPICKS"},
+    {plu:null, name:"SWEET AND SOUR SHNITZELS",      flavoured:true},
+    {plu:null, name:"BBQ SHNITZELS",                 flavoured:true},
+    {plu:null, name:"TERIYAKI CHICKEN SHNITZELS",    flavoured:true},
+    {plu:null, name:"CRUMB COATED SHNITZELS",        flavoured:true},
+    {plu:null, name:"CRUMB COATED DARK SHNITZEL",    flavoured:true},
+    {plu:null, name:"SWEET AND SOUR DARK SHNITZELS", flavoured:true},
+    {plu:null, name:"DELI STYLE DARK SHNITZELS",     flavoured:true},
+    {plu:null, name:"BBQ DARK SHNITZELS",            flavoured:true},
     {plu:null, name:"BREADED SHNITZELS",             flavoured:true},
     {plu:null, name:"BEEF GRILLSTICKS",              flavoured:true},
     {plu:null, name:"24-PACK MEAT BALLS",            flavoured:true},
@@ -489,6 +496,14 @@ const CUSTOMERS = [
     {plu:721,  name:"KOSHERED CHICKEN LIVER"},
     {plu:456,  name:"DARK SHNITZEL (PARGIOT)"},
     {plu:611,  name:"PUPICKS"},
+    {plu:null, name:"SWEET AND SOUR SHNITZELS",      flavoured:true},
+    {plu:null, name:"BBQ SHNITZELS",                 flavoured:true},
+    {plu:null, name:"TERIYAKI CHICKEN SHNITZELS",    flavoured:true},
+    {plu:null, name:"CRUMB COATED SHNITZELS",        flavoured:true},
+    {plu:null, name:"CRUMB COATED DARK SHNITZEL",    flavoured:true},
+    {plu:null, name:"SWEET AND SOUR DARK SHNITZELS", flavoured:true},
+    {plu:null, name:"DELI STYLE DARK SHNITZELS",     flavoured:true},
+    {plu:null, name:"BBQ DARK SHNITZELS",            flavoured:true},
     {plu:null, name:"BREADED SHNITZELS",             flavoured:true},
     {plu:null, name:"BEEF GRILLSTICKS",              flavoured:true},
     {plu:null, name:"24-PACK MEAT BALLS",            flavoured:true},
@@ -517,6 +532,14 @@ const CUSTOMERS = [
     {plu:721,  name:"KOSHERED CHICKEN LIVER"},
     {plu:456,  name:"DARK SHNITZEL (PARGIOT)"},
     {plu:611,  name:"PUPICKS"},
+    {plu:null, name:"SWEET AND SOUR SHNITZELS",      flavoured:true},
+    {plu:null, name:"BBQ SHNITZELS",                 flavoured:true},
+    {plu:null, name:"TERIYAKI CHICKEN SHNITZELS",    flavoured:true},
+    {plu:null, name:"CRUMB COATED SHNITZELS",        flavoured:true},
+    {plu:null, name:"CRUMB COATED DARK SHNITZEL",    flavoured:true},
+    {plu:null, name:"SWEET AND SOUR DARK SHNITZELS", flavoured:true},
+    {plu:null, name:"DELI STYLE DARK SHNITZELS",     flavoured:true},
+    {plu:null, name:"BBQ DARK SHNITZELS",            flavoured:true},
     {plu:null, name:"BREADED SHNITZELS",             flavoured:true},
     {plu:null, name:"BEEF GRILLSTICKS",              flavoured:true},
     {plu:null, name:"24-PACK MEAT BALLS",            flavoured:true},
@@ -545,6 +568,14 @@ const CUSTOMERS = [
     {plu:721,  name:"KOSHERED CHICKEN LIVER"},
     {plu:456,  name:"DARK SHNITZEL (PARGIOT)"},
     {plu:611,  name:"PUPICKS"},
+    {plu:null, name:"SWEET AND SOUR SHNITZELS",      flavoured:true},
+    {plu:null, name:"BBQ SHNITZELS",                 flavoured:true},
+    {plu:null, name:"TERIYAKI CHICKEN SHNITZELS",    flavoured:true},
+    {plu:null, name:"CRUMB COATED SHNITZELS",        flavoured:true},
+    {plu:null, name:"CRUMB COATED DARK SHNITZEL",    flavoured:true},
+    {plu:null, name:"SWEET AND SOUR DARK SHNITZELS", flavoured:true},
+    {plu:null, name:"DELI STYLE DARK SHNITZELS",     flavoured:true},
+    {plu:null, name:"BBQ DARK SHNITZELS",            flavoured:true},
     {plu:null, name:"BREADED SHNITZELS",             flavoured:true},
     {plu:null, name:"BEEF GRILLSTICKS",              flavoured:true},
     {plu:null, name:"24-PACK MEAT BALLS",            flavoured:true},
@@ -573,6 +604,14 @@ const CUSTOMERS = [
     {plu:721,  name:"KOSHERED CHICKEN LIVER"},
     {plu:456,  name:"DARK SHNITZEL (PARGIOT)"},
     {plu:611,  name:"PUPICKS"},
+    {plu:null, name:"SWEET AND SOUR SHNITZELS",      flavoured:true},
+    {plu:null, name:"BBQ SHNITZELS",                 flavoured:true},
+    {plu:null, name:"TERIYAKI CHICKEN SHNITZELS",    flavoured:true},
+    {plu:null, name:"CRUMB COATED SHNITZELS",        flavoured:true},
+    {plu:null, name:"CRUMB COATED DARK SHNITZEL",    flavoured:true},
+    {plu:null, name:"SWEET AND SOUR DARK SHNITZELS", flavoured:true},
+    {plu:null, name:"DELI STYLE DARK SHNITZELS",     flavoured:true},
+    {plu:null, name:"BBQ DARK SHNITZELS",            flavoured:true},
     {plu:null, name:"BREADED SHNITZELS",             flavoured:true},
     {plu:null, name:"BEEF GRILLSTICKS",              flavoured:true},
     {plu:null, name:"24-PACK MEAT BALLS",            flavoured:true},
@@ -630,19 +669,19 @@ const BEEF_BY_CUSTOMER = {
     {plu:null,name:"ROLLED PICKLED BRISKET"},{plu:19, name:"WHOLE SHIN"},
     {plu:63, name:"THIN SLICED GRILLING STEAK"},
   ],
+  halperns:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
     {plu:16, name:"BOLA JOINT"},{plu:14, name:"BOLA STEAKS"},
-    {plu:16, name:"CHOLENT PACK"},{plu:16, name:"CUBED CHOLENT BEEF"},
-    {plu:15, name:"CUBED TOP RIB"},{plu:42, name:"FAIRY STEAKS"},
-    {plu:65, name:"BRAISING STEAK"},{plu:50, name:"FLANK"},
-    {plu:2,  name:"FLAT BRISKET JOINT"},{plu:75,name:"FLAT PICKLED JOINT"},
-    {plu:9,  name:"GOULASH BEEF CUBES"},{plu:14, name:"LEAN SANDWICH STEAKS"},
-    {plu:62, name:"MARROW BONES"},{plu:66, name:"MEAT BONES"},
-    {plu:66, name:"MINCED BEEF"},{plu:19, name:"MINCED STEAK"},
-    {plu:null,name:"PICKLED BEEF ROLL"},{plu:null,name:"POT ROAST"},
-    {plu:14, name:"PRIME CHOLENT MEAT"},{plu:null,name:"RIB-EYE STEAKS"},
-    {plu:null,name:"ROLLED BRISKET JOINT"},{plu:null,name:"ROLLED PICKLED BRISKET"},
-    {plu:19, name:"SLICED SHIN"},
+    {plu:16, name:"CUBED CHOLENT BEEF"},{plu:15, name:"CUBED TOP RIB"},
+    {plu:42, name:"FAIRY STEAKS"},{plu:65, name:"BRAISING STEAK"},
+    {plu:50, name:"FLANK"},{plu:2,  name:"FLAT BRISKET JOINT"},
+    {plu:75, name:"FLAT PICKLED JOINT"},{plu:9,  name:"GOULASH BEEF CUBES"},
+    {plu:14, name:"LEAN SANDWICH STEAKS"},{plu:62, name:"MARROW BONES"},
+    {plu:66, name:"MEAT BONES"},{plu:66, name:"MINCED BEEF"},
+    {plu:19, name:"MINCED STEAK"},{plu:null,name:"PICKLED BEEF ROLL"},
+    {plu:null,name:"POT ROAST"},{plu:14, name:"PRIME CHOLENT MEAT"},
+    {plu:null,name:"RIB-EYE STEAKS"},{plu:null,name:"ROLLED BRISKET JOINT"},
+    {plu:null,name:"ROLLED PICKLED BRISKET"},{plu:19, name:"SLICED SHIN"},
   ],
   kayes:[
     {plu:114,name:"BEEF RIBLETS (FLANKEN)"},{plu:51, name:"BLADE STEAKS"},
@@ -734,10 +773,6 @@ const BEEF_BY_CUSTOMER = {
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_NeI9XAc73bwJcYVFUIk2feew5djxBI5uLkmxEyFXV5fwzrYcEIEDwoJmsrWUTzg6/exec';
 
-// ══════════════════════════════════════════════════════════════════
-// KEY FIX: orderKey returns clean product name only — no PLU prefix
-// This ensures Google Sheet stores clean names that match app.html
-// ══════════════════════════════════════════════════════════════════
 function orderKey(p) { return p.name; }
 
 let custId = null, currentDay = 'Monday', quantities = {};
@@ -749,13 +784,11 @@ function init() {
   const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const today = dayNames[d.getDay()];
   if (DAYS.includes(today)) currentDay = today;
-
   const params = new URLSearchParams(window.location.search);
   custId = params.get('customer') || params.get('c');
   if (!custId) { showNotFound('No customer specified in link.'); return; }
   const cust = CUSTOMERS.find(c => c.id === custId);
   if (!cust) { showNotFound(`Unknown customer: "${custId}"`); return; }
-
   document.getElementById('custBadge').textContent = cust.name;
   document.title = `MH Meats — ${cust.name} Order`;
   renderForm();
@@ -765,12 +798,9 @@ function renderForm() {
   const cust = CUSTOMERS.find(c => c.id === custId);
   const main = document.getElementById('mainArea');
   let html = '';
-
-
   html += `<div class="last-order-banner" id="lastOrderBanner">
     <span style="color:var(--accent);font-weight:600">📋 Last order found</span> — click <strong style="color:var(--text)">Last Order</strong> below to pre-fill this form, then edit as needed.
   </div>`;
-
   if (custId === 'mhchef') {
     ['BEEF','CHICKEN','LAMB'].forEach(sec => {
       const prods = cust.products.filter(p => p.section === sec);
@@ -783,17 +813,14 @@ function renderForm() {
     const standard = cust.products.filter(p => !p.flavoured);
     const flavoured = cust.products.filter(p => p.flavoured);
     const beef = BEEF_BY_CUSTOMER[custId] || [];
-    // Beef FIRST — prominent, visible on mobile
     if (beef.length) html += buildSection('🥩 Beef', beef, true);
     if (standard.length) html += buildSection('🐔 Poultry', standard, false);
     if (flavoured.length) html += buildSection('🌶 Flavoured Products', flavoured, false);
   }
-
   html += `<div id="orderHistorySection" style="margin-top:20px;">
     <div class="section-label">📋 ORDER HISTORY <span style="font-size:10px;font-weight:400;color:#555">(last 7 days)</span></div>
     <div id="historyContent" style="color:var(--muted);font-size:12px;">Loading history...</div>
   </div>`;
-
   main.innerHTML = html;
   document.getElementById('footerBar').style.display = 'flex';
   updateFooter();
@@ -806,7 +833,6 @@ function buildSection(title, products, isBeef) {
   const titleTag = isBeef
     ? `<div class="beef-divider-title">${title}</div><span style="font-size:10px;color:#eb5757;font-family:'DM Mono',monospace;background:rgba(123,32,32,.2);padding:2px 6px;border-radius:3px;text-transform:uppercase;">BEEF</span>`
     : title;
-
   const rows = products.map(p => {
     const k = orderKey(p);
     const qty = quantities[k] || 0;
@@ -818,13 +844,10 @@ function buildSection(title, products, isBeef) {
         data-key="${k}" onchange="setQty('${k}',this.value,this)" onkeydown="handleArrow(event,this)">
     </div>`;
   }).join('');
-
   return `<div class="product-section" style="margin-bottom:14px;">
     <div class="${hdrClass}">${titleTag}</div>
     <div class="product-list">${rows}</div>
   </div>`;
-}
-
 }
 
 function setQty(key, val, input) {
@@ -855,9 +878,7 @@ function submitOrder() {
   const cust = CUSTOMERS.find(c => c.id === custId);
   const btn = document.getElementById('submitBtn');
   btn.textContent = 'Submitting...'; btn.disabled = true;
-
   const payload = { customer:custId, customerName:cust.name, day:currentDay, orders:quantities, timestamp:new Date().toISOString() };
-
   fetch(APPS_SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
     .then(() => showConfirmation(payload))
     .catch(() => { btn.textContent = 'Submit Order →'; btn.disabled = false; alert('Submission failed. Please try again.'); });
@@ -869,7 +890,6 @@ function showConfirmation(payload) {
   document.getElementById('confirmScreen').style.display = 'block';
   const cust = CUSTOMERS.find(c => c.id === custId);
   document.getElementById('confirmSub').innerHTML = `Your order for <strong>${payload.day}</strong> has been received by MH Meats.<br>You will receive confirmation shortly.`;
-
   const rows = Object.entries(payload.orders).map(([k,qty]) =>
     `<div class="confirm-row"><span>${k}</span><span class="qty">× ${qty}</span></div>`
   ).join('');
@@ -890,7 +910,6 @@ function showNotFound(msg) {
   document.getElementById('mainArea').innerHTML = `<div class="not-found"><h2>Link not recognised</h2><p>${msg}</p><p style="margin-top:8px;font-size:13px">Please ask MH Meats to resend your order link.</p></div>`;
 }
 
-// Last Order
 let lastOrderData = null;
 function fetchLastOrder() {
   if (!custId) return;
@@ -928,7 +947,6 @@ function loadLastOrder() {
   if (btn) { btn.textContent = '✓ Loaded'; btn.style.color='var(--success)'; btn.style.borderColor='var(--success)'; btn.disabled=true; }
 }
 
-// Order History
 function fetchOrderHistory() {
   if (!custId) { document.getElementById('historyContent').innerHTML = '<div style="color:#555;font-size:11px;">No history available.</div>'; return; }
   const cbName = 'historyCb_' + Date.now();
@@ -1007,7 +1025,6 @@ function reorderHist(dataStr) {
   } catch(e) {}
 }
 
-// Voice
 let recognition = null, voiceActive = false;
 function toggleVoice() { voiceActive ? stopVoice() : startVoice(); }
 function startVoice() {
@@ -1069,10 +1086,6 @@ function voiceScore(spoken, productName) {
   return matches / Math.max(sw.length, pw.length);
 }
 
-
-// ═══════════════════════════════════════
-// NAME NORMALISATION — matches main app
-// ═══════════════════════════════════════
 const NAME_MAP={
   'CARCASS - 5-PACK':'CARCASS 5-PACK','CARCASS-5-PACK':'CARCASS 5-PACK',
   '5-PACK CARCASSES':'CARCASS 5-PACK','5 PACK CARCASSES':'CARCASS 5-PACK',
@@ -1090,27 +1103,25 @@ const NAME_MAP={
   '2-PACK LEG QUARTERS':'ROASTER LEG QUARTERS 2-PACK',
   'CHICKEN LEGS - 2 PACK':'ROASTER LEG QUARTERS 2-PACK',
   'CHICKEN LEGS - 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEGS 2 PACK':  'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEGS 2-PACK':  'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEGS-2-PACK':  'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEGS':         'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEG QUARTERS - 2-PACK':     'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEG QUARTERS 2-PACK':       'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEG 2-PACK':   'ROASTER LEG QUARTERS 2-PACK',
-  'CHICKEN LEGS - VALUE PACK':         'ROASTER LEG QUARTERS 4-PACK',
-  'CHICKEN LEGS VALUE PACK':           'ROASTER LEG QUARTERS 4-PACK',
-  'CHICKEN LEGS - 4 PACK':             'ROASTER LEG QUARTERS 4-PACK',
-  'CHICKEN LEGS - 4-PACK':             'ROASTER LEG QUARTERS 4-PACK',
-  'CHICKEN LEGS 4-PACK':               'ROASTER LEG QUARTERS 4-PACK',
-  'CHICKEN LEG QUARTERS VALUE PACK':   'ROASTER LEG QUARTERS 4-PACK',
-  'CHICKEN LEGS IN 1/8 - 2 PACK':     'ROASTER LEG QUARTERS IN 1/8',
-  'CHICKEN LEGS IN 1/8 2 PACK':        'ROASTER LEG QUARTERS IN 1/8',
-  'CHICKEN LEGS IN 1/8 2-PACK':        'ROASTER LEG QUARTERS IN 1/8',
-  'CHICKEN LEGS IN 1/8':               'ROASTER LEG QUARTERS IN 1/8',
-  'CHICKEN LEGS IN 1/8 VALUE PACK':    'ROASTER LEG QUARTERS IN 1/8 VALUE PACK',
-  'CHICKEN LEG QUARTERS IN 1/8':       'ROASTER LEG QUARTERS IN 1/8',
-
-
+  'CHICKEN LEGS 2 PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEGS 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEGS-2-PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEGS':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEG QUARTERS - 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEG QUARTERS 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEG 2-PACK':'ROASTER LEG QUARTERS 2-PACK',
+  'CHICKEN LEGS - VALUE PACK':'ROASTER LEG QUARTERS 4-PACK',
+  'CHICKEN LEGS VALUE PACK':'ROASTER LEG QUARTERS 4-PACK',
+  'CHICKEN LEGS - 4 PACK':'ROASTER LEG QUARTERS 4-PACK',
+  'CHICKEN LEGS - 4-PACK':'ROASTER LEG QUARTERS 4-PACK',
+  'CHICKEN LEGS 4-PACK':'ROASTER LEG QUARTERS 4-PACK',
+  'CHICKEN LEG QUARTERS VALUE PACK':'ROASTER LEG QUARTERS 4-PACK',
+  'CHICKEN LEGS IN 1/8 - 2 PACK':'ROASTER LEG QUARTERS IN 1/8',
+  'CHICKEN LEGS IN 1/8 2 PACK':'ROASTER LEG QUARTERS IN 1/8',
+  'CHICKEN LEGS IN 1/8 2-PACK':'ROASTER LEG QUARTERS IN 1/8',
+  'CHICKEN LEGS IN 1/8':'ROASTER LEG QUARTERS IN 1/8',
+  'CHICKEN LEGS IN 1/8 VALUE PACK':'ROASTER LEG QUARTERS IN 1/8 VALUE PACK',
+  'CHICKEN LEG QUARTERS IN 1/8':'ROASTER LEG QUARTERS IN 1/8',
   'LEG QUARTERS - 4-PACK':'ROASTER LEG QUARTERS 4-PACK',
   'LEG QUARTERS-4-PACK':'ROASTER LEG QUARTERS 4-PACK',
   'LEG QUARTERS - 6-PACK':'ROASTER LEG QUARTERS VALUE PACK (6)',
@@ -1121,7 +1132,7 @@ const NAME_MAP={
   'CAPONS (BONED THIGHS)':'CAPONS (BONELESS DARKS)',
   'WINGS - 6-PACK':'CHICKEN WINGS 6-PACK','WINGS-6-PACK':'CHICKEN WINGS 6-PACK',
   'WINGS - 12-PACK':'CHICKEN WINGS (12 PIECES)','WINGS-12-PACK':'CHICKEN WINGS (12 PIECES)',
-  'WINGS –12-PACK':'CHICKEN WINGS (12 PIECES)','WINGS – 12-PACK':'CHICKEN WINGS (12 PIECES)',
+  'WINGS \u201312-PACK':'CHICKEN WINGS (12 PIECES)','WINGS \u2013 12-PACK':'CHICKEN WINGS (12 PIECES)',
   '12-PACK CHICKEN WINGS':'CHICKEN WINGS (12 PIECES)',
   'NECKS 8-PACK':'CHICKEN NECKS (8-PACK)','NECKS-8-PACK':'CHICKEN NECKS (8-PACK)',
   'CHICKEN FILLETS':'CHICKEN FILLET',
@@ -1139,34 +1150,26 @@ const NAME_MAP={
   'CHICKEN SHNITZEL:6 PIECES':'CHICKEN SHNITZEL 6-PACK',
   'SHNITZELS - 2-PACK':'CHICKEN SHNITZEL','SHNITZELS-2-PACK':'CHICKEN SHNITZEL',
   'GOUJONS':'CHICKEN GOUJONS',
-  // ── Necks (singular vs plural)
-  'CHICKEN NECK (8-PACK)':             'CHICKEN NECKS (8-PACK)',
-  'CHICKEN NECK 8-PACK':               'CHICKEN NECKS (8-PACK)',
-  'CHICKEN NECKS 8-PACK':              'CHICKEN NECKS (8-PACK)',
-  // ── Polkies → Chicken Drumsticks
-  'POLKIES':                           'CHICKEN DRUMSTICKS',
-  'POLKIE':                            'CHICKEN DRUMSTICKS',
-  // ── Bare ROASTER THIGHS → 4-PACK
-  'ROASTER THIGHS':                    'ROASTER THIGHS 4-PACK',
-  'ROASTER THIGH':                     'ROASTER THIGHS 4-PACK',
-  // ── Flavoured — colon format from Velocity PLU DB
-  'MEAT BALLS:24 PACK':                'MEAT BALLS - 24 PACK',
-  'MEAT BALLS:24-PACK':                'MEAT BALLS - 24 PACK',
-  'MEAT BALLS - 24-PACK':              'MEAT BALLS - 24 PACK',
-  'MEAT BALLS:12-PACK':                'MEAT BALLS - 12 PACK',
-  'MEAT BALLS:12 PACK':                'MEAT BALLS - 12 PACK',
-  'CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6': 'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6',
-  'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6': 'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6',
-  '2OZ BEEFBURGERS:6-PACK':           'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6',
-  '2OZ BURGERS:6-PACK':               'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6',
-  '6-PACK 2OZ BURGERS':               '6-PACK 2OZ BURGERS',
-  // ── Other colon-format beef/flavoured from Velocity
-  'TASTY BEEF SKEWERS:PACK':           'TASTY BEEF SKEWERS',
-  'MIXED SKEWERS:PACK':                'MIXED SKEWERS PACK',
-  'CHICKEN SHISHLIK':                  'CHICKEN SHISHLIK',
-  'CHICKEN SHWARMA':                   'CHICKEN SHWARMA',
-  'CUMBERLAND SAUSAGES':               'CUMBERLAND SAUSAGES',
-
+  'CHICKEN NECK (8-PACK)':'CHICKEN NECKS (8-PACK)',
+  'CHICKEN NECK 8-PACK':'CHICKEN NECKS (8-PACK)',
+  'CHICKEN NECKS 8-PACK':'CHICKEN NECKS (8-PACK)',
+  'POLKIES':'CHICKEN DRUMSTICKS','POLKIE':'CHICKEN DRUMSTICKS',
+  'ROASTER THIGHS':'ROASTER THIGHS 4-PACK','ROASTER THIGH':'ROASTER THIGHS 4-PACK',
+  'MEAT BALLS:24 PACK':'MEAT BALLS - 24 PACK',
+  'MEAT BALLS:24-PACK':'MEAT BALLS - 24 PACK',
+  'MEAT BALLS - 24-PACK':'MEAT BALLS - 24 PACK',
+  'MEAT BALLS:12-PACK':'MEAT BALLS - 12 PACK',
+  'MEAT BALLS:12 PACK':'MEAT BALLS - 12 PACK',
+  'CLASSIC 2 OUNCE BEEFBURGERS:PACK OF 6':'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6',
+  'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6':'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6',
+  '2OZ BEEFBURGERS:6-PACK':'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6',
+  '2OZ BURGERS:6-PACK':'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6',
+  '6-PACK 2OZ BURGERS':'6-PACK 2OZ BURGERS',
+  'TASTY BEEF SKEWERS:PACK':'TASTY BEEF SKEWERS',
+  'MIXED SKEWERS:PACK':'MIXED SKEWERS PACK',
+  'CHICKEN SHISHLIK':'CHICKEN SHISHLIK',
+  'CHICKEN SHWARMA':'CHICKEN SHWARMA',
+  'CUMBERLAND SAUSAGES':'CUMBERLAND SAUSAGES',
   'PARGIOT':'DARK SHNITZEL (PARGIOT)','DARK SHNITZEL':'DARK SHNITZEL (PARGIOT)',
   'MINCED CHICKEN':'HIGH QUALITY MINCED CHICKEN',
   'CHICKEN LIVER':'KOSHERED CHICKEN LIVER',
