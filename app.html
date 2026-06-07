@@ -2922,15 +2922,26 @@ function pullRemoteOrders() {
     const custNotes = {}; // store notes per customer
 
     // Pre-scan which customers appear in pull so we only wipe those
-    const CUST_ID_MAP2 = {
-      'mh meats':'mhmeats','ks meats':'ksmeats',"halpern's":'halperns',
-      "kaye's kosher":'kayes','deli@mh meats':'deli','mh meats chef':'mhchef',
-      "yoel's kitchen":'yoels','craft caterer':'craft',"motti's kitchen":'mottis',
-      'freilich':'freilich','bss sem':'bsssem',"best of ushi's":'ushis',
-    };
+    function normCust(raw) {
+      if (!raw) return raw;
+      const s = String(raw).trim().toLowerCase().replace(/['’]/g,'');
+      if (s.includes('mhmeats') || s === 'mh meats') return 'mhmeats';
+      if (s.includes('ksmeats') || s === 'ks meats') return 'ksmeats';
+      if (s.includes('halpern')) return 'halperns';
+      if (s.includes('kaye') || s.includes('kosher')) return 'kayes';
+      if (s.includes('deli')) return 'deli';
+      if (s.includes('chef')) return 'mhchef';
+      if (s.includes('yoel')) return 'yoels';
+      if (s.includes('craft')) return 'craft';
+      if (s.includes('motti')) return 'mottis';
+      if (s.includes('freilich')) return 'freilich';
+      if (s.includes('bss') || s.includes('sem')) return 'bsssem';
+      if (s.includes('ushi')) return 'ushis';
+      return raw;
+    }
     const custsInPull = new Set(data.orders
       .filter(r => !r.status || r.status === 'active')
-      .map(r => CUST_ID_MAP2[r.customer.toLowerCase()] || r.customer));
+      .map(r => normCust(r.customer)));
     custsInPull.forEach(cid => { orders[day][cid] = {}; });
 
     data.orders.forEach(row => {
@@ -2944,11 +2955,15 @@ function pullRemoteOrders() {
 
       // Legacy name map — old portal names → staff app canonical names
       const LEGACY_MAP = {
-        // MH Meats old portal names
+        // ── Carcasses ──
         'CARCASS':                            'CARCASS-1-PACK',
         'CARCASS DOUBLE PACK':               'CARCASS-2-PACK',
         'CARCASS 5-PACK':                    'CARCASS-5-PACK',
+        '5-PACK CARCASSES':                  'CARCASS-5-PACK',
+        // ── Soup packs ──
         'FAMILY SOUP PARCEL':                'FAMILY SIZE SOUP PACK',
+        'DOUBLE SOUP PACK':                  'DOUBLE SOUP PACK',
+        // ── Breast / leg quarters ──
         'BREAST ROASTER':                    'BREAST QUARTERS',
         'BREAST QUARTER ROASTER':            'BREAST QUARTERS',
         'ROASTER LEG QUARTERS':              'LEG QUARTERS-1-PACK',
@@ -2958,80 +2973,91 @@ function pullRemoteOrders() {
         'ROASTER LEG QUARTERS VALUE PACK (6)':'LEG QUARTERS-6-PACK',
         'ROASTER LEG QUARTERS IN 1/8':       'LEG QUARTERS IN 1/8',
         'ROASTER LEG QUARTERS IN 1/8 VALUE PACK':'LEG QUARTERS IN 1/8 VALUE PACK',
+        // ── Thighs ──
+        'ROASTER THIGHS':                    'THIGH-4-PACK',
         'ROASTER THIGHS 2-PACK':             'THIGH-2-PACK',
         'ROASTER THIGHS 4-PACK':             'THIGH-4-PACK',
-        'ROASTER THIGHS':                    'THIGH-4-PACK',
+        'ROASTER THIGH':                     'THIGH-4-PACK',
+        // ── Wings / necks ──
         'CAPONS (BONELESS DARKS)':           'CAPONS (BONED THIGHS)',
         'CHICKEN WINGS 6-PACK':              'WINGS-6-PACK',
         'CHICKEN WINGS (12 PIECES)':         'WINGS-12-PACK',
         'CHICKEN NECKS (8-PACK)':            'NECKS 8-PACK',
+        'CHICKEN NECK (8-PACK)':             'NECKS 8-PACK',
         'CHICKEN NECK 8-PACK':               'NECKS 8-PACK',
+        // ── Shnitzels ──
+        'CHICKEN SHNITZEL':                  'SHNITZELS-2-PACK',
         'SHNITZELS 2-PACK':                  'SHNITZELS-2-PACK',
         'SHNITZELS 6-PACK':                  'SHNITZELS-6-PACK',
         'SHNITZELS 10-PACK':                 'SHNITZELS-10-PACK',
-        'CHICKEN SHNITZEL':                  'SHNITZELS-2-PACK',
-        // KS/Halperns/Kayes old portal names
-        'KOSHERED CHICKEN LIVER':            'CHICKEN LIVER',
-        'HIGH QUALITY MINCED CHICKEN':       'MINCED CHICKEN',
-        'CHICKEN FILLET':                    'CHICKEN FILLETS',
-        'CHICKEN SHNITZEL VALUE PACK (10)':  '10-PACK CHICKEN SHNITZELS',
         'CHICKEN SHNITZEL 6-PACK':           '6-PACK CHICKEN SHNITZELS',
+        'CHICKEN SHNITZEL VALUE PACK (10)':  '10-PACK CHICKEN SHNITZELS',
+        '6-PACK CHICKEN SHNITZELS':          '6-PACK CHICKEN SHNITZELS',
+        '10-PACK CHICKEN SHNITZELS':         '10-PACK CHICKEN SHNITZELS',
+        // ── Other poultry ──
         'DARK SHNITZEL (PARGIOT)':           'PARGIOT',
+        'CHICKEN FILLET':                    'CHICKEN FILLETS',
+        'HIGH QUALITY MINCED CHICKEN':       'MINCED CHICKEN',
+        'KOSHERED CHICKEN LIVER':            'CHICKEN LIVER',
+        'CHICKEN STIR FRY':                  'CHICKEN STIR FRY',
+        'CHICKEN SHWARMA':                   'CHICKEN SHWARMA',
+        // ── KS/HAL/KAY portal names ──
         'CHICKEN LEGS 2-PACK':               'CHICKEN LEGS-2 PACK',
         'CHICKEN LEGS 2 PACK':               'CHICKEN LEGS-2 PACK',
         'CHICKEN LEGS VALUE PACK':           'CHICKEN LEGS-VALUE PACK',
         'CHICKEN LEGS IN 1/8 2-PACK':        'CHICKEN LEGS IN 1/8-2 PACK',
         'CHICKEN LEGS IN 1/8 VALUE PACK':    'CHICKEN LEGS IN 1/8-VALUE PACK',
-        // Beef name variants
-        'WHOLE SHIN BEEF':                   'WHOLE SHIN',
-        'CRUMB COATED DARK SHNITZEL':        'CRUMB COATED DARK SHNITZELS',
+        // ── Beef name variants ──
+        'PRIME CHOLENT MEAT':                'WHOLE TOP RIB',
         'BEEF STIR-FRY':                     'BEEF STIRFRY',
         'BEEF STIR FRY':                     'BEEF STIRFRY',
-        'PRIME CHOLENT MEAT':                'WHOLE TOP RIB',
-        // Spelling variants
+        'WHOLE SHIN BEEF':                   'WHOLE SHIN',
+        'CRUMB COATED DARK SHNITZEL':        'CRUMB COATED DARK SHNITZELS',
+        // ── Spelling variants ──
         'ROASTER IN 1/4 SHNIZELED':          'ROASTER IN 1/4 SHNITZELED',
         'ROASTER IN 1/8 SHNIZELED':          'ROASTER IN 1/8 SHNITZELED',
-        // Dash/format variants
+        // ── Dash/format variants ──
         'CLASSIC 2 OUNCE BEEFBURGERS - PACK OF 6':'CLASSIC 2 OUNCE BEEFBURGERS-PACK OF 6',
         'MEAT BALLS - 24 PACK':              'MEAT BALLS-24 PACK',
         'MEAT BALLS - 12 PACK':              'MEAT BALLS-12 PACK',
-        '24-PACK MEAT BALLS':                 'MEAT BALLS-24 PACK',
-        // Portal poultry names → master tool equivalents
-        'ROASTER LEG QUARTERS 2-PACK':        'LEG QUARTERS-2-PACK',
-        'ROASTER LEG QUARTERS VALUE PACK (4)': 'LEG QUARTERS-4-PACK',
-        'ROASTER LEG QUARTERS VALUE PACK (6)': 'LEG QUARTERS-6-PACK',
-        'ROASTER LEG QUARTERS IN 1/8':         'LEG QUARTERS IN 1/8',
-        'ROASTER LEG QUARTERS IN 1/8 VALUE PACK':'LEG QUARTERS IN 1/8 VALUE PACK',
-        'ROASTER LEG QUARTERS':                'LEG QUARTERS-1-PACK',
-        'ROASTER THIGHS':                      'THIGH-4-PACK',
-        'ROASTER THIGHS 2-PACK':               'THIGH-2-PACK',
-        'ROASTER THIGHS 4-PACK':               'THIGH-4-PACK',
-        'CARCASS 5-PACK':                      'CARCASS-5-PACK',
-        'CARCASS DOUBLE PACK':                 'CARCASS-2-PACK',
-        'CARCASS':                             'CARCASS-1-PACK',
-        'CHICKEN FILLET':                      'CHICKEN FILLETS',
-        'CHICKEN NECKS (8-PACK)':              'NECKS 8-PACK',
-        'CHICKEN WINGS (12 PIECES)':           '12-PACK CHICKEN WINGS',
-        'CHICKEN WINGS 6-PACK':                'WINGS-6-PACK',
-        'CHICKEN SHNITZEL VALUE PACK (10)':    '10-PACK CHICKEN SHNITZELS',
-        'CHICKEN SHNITZEL 6-PACK':             '6-PACK CHICKEN SHNITZELS',
-        'CHICKEN SHNITZEL':                    'SHNITZELS-2-PACK',
-        'DARK SHNITZEL (PARGIOT)':             'PARGIOT',
-        'HIGH QUALITY MINCED CHICKEN':         'MINCED CHICKEN',
-        'KOSHERED CHICKEN LIVER':              'CHICKEN LIVER',
-        'CAPONS (BONELESS DARKS)':             'CAPONS (BONED THIGHS)',
-        'CHICKEN STIR FRY':                    'CHICKEN STIR FRY',
-        'FAMILY SIZE SOUP PACK':               'FAMILY SIZE SOUP PACK',
-        'SOUP PACK':                           'SOUP PACK',
-        // LARGE/SMALL legacy
+        '24-PACK MEAT BALLS':                'MEAT BALLS-24 PACK',
+        // ── LARGE/SMALL legacy ──
         'BOLA JOINT LARGE':                  'BOLA JOINT',
+        'BOLA JOINT SMALL':                  'BOLA JOINT',
         'FLAT BRISKET JOINT LARGE':          'FLAT BRISKET JOINT',
+        'FLAT BRISKET JOINT SMALL':          'FLAT BRISKET JOINT',
         'FLAT PICKLED JOINT LARGE':          'FLAT PICKLED JOINT',
+        'FLAT PICKLED JOINT SMALL':          'FLAT PICKLED JOINT',
         'PICKLED BEEF ROLL LARGE':           'PICKLED BEEF ROLL',
+        'PICKLED BEEF ROLL SMALL':           'PICKLED BEEF ROLL',
         'POT ROAST LARGE':                   'POT ROAST',
+        'POT ROAST SMALL':                   'POT ROAST',
         'ROLLED BRISKET JOINT LARGE':        'ROLLED BRISKET JOINT',
+        'ROLLED BRISKET JOINT SMALL':        'ROLLED BRISKET JOINT',
         'ROLLED PICKLED BRISKET LARGE':      'ROLLED PICKLED BRISKET',
+        'ROLLED PICKLED BRISKET SMALL':      'ROLLED PICKLED BRISKET',
+        'BOLA STEAKS LARGE':                 'BOLA STEAKS',
+        'BLADE STEAKS LARGE':                'BLADE STEAKS',
+        'BRAISING STEAK LARGE':              'BRAISING STEAK',
+        'FAIRY STEAKS LARGE':                'FAIRY STEAKS',
+        'RIB-EYE STEAKS LARGE':              'RIB-EYE STEAKS',
+        'MARROW BONES LARGE':                'MARROW BONES',
+        'MEAT BONES LARGE':                  'MEAT BONES',
+        'GOULASH BEEF CUBES LARGE':          'GOULASH BEEF CUBES',
+        'MINCED BEEF LARGE':                 'MINCED BEEF',
+        'MINCED STEAK LARGE':                'MINCED STEAK',
+        'FLANK LARGE':                       'FLANK',
+        'WHOLE SHIN LARGE':                  'WHOLE SHIN',
+        'SLICED SHIN LARGE':                 'SLICED SHIN',
+        'CUBED TOP RIB LARGE':               'CUBED TOP RIB',
+        'CUBED CHOLENT BEEF LARGE':          'CUBED CHOLENT BEEF',
+        'ROLLED BRISKET JOINT LARGE':        'ROLLED BRISKET JOINT',
+        'THIN SLICED GRILLING STEAK LARGE':  'THIN SLICED GRILLING STEAK',
+        'WHOLE ROASTER LARGE':               'WHOLE ROASTER',
+        'PRIME CHOLENT MEAT LARGE':          'PRIME CHOLENT MEAT',
       };
+
+      // Bulletproof normalization
 
       // Bulletproof normalization — handles LARGE/SMALL legacy, all dash spacing variants
       function normalizeKey(s) {
@@ -3042,21 +3068,25 @@ function pullRemoteOrders() {
       }
 
       // Normalise customer ID — sheet may store display name or spaced variant
-      const CUST_ID_MAP = {
-        'mh meats':'mhmeats','mhmeats':'mhmeats',
-        'ks meats':'ksmeats','ksmeats':'ksmeats',
-        "halpern's":'halperns','halperns':'halperns',
-        "kaye's kosher":'kayes','kayes':'kayes',
-        'deli@mh meats':'deli','deli':'deli',
-        'mh meats chef':'mhchef','mhchef':'mhchef',
-        "yoel's kitchen":'yoels','yoels':'yoels',
-        'craft caterer':'craft','craft':'craft',
-        "motti's kitchen":'mottis','mottis':'mottis',
-        'freilich':'freilich',
-        'bss sem':'bsssem','bsssem':'bsssem',
-        "best of ushi's":'ushis','ushis':'ushis',
-      };
-      const normCustId = CUST_ID_MAP[customer.toLowerCase()] || customer;
+      // Exhaustive customer ID normalisation — handles any name/ID variant from sheet
+      function normaliseCustId(raw) {
+        if (!raw) return raw;
+        const s = String(raw).trim().toLowerCase().replace(/['’]/g,'');
+        if (s.includes('mhmeats') || s === 'mh meats' || s === 'mhmeats') return 'mhmeats';
+        if (s.includes('ksmeats') || s === 'ks meats' || s === 'ksmeats') return 'ksmeats';
+        if (s.includes('halpern')) return 'halperns';
+        if (s.includes('kaye') || s.includes('kosher')) return 'kayes';
+        if (s.includes('deli')) return 'deli';
+        if (s.includes('chef')) return 'mhchef';
+        if (s.includes('yoel')) return 'yoels';
+        if (s.includes('craft')) return 'craft';
+        if (s.includes('motti')) return 'mottis';
+        if (s.includes('freilich')) return 'freilich';
+        if (s.includes('bss') || s.includes('sem')) return 'bsssem';
+        if (s.includes('ushi')) return 'ushis';
+        return raw; // fallback to original
+      }
+      const normCustId = normaliseCustId(customer);
       const custObj = CUSTOMERS.find(c => c.id === normCustId);
       const allProds = custObj ? [...custObj.products, ...(BEEF_BY_CUSTOMER[normCustId] || [])] : [];
       let finalKey = productKey.trim();
