@@ -2922,13 +2922,22 @@ function pullRemoteOrders() {
     const custNotes = {}; // store notes per customer
 
     // Pre-scan which customers appear in pull so we only wipe those
-    const custsInPull = new Set(data.orders.filter(r => !r.status || r.status === 'active').map(r => r.customer));
+    const CUST_ID_MAP2 = {
+      'mh meats':'mhmeats','ks meats':'ksmeats',"halpern's":'halperns',
+      "kaye's kosher":'kayes','deli@mh meats':'deli','mh meats chef':'mhchef',
+      "yoel's kitchen":'yoels','craft caterer':'craft',"motti's kitchen":'mottis',
+      'freilich':'freilich','bss sem':'bsssem',"best of ushi's":'ushis',
+    };
+    const custsInPull = new Set(data.orders
+      .filter(r => !r.status || r.status === 'active')
+      .map(r => CUST_ID_MAP2[r.customer.toLowerCase()] || r.customer));
     custsInPull.forEach(cid => { orders[day][cid] = {}; });
 
     data.orders.forEach(row => {
       const { customer, productKey, quantity, notes, status } = row;
       if (status && status !== 'active') return; // skip already-imported
-      if (!orders[day][customer]) orders[day][customer] = {};
+      if (!orders[day][normCustId]) orders[day][normCustId] = {};
+      customer = normCustId; // use normalised ID throughout
 
       // Capture notes
       if (notes && notes.trim()) custNotes[customer] = notes.trim();
@@ -3032,8 +3041,24 @@ function pullRemoteOrders() {
           .replace(/\s+/g, ' ');
       }
 
-      const custObj = CUSTOMERS.find(c => c.id === customer);
-      const allProds = custObj ? [...custObj.products, ...(BEEF_BY_CUSTOMER[customer] || [])] : [];
+      // Normalise customer ID — sheet may store display name or spaced variant
+      const CUST_ID_MAP = {
+        'mh meats':'mhmeats','mhmeats':'mhmeats',
+        'ks meats':'ksmeats','ksmeats':'ksmeats',
+        "halpern's":'halperns','halperns':'halperns',
+        "kaye's kosher":'kayes','kayes':'kayes',
+        'deli@mh meats':'deli','deli':'deli',
+        'mh meats chef':'mhchef','mhchef':'mhchef',
+        "yoel's kitchen":'yoels','yoels':'yoels',
+        'craft caterer':'craft','craft':'craft',
+        "motti's kitchen":'mottis','mottis':'mottis',
+        'freilich':'freilich',
+        'bss sem':'bsssem','bsssem':'bsssem',
+        "best of ushi's":'ushis','ushis':'ushis',
+      };
+      const normCustId = CUST_ID_MAP[customer.toLowerCase()] || customer;
+      const custObj = CUSTOMERS.find(c => c.id === normCustId);
+      const allProds = custObj ? [...custObj.products, ...(BEEF_BY_CUSTOMER[normCustId] || [])] : [];
       let finalKey = productKey.trim();
 
       // 1. Try exact match first
