@@ -1904,7 +1904,7 @@ function loadFromStorage() {
 // ══════════════════════════════════════════════════════════════════
 function init() {
   // Version-based cache bust — increment when product lists change
-  const PRODUCT_VERSION = '24';
+  const PRODUCT_VERSION = '25';
   try {
     if (localStorage.getItem('mhmeats_product_version') !== PRODUCT_VERSION) {
       localStorage.removeItem('mhmeats_products');
@@ -2945,10 +2945,8 @@ function pullRemoteOrders() {
     custsInPull.forEach(cid => { orders[day][cid] = {}; });
 
     data.orders.forEach(row => {
-      const { customer, productKey, quantity, notes, status } = row;
+      let { customer, productKey, quantity, notes, status } = row;
       if (status && status !== 'active') return; // skip already-imported
-      if (!orders[day][normCustId]) orders[day][normCustId] = {};
-      customer = normCustId; // use normalised ID throughout
 
       // Capture notes
       if (notes && notes.trim()) custNotes[customer] = notes.trim();
@@ -3087,6 +3085,7 @@ function pullRemoteOrders() {
         return raw; // fallback to original
       }
       const normCustId = normaliseCustId(customer);
+      customer = normCustId; // use normalised ID for all storage writes
       const custObj = CUSTOMERS.find(c => c.id === normCustId);
       const allProds = custObj ? [...custObj.products, ...(BEEF_BY_CUSTOMER[normCustId] || [])] : [];
       let finalKey = productKey.trim();
