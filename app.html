@@ -219,6 +219,15 @@
     transition: border-color 0.15s;
   }
   .product-row:hover { border-color: #3a3a3a; }
+  .product-name-wrap { display:flex; flex-direction:column; flex:1; min-width:0; gap:2px; }
+  .note-input {
+    font-size:10px; font-family:'DM Mono',monospace; color:var(--accent);
+    background:transparent; border:none; border-bottom:1px dashed #444;
+    padding:1px 2px; outline:none; width:100%; max-width:220px;
+    opacity:0.5; transition:opacity 0.15s;
+  }
+  .note-input:focus, .note-input:not([value=""]) { opacity:1; }
+  .note-input::placeholder { color:#555; font-style:italic; }
   .product-row.has-qty { border-color: var(--accent); background: rgba(200,168,75,0.05); }
 
   .plu-tag {
@@ -1332,6 +1341,36 @@ const CUSTOMERS = [
     {name:"CHICKEN SHWARMA",flavoured:true},
     {name:"4-PACK 4OZ BURGERS",flavoured:true},
     {name:"6-PACK 2OZ BURGERS",flavoured:true}
+  ]},
+  { id:"yesoiday", name:"Yesoiday Hatorah",  color:"#ffffff", products:[
+    {name:"SHNITZELS"},
+    {name:"CARCASSES"},
+    {name:"WINGS"},
+    {name:"CHICKEN FILLETS"},
+    {name:"CHICKEN GOUJONS"},
+    {name:"CHICKEN LEGS"},
+    {name:"CHICKEN LEGS IN 1/8"},
+    {name:"CHICKEN LIVER"},
+    {name:"ROASTER THIGHS 4-PACK"},
+    {name:"CHICKEN PARGIOT"},
+    {name:"CHICKEN DRUMSTICKS"},
+    {name:"DOUBLE SOUP PACK"},
+    {name:"PUPICKS"},
+    {name:"SWEET AND SOUR SHNITZELS",flavoured:true},
+    {name:"BBQ SHNITZELS",flavoured:true},
+    {name:"TERIYAKI CHICKEN SHNITZELS",flavoured:true},
+    {name:"CRUMB COATED SHNITZELS",flavoured:true},
+    {name:"CRUMB COATED DARK SHNITZELS",flavoured:true},
+    {name:"SWEET AND SOUR DARK SHNITZELS",flavoured:true},
+    {name:"DELI STYLE DARK SHNITZELS",flavoured:true},
+    {name:"BBQ DARK SHNITZELS",flavoured:true},
+    {name:"BREADED SHNITZELS",flavoured:true},
+    {name:"BEEF GRILLSTICKS",flavoured:true},
+    {name:"MEAT BALLS-24 PACK",flavoured:true},
+    {name:"CUMBERLAND SAUSAGES",flavoured:true},
+    {name:"CHICKEN SHWARMA",flavoured:true},
+    {name:"4-PACK 4OZ BURGERS",flavoured:true},
+    {name:"6-PACK 2OZ BURGERS",flavoured:true}
   ]}
 ];
 
@@ -1839,11 +1878,71 @@ const BEEF_BY_CUSTOMER = {
     {name:"ROUND BOLA",unit:"UNITS",mult:1},
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
     {name:"SLICED SHIN",unit:"KG",mult:1}
+  ],
+  yesoiday: [
+    {name:"BEEF RIBLETS (FLANKEN)",unit:"UNITS",mult:1},
+    {name:"BEEF STIRFRY",unit:"UNITS",mult:1},
+    {name:"BEEF SPARE RIBS",unit:"UNITS",mult:1},
+    {name:"BLADE STEAKS",unit:"UNITS",mult:1},
+    {name:"BLADE JOINT",unit:"UNITS",mult:1},
+    {name:"BOLA JOINT",unit:"UNITS",mult:1},
+    {name:"BONELESS SHORT RIB",unit:"UNITS",mult:1},
+    {name:"CHUCK EYE STEAKS",unit:"UNITS",mult:1},
+    {name:"CHOLENT PACK",unit:"UNITS",mult:1},
+    {name:"BOLA STEAKS",unit:"UNITS",mult:1},
+    {name:"COTE DE BOUEF",unit:"UNITS",mult:1},
+    {name:"CUBED CHOLENT BEEF",unit:"KG",mult:1},
+    {name:"CUBED TOP RIB",unit:"KG",mult:1},
+    {name:"CUBED SHIN",unit:"KG",mult:1},
+    {name:"DENVER STEAKS",unit:"UNITS",mult:1},
+    {name:"DOUBLE TOP RIB",unit:"UNITS",mult:1},
+    {name:"FAIRY STEAKS",unit:"UNITS",mult:1},
+    {name:"BRAISING STEAK",unit:"UNITS",mult:1},
+    {name:"FALSHE FILLET MIGNON",unit:"UNITS",mult:1},
+    {name:"FAMILY BRAISING STEAK",unit:"UNITS",mult:1},
+    {name:"FLANK",unit:"KG",mult:1},
+    {name:"FLAT BRISKET JOINT",unit:"UNITS",mult:1},
+    {name:"FLAT PICKLED JOINT",unit:"UNITS",mult:1},
+    {name:"FLAT IRON STEAK",unit:"UNITS",mult:1},
+    {name:"FRENCH ROAST",unit:"UNITS",mult:1},
+    {name:"GALLA BONES",unit:"UNITS",mult:1},
+    {name:"GOULASH BEEF CUBES",unit:"KG",mult:1},
+    {name:"LEAN SANDWICH STEAKS",unit:"UNITS",mult:1},
+    {name:"LONDON BROIL 500G",unit:"UNITS",mult:1},
+    {name:"LONDON BROIL 1KG",unit:"UNITS",mult:1},
+    {name:"MARROW BONES",unit:"UNITS",mult:1},
+    {name:"MEAT BONES",unit:"KG",mult:1},
+    {name:"MINCED BEEF",unit:"KG",mult:1},
+    {name:"MINCED STEAK",unit:"KG",mult:1},
+    {name:"MINUTE STEAKS",unit:"UNITS",mult:1},
+    {name:"PHILADELPHIA STEAKS",unit:"UNITS",mult:1},
+    {name:"OYSTER STEAK",unit:"UNITS",mult:1},
+    {name:"PICKLED BEEF ROLL",unit:"UNITS",mult:1},
+    {name:"PICKLED TONGUES",unit:"UNITS",mult:1},
+    {name:"3-BONE SHORT RIB",unit:"UNITS",mult:1},
+    {name:"FRESH TONGUES",unit:"UNITS",mult:1},
+    {name:"POT ROAST",unit:"UNITS",mult:1},
+    {name:"PULLED BEEF JOINT",unit:"UNITS",mult:1},
+    {name:"WHOLE TOP RIB",unit:"UNITS",mult:1},
+    {name:"TOP RIB ON BONE",unit:"UNITS",mult:1},
+    {name:"RIB-EYE STEAKS",unit:"UNITS",mult:1},
+    {name:"RIB STRIPS",unit:"UNITS",mult:1},
+    {name:"RIB ON BONE",unit:"UNITS",mult:1},
+    {name:"RIBEYE JOINT",unit:"UNITS",mult:1},
+    {name:"ROLLED BRISKET JOINT",unit:"UNITS",mult:1},
+    {name:"ROLLED PICKLED BRISKET",unit:"UNITS",mult:1},
+    {name:"ROLLED TOP RIB JOINT",unit:"UNITS",mult:1},
+    {name:"ROUND BOLA",unit:"UNITS",mult:1},
+    {name:"WHOLE SHIN",unit:"UNITS",mult:1},
+    {name:"SLICED SHIN",unit:"KG",mult:1}
   ]
 };
 
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
-const CUSTOMER_SHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhshop:'MHS',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+const CUSTOMER_SHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhshop:'MHS',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH',yesoiday:'YES'};
+
+// Bulk/caterer customers — orders stay SEPARATE throughout butcher/packer/dispatch
+const BULK_CUSTOMERS = ['bsssem','yoels','craft','mottis','freilich','deli','ushis','yesoiday'];
 
 // ══════════════════════════════════════════════════════════════════
 // STATE
@@ -1855,6 +1954,21 @@ let currentCustomer = null;
 // orders[day][customerId][productKey] = qty
 let orders = {};
 DAYS.forEach(d => { orders[d] = {}; });
+
+// orderNotes[day][customerId][productKey] = note string
+let orderNotes = {};
+DAYS.forEach(d => { orderNotes[d] = {}; });
+
+function getNote(day, custId, prod) {
+  return (orderNotes[day] && orderNotes[day][custId] && orderNotes[day][custId][orderKey(prod)]) || '';
+}
+function setNote(day, custId, prod, val) {
+  if (!orderNotes[day][custId]) orderNotes[day][custId] = {};
+  const v = val.trim();
+  if (!v) { delete orderNotes[day][custId][orderKey(prod)]; }
+  else { orderNotes[day][custId][orderKey(prod)] = v; }
+  saveToStorage();
+}
 
 function orderKey(prod) {
   return prod.name.trim();
@@ -2011,9 +2125,17 @@ function buildProductSection(title, products, custId, type, isFlavoured) {
     const unitLabel = p.unit
       ? `<div style="font-family:'DM Mono',monospace;font-size:9px;color:${p.unit==='KG'?'#6dbf99':'var(--muted)'};width:30px;text-align:center;flex-shrink:0;font-weight:500">${p.unit}</div>`
       : '';
+    const note = getNote(currentDay, custId, p);
+    const noteHtml = `<input type="text" class="note-input" placeholder="add note…"
+      value="${note.replace(/"/g,'&quot;')}"
+      onblur="handleNoteChange(this,'${custId}','${type}',${i})"
+      title="Click to add a note for this product">`;
     return `
       <div class="product-row ${qty > 0 ? 'has-qty' : ''}" id="prow-${custId}-${type}-${i}">
-        <div class="product-name">${p.name}</div>
+        <div class="product-name-wrap">
+          <div class="product-name">${p.name}</div>
+          ${noteHtml}
+        </div>
         ${unitLabel}
         <input type="number" class="qty-input" min="0"
           value="${qty > 0 ? qty : ''}"
@@ -2046,6 +2168,19 @@ function getProductList(custId, type) {
   if (type === 'lamb') return cust.products.filter(p => p.section === 'LAMB');
   if (type === 'beef_chef') return cust.products.filter(p => p.section === 'BEEF');
   return cust.products.filter(p => !p.flavoured && !p.section);
+}
+
+function handleNoteChange(input, custId, type, idx) {
+  const list = getProductList(custId, type);
+  const prod = list[idx];
+  if (!prod) return;
+  setNote(currentDay, custId, prod, input.value);
+  // Refresh the row highlight if needed
+  const row = document.getElementById(`prow-${custId}-${type}-${idx}`);
+  if (row) {
+    const qty = getQty(currentDay, custId, prod);
+    row.className = 'product-row' + (qty > 0 ? ' has-qty' : '');
+  }
 }
 
 function handleQtyChange(input, custId, type, idx) {
@@ -2169,7 +2304,8 @@ function getTotalsForDay(day) {
       const k = orderKey(p);
       if (!totals[k]) totals[k] = { name: p.name, qty: 0, flavoured: !!p.flavoured, sources: [], beef: false };
       totals[k].qty += qty;
-      totals[k].sources.push({ name: cust.name, qty });
+      const note = getNote(day, cust.id, p);
+      totals[k].sources.push({ name: cust.name, qty, note });
     });
     const beefList = BEEF_BY_CUSTOMER[cust.id] || [];
     beefList.forEach(p => {
@@ -2178,7 +2314,8 @@ function getTotalsForDay(day) {
       const k = 'beef|' + orderKey(p);
       if (!totals[k]) totals[k] = { name: p.name, qty: 0, flavoured: false, sources: [], beef: true };
       totals[k].qty += qty;
-      totals[k].sources.push({ name: cust.name, qty });
+      const noteB = getNote(day, cust.id, p);
+      totals[k].sources.push({ name: cust.name, qty, note: noteB });
     });
   });
   return totals;
@@ -2275,13 +2412,14 @@ function renderChefSheet(day) {
 }
 
 function buildSheetTable(title, items, showSources) {
-  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH',yesoiday:'YES'};
   const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => {
     const sourceTags = (showSources && item.sources && item.sources.length >= 1)
       ? item.sources.map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); return `<span class="cat-tag">${cust?CSHORT[cust.id]:s.name.slice(0,3)}:${s.qty}</span>`; }).join(' ')
       : '';
+    const noteTexts = item.sources ? item.sources.filter(s=>s.note).map(s => { const cust = CUSTOMERS.find(c=>c.name===s.name); const lbl = cust?CSHORT[cust.id]:s.name.slice(0,3); return `${lbl}: ${s.note}`; }).join(' | ') : '';
     return `<tr class="${item.qty > 10 ? 'row-highlight' : ''}">
-      <td>${item.name}${sourceTags ? ' '+sourceTags : ''}</td>
+      <td>${item.name}${sourceTags ? ' '+sourceTags : ''}${noteTexts ? `<div style="font-size:10px;color:#e8a838;margin-top:2px">📝 ${noteTexts}</div>` : ''}</td>
       <td class="td-qty">${item.qty}</td>
       <td class="td-check">☐</td>
     </tr>`;
@@ -2301,7 +2439,7 @@ function buildCategoryTable(category, items, day, extraTotal) {
   const rows = items.map(item => `<tr>
     <td class="td-qty">${item.qty}</td>
     <td style="width:60px;color:var(--muted);font-size:11px">${item.unit||'UNITS'}</td>
-    <td>${item.name}${item.desc ? `<span style="font-size:10px;color:var(--muted);margin-left:6px">${item.desc}</span>` : ''}</td>
+    <td>${item.name}${item.desc ? `<span style="font-size:10px;color:var(--muted);margin-left:6px">${item.desc}</span>` : ''}${item.note ? `<div style="font-size:10px;color:#e8a838;margin-top:2px">📝 ${item.note}</div>` : ''}</td>
     <td class="td-check">☐</td>
   </tr>`).join('');
   const totalRow = extraTotal !== undefined
@@ -2372,9 +2510,10 @@ function renderButcherSheet(day) {
   };
 
   function poultryQty(name) {
-    // Returns BUTCHER AMOUNT — packs × multiplier
+    // Returns BUTCHER AMOUNT — packs × multiplier (retail customers only)
     let total = 0;
     CUSTOMERS.forEach(cust => {
+      if (BULK_CUSTOMERS.includes(cust.id)) return; // bulk handled separately
       const custOrders = orders[day][cust.id] || {};
       const match = cust.products.find(p => !p.flavoured && p.name.trim() === name.trim());
       if (match) {
@@ -2436,6 +2575,7 @@ function renderButcherSheet(day) {
     let total = 0;
     const searchNames = [name.trim(), ...(reverseAliases[name.trim()] || [])];
     CUSTOMERS.forEach(cust => {
+      if (BULK_CUSTOMERS.includes(cust.id)) return; // bulk handled separately
       const custOrders = orders[day][cust.id] || {};
       (BEEF_BY_CUSTOMER[cust.id]||[]).forEach(p => {
         if (searchNames.includes(p.name.trim())) {
@@ -2550,7 +2690,30 @@ function renderButcherSheet(day) {
   const beefItems = beefCategoryItems; // used below
 
   const any = fullBirds.length||bottomQuarters.length||crowns.length||turkey.length||beefItems.length;
-  if (!any) {
+
+  // Build bulk customer butcher blocks
+  const bulkHtmlParts = BULK_CUSTOMERS.map(cid => {
+    const cust = CUSTOMERS.find(c => c.id === cid);
+    if (!cust) return '';
+    const custOrders = orders[day][cust.id] || {};
+    const bPoultry = cust.products.filter(p=>!p.flavoured).map(p=>({
+      name:p.name, qty:custOrders[orderKey(p)]||0, unit:'UNITS',
+      note:getNote(day,cust.id,p)
+    })).filter(p=>p.qty>0);
+    const bBeef = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({
+      name:p.name, qty:custOrders[orderKey(p)]||0, unit:p.unit||'UNITS',
+      note:getNote(day,cust.id,p)
+    })).filter(p=>p.qty>0);
+    if (!bPoultry.length && !bBeef.length) return '';
+    let html = `<div style="margin-top:4px;padding:4px 0 2px;font-size:11px;font-weight:700;color:${cust.color==='#ffffff'?'#aaa':cust.color};letter-spacing:0.5px">⚡ BULK — ${cust.name.toUpperCase()}</div>`;
+    if (bPoultry.length) html += buildCategoryTable(`🐔 ${cust.name} — POULTRY`, bPoultry, day);
+    if (bBeef.length) html += buildCategoryTable(`🥩 ${cust.name} — BEEF`, bBeef, day);
+    return html;
+  }).join('');
+
+  const anyBulk = bulkHtmlParts.trim().length > 0;
+
+  if (!any && !anyBulk) {
     document.getElementById('butcherSheetContent').innerHTML = `<div class="empty-state"><div class="empty-icon">🔪</div><div class="empty-text">No orders for ${day}</div></div>`;
     return;
   }
@@ -2565,6 +2728,7 @@ function renderButcherSheet(day) {
       html += buildCategoryTable(cat.cat, cat.items, day);
     });
   }
+  if (anyBulk) html += `<div style="margin-top:20px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;color:var(--accent);margin-bottom:10px;padding:6px 0;border-bottom:2px solid var(--accent)">⚡ BULK / CATERER ORDERS</div>${bulkHtmlParts}</div>`;
   document.getElementById('butcherSheetContent').innerHTML = html;
 }
 
@@ -2603,11 +2767,12 @@ function renderPackerSheet(day) {
   // Uses RAW PACK QUANTITIES (what was ordered), not butcher amounts
   // Consolidates by product NAME so same product from different customers adds up
 
-  const poultryTotals = {};   // key = product name
+  const poultryTotals = {};   // key = product name (retail only)
   const flavouredTotals = {}; // key = product name
-  const beefTotals = {};      // key = product name
+  const beefTotals = {};      // key = product name (retail only)
 
   CUSTOMERS.forEach(cust => {
+    if (BULK_CUSTOMERS.includes(cust.id)) return; // bulk handled separately
     const custOrders = orders[day][cust.id] || {};
 
     // Poultry products
@@ -2643,7 +2808,41 @@ function renderPackerSheet(day) {
   const flavouredItems = sort(Object.values(flavouredTotals));
   const beefItems     = sort(Object.values(beefTotals));
 
-  const any = poultryItems.length || flavouredItems.length || beefItems.length;
+  // Build bulk customer sections
+  const bulkSections = BULK_CUSTOMERS.map(cid => {
+    const cust = CUSTOMERS.find(c => c.id === cid);
+    if (!cust) return '';
+    const custOrders = orders[day][cust.id] || {};
+    const bPoultry = cust.products.filter(p=>!p.flavoured).map(p=>({
+      name:p.name, qty:custOrders[orderKey(p)]||0, unit:p.unit||'UNITS',
+      note:getNote(day,cust.id,p)
+    })).filter(p=>p.qty>0);
+    const bFlavoured = cust.products.filter(p=>p.flavoured).map(p=>({
+      name:p.name, qty:custOrders[orderKey(p)]||0, unit:p.unit||'UNITS',
+      note:getNote(day,cust.id,p)
+    })).filter(p=>p.qty>0);
+    const bBeef = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({
+      name:p.name, qty:custOrders[orderKey(p)]||0, unit:p.unit||'UNITS',
+      note:getNote(day,cust.id,p)
+    })).filter(p=>p.qty>0);
+    if (!bPoultry.length && !bFlavoured.length && !bBeef.length) return '';
+    const bulkRows = (items, icon) => items.map(item =>
+      `<tr><td>${icon} ${item.name}${item.note?`<div style="font-size:10px;color:#e8a838">📝 ${item.note}</div>`:''}</td>
+       <td style="width:60px;color:var(--muted);font-size:11px;text-align:center">${item.unit}</td>
+       <td class="td-qty">${item.qty}</td><td class="td-check">☐</td></tr>`
+    ).join('');
+    const allRows = bulkRows(bPoultry,'🐔') + bulkRows(bFlavoured,'🌶') + bulkRows(bBeef,'🥩');
+    return `<div class="sheet-table" style="margin-bottom:16px;border-left:3px solid ${cust.color==='#ffffff'?'#aaa':cust.color}">
+      <div class="sheet-title-bar">
+        <div class="sheet-title">📦 BULK — ${cust.name.toUpperCase()}</div>
+        <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${bPoultry.length+bFlavoured.length+bBeef.length} lines</div>
+      </div>
+      <table><thead><tr><th>PRODUCT</th><th style="width:60px;text-align:center">UNIT</th><th style="text-align:right">QTY</th><th>✓</th></tr></thead>
+      <tbody>${allRows}</tbody></table>
+    </div>`;
+  }).join('');
+
+  const any = poultryItems.length || flavouredItems.length || beefItems.length || bulkSections;
   if (!any) {
     document.getElementById('packerSheetContent').innerHTML =
       `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No orders for ${day}</div></div>`;
@@ -2654,12 +2853,13 @@ function renderPackerSheet(day) {
   if (poultryItems.length)   html += buildPackerTable(`📦 POULTRY PACKER LIST — ${day.toUpperCase()}`, poultryItems);
   // Flavoured products excluded from packer — handled by Chef sheet only
   if (beefItems.length)      html += buildPackerBeefTable(`🥩 BEEF PACKER LIST — ${day.toUpperCase()}`, beefItems, day);
+  if (bulkSections)          html += `<div style="margin-top:20px"><div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;color:var(--accent);margin-bottom:10px;padding:6px 0;border-bottom:2px solid var(--accent)">⚡ BULK / CATERER ORDERS</div>${bulkSections}</div>`;
 
   document.getElementById('packerSheetContent').innerHTML = html;
 }
 
 function buildPackerTable(title, items) {
-  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH',yesoiday:'YES'};
   const totalQty = items.reduce((a,b) => a + b.qty, 0);
   const rows = items.map(item => {
     const tags = (item.sources && item.sources.length >= 1)
@@ -2684,7 +2884,7 @@ function buildPackerTable(title, items) {
 }
 
 function buildPackerBeefTable(title, items, day) {
-  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH'};
+  const CSHORT = {mhmeats:'MH',ksmeats:'KS',halperns:'HAL',kayes:'KAY',deli:'DELI',mhchef:'CHEF',yoels:'YOE',craft:'CRA',mottis:'MOT',freilich:'FRE',bsssem:'BSS',ushis:'USH',yesoiday:'YES'};
   const rows = items.sort((a,b) => a.name.localeCompare(b.name)).map(item => {
     const tags = (item.sources && item.sources.length >= 1)
       ? item.sources.map(s => `<span class="cat-tag">${CSHORT[s.id]||s.name.slice(0,3)}:${s.qty}</span>`).join(' ')
@@ -2745,9 +2945,9 @@ function renderDispatchSheet(day) {
   let any = false;
   CUSTOMERS.forEach(cust => {
     const custOrders = orders[day][cust.id] || {};
-    const poultry = cust.products.filter(p=>!p.flavoured).map(p=>({...p,qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const flavoured = cust.products.filter(p=>p.flavoured).map(p=>({...p,qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
-    const beef = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p,qty:custOrders[orderKey(p)]||0})).filter(p=>p.qty>0);
+    const poultry = cust.products.filter(p=>!p.flavoured).map(p=>({...p,qty:custOrders[orderKey(p)]||0,note:getNote(day,cust.id,p)})).filter(p=>p.qty>0);
+    const flavoured = cust.products.filter(p=>p.flavoured).map(p=>({...p,qty:custOrders[orderKey(p)]||0,note:getNote(day,cust.id,p)})).filter(p=>p.qty>0);
+    const beef = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({...p,qty:custOrders[orderKey(p)]||0,note:getNote(day,cust.id,p)})).filter(p=>p.qty>0);
     const all = [...poultry, ...flavoured, ...beef];
     if (!all.length) return;
     any = true;
@@ -2757,7 +2957,7 @@ function renderDispatchSheet(day) {
         <div style="font-size:11px;font-weight:700;color:${color};letter-spacing:0.5px;margin-bottom:4px">${icon} ${title}</div>
         <table style="width:100%;border-collapse:collapse">
           ${items.map(p=>`<tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:4px 8px;font-size:12px">${p.name}</td>
+            <td style="padding:4px 8px;font-size:12px">${p.name}${p.note?`<span style="display:block;font-size:10px;color:#e8a838">📝 ${p.note}</span>`:''}</td>
             <td style="padding:4px 8px;text-align:right;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--accent)">${p.qty}</td>
           </tr>`).join('')}
         </table>
