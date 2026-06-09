@@ -3212,8 +3212,8 @@ function printButcherSection(species) {
     const title = sec.querySelector('.sheet-title');
     if (!title) return;
     const t = title.textContent.toLowerCase();
-    if (species === 'poultry' && (t.includes('poultry') || t.includes('chicken') || t.includes('flavoured'))) html += sec.outerHTML;
-    if (species === 'beef' && !(t.includes('poultry') || t.includes('chicken') || t.includes('flavoured') || t.includes('bird') || t.includes('crown') || t.includes('turkey') || t.includes('bottom'))) html += sec.outerHTML;
+    if (species === 'poultry' && (t.includes('poultry') || t.includes('chicken') || t.includes('flavoured') || t.includes('bird') || t.includes('crown') || t.includes('turkey') || t.includes('bottom quarter'))) html += sec.outerHTML;
+    if (species === 'beef' && !(t.includes('poultry') || t.includes('chicken') || t.includes('flavoured') || t.includes('bird') || t.includes('crown') || t.includes('turkey') || t.includes('bottom quarter'))) html += sec.outerHTML;
   });
   if (!html) { alert('No ' + species + ' data to print.'); return; }
   const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
