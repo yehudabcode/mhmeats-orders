@@ -616,6 +616,7 @@
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
       <button class="btn btn-ghost" style="margin-left:auto" onclick="printButcherSection('poultry')">🖨 Poultry</button>
       <button class="btn btn-ghost" onclick="printButcherSection('beef')">🖨 Beef</button>
+      <button class="btn btn-ghost" onclick="printButcherSection('bulk')">🖨 Bulk</button>
       <button class="btn btn-primary" onclick="printActivePanel()">🖨 All</button>
     </div>
     <div id="butcherSheetContent"></div>
@@ -627,6 +628,7 @@
       <div class="sheet-day-btns" id="packerDayBtns"></div>
       <button class="btn btn-ghost" style="margin-left:auto" onclick="printPackerSection('poultry')">🖨 Poultry</button>
       <button class="btn btn-ghost" onclick="printPackerSection('beef')">🖨 Beef</button>
+      <button class="btn btn-ghost" onclick="printPackerSection('bulk')">🖨 Bulk</button>
       <button class="btn btn-primary" onclick="printActivePanel()">🖨 All</button>
     </div>
     <div id="packerSheetContent"></div>
@@ -3416,11 +3418,12 @@ function printButcherSection(species) {
     if (!title) return;
     const t = title.textContent.toLowerCase();
     if (species === 'poultry' && (t.includes('poultry') || t.includes('chicken') || t.includes('flavoured') || t.includes('bird') || t.includes('crown') || t.includes('turkey') || t.includes('bottom quarter'))) html += sec.outerHTML;
-    if (species === 'beef' && !(t.includes('poultry') || t.includes('chicken') || t.includes('flavoured') || t.includes('bird') || t.includes('crown') || t.includes('turkey') || t.includes('bottom quarter'))) html += sec.outerHTML;
+    if (species === 'beef' && !(t.includes('poultry') || t.includes('chicken') || t.includes('flavoured') || t.includes('bird') || t.includes('crown') || t.includes('turkey') || t.includes('bottom quarter')) && !t.includes('bulk')) html += sec.outerHTML;
+    if (species === 'bulk' && t.includes('bulk')) html += sec.outerHTML;
   });
   if (!html) { alert('No ' + species + ' data to print.'); return; }
   const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-  const label = species === 'beef' ? '🥩 BEEF' : '🐔 POULTRY & FLAVOURED';
+  const label = species === 'beef' ? '🥩 BEEF' : species === 'bulk' ? '📦 BULK / CATERER' : '🐔 POULTRY & FLAVOURED';
   const w = window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Butcher — ${label}</title>
   <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
@@ -3450,10 +3453,11 @@ function printPackerSection(species) {
     const t = title.textContent.toLowerCase();
     if (species === 'poultry' && (t.includes('poultry') || t.includes('chicken') || t.includes('flavoured'))) html += sec.outerHTML;
     if (species === 'beef' && t.includes('beef')) html += sec.outerHTML;
+    if (species === 'bulk' && t.includes('bulk')) html += sec.outerHTML;
   });
   if (!html) { alert('No ' + species + ' data to print.'); return; }
   const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-  const label = species === 'beef' ? '🥩 BEEF' : '🐔 POULTRY & FLAVOURED';
+  const label = species === 'beef' ? '🥩 BEEF' : species === 'bulk' ? '📦 BULK / CATERER' : '🐔 POULTRY & FLAVOURED';
   const w = window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Packer — ${label}</title>
   <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
