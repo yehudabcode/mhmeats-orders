@@ -2007,12 +2007,54 @@ function setQty(day, custId, prod, val) {
 // STORAGE
 // ══════════════════════════════════════════════════════════════════
 function saveToStorage() {
-  try { localStorage.setItem('mhmeats_orders', JSON.stringify(orders)); } catch(e) {}
+  try {
+    // Stamp each day with today's date so we can purge stale data on load
+    const today = new Date().toISOString().slice(0,10);
+    const stored = { orders, dates: {} };
+    try {
+      const existing = JSON.parse(localStorage.getItem('mhmeats_orders') || '{}');
+      if (existing.dates) stored.dates = existing.dates;
+    } catch(e) {}
+    DAYS.forEach(day => {
+      if (orders[day] && Object.keys(orders[day]).length > 0) {
+        stored.dates[day] = today;
+      }
+    });
+    localStorage.setItem('mhmeats_orders', JSON.stringify(stored));
+  } catch(e) {}
 }
 function loadFromStorage() {
   try {
-    const d = localStorage.getItem('mhmeats_orders');
-    if (d) orders = JSON.parse(d);
+    const raw = localStorage.getItem('mhmeats_orders');
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    const today = new Date();
+    const cutoff = new Date(today); cutoff.setDate(today.getDate() - 7);
+
+    // Support both old format (plain orders object) and new format ({orders, dates})
+    if (parsed.orders && parsed.dates !== undefined) {
+      // New format
+      orders = parsed.orders;
+      const dates = parsed.dates;
+      let purged = [];
+      DAYS.forEach(day => {
+        if (dates[day]) {
+          const stored = new Date(dates[day]);
+          if (stored < cutoff) {
+            orders[day] = {};
+            delete dates[day];
+            purged.push(day);
+          }
+        }
+      });
+      if (purged.length) {
+        console.log('[MH Meats] Auto-purged stale orders (>7 days):', purged.join(', '));
+        saveToStorage();
+      }
+    } else {
+      // Old format — plain orders object, no dates — load as-is
+      orders = parsed;
+    }
     DAYS.forEach(day => { if (!orders[day]) orders[day] = {}; });
   } catch(e) {}
 }
