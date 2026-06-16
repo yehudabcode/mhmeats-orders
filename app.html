@@ -616,6 +616,7 @@
       <div class="sheet-day-btns" id="butcherDayBtns"></div>
       <button class="btn btn-ghost" style="margin-left:auto" onclick="printButcherSection('poultry')">🖨 Poultry</button>
       <button class="btn btn-ghost" onclick="printButcherSection('beef')">🖨 Beef</button>
+      <button class="btn btn-ghost" onclick="printBulkSection('butcher')">⚡ Bulk</button>
       <button class="btn btn-primary" onclick="printActivePanel()">🖨 All</button>
     </div>
     <div id="butcherSheetContent"></div>
@@ -627,6 +628,7 @@
       <div class="sheet-day-btns" id="packerDayBtns"></div>
       <button class="btn btn-ghost" style="margin-left:auto" onclick="printPackerSection('poultry')">🖨 Poultry</button>
       <button class="btn btn-ghost" onclick="printPackerSection('beef')">🖨 Beef</button>
+      <button class="btn btn-ghost" onclick="printBulkSection('packer')">⚡ Bulk</button>
       <button class="btn btn-primary" onclick="printActivePanel()">🖨 All</button>
     </div>
     <div id="packerSheetContent"></div>
@@ -2758,7 +2760,7 @@ function renderButcherSheet(day) {
     if (!bPoultry.length && !bBeef.length) return '';
     let html = `<div style="margin-top:4px;padding:4px 0 2px;display:flex;align-items:center;justify-content:space-between">
       <div style="font-size:11px;font-weight:700;color:${cust.color==='#ffffff'?'#aaa':cust.color};letter-spacing:0.5px">⚡ BULK — ${cust.name.toUpperCase()}</div>
-      <button class="btn btn-ghost no-print" style="font-size:10px;padding:3px 10px" onclick="printBulkCustomer('butcher','${cust.id}','${day}')">🖨 Print ${cust.name}</button>
+      <button class="btn btn-primary no-print" onclick="printBulkCustomer('butcher','${cust.id}','${day}')">🖨 Print ${cust.name}</button>
     </div>`;
     if (bPoultry.length) html += buildCategoryTable(`🐔 ${cust.name} — POULTRY`, bPoultry, day);
     if (bBeef.length) html += buildCategoryTable(`🥩 ${cust.name} — BEEF`, bBeef, day);
@@ -2892,7 +2894,7 @@ function renderPackerSheet(day) {
       <div class="sheet-title-bar">
         <div class="sheet-title">📦 BULK — ${cust.name.toUpperCase()}</div>
         <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${bPoultry.length+bFlavoured.length+bBeef.length} lines</div>
-        <button class="btn btn-ghost no-print" style="font-size:10px;padding:3px 10px;margin-left:8px" onclick="printBulkCustomer('packer','${cust.id}','${day}')">🖨 Print ${cust.name}</button>
+        <button class="btn btn-primary no-print" style="margin-left:8px" onclick="printBulkCustomer('packer','${cust.id}','${day}')">🖨 Print ${cust.name}</button>
       </div>
       <table><thead><tr><th>PRODUCT</th><th style="width:60px;text-align:center">UNIT</th><th style="text-align:right">QTY</th><th>✓</th></tr></thead>
       <tbody>${allRows}</tbody></table>
@@ -2964,6 +2966,54 @@ function buildPackerBeefTable(title, items, day) {
     </tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
+}
+
+function printBulkSection(sheet) {
+  const label = sheet === 'butcher' ? 'BUTCHER LIST' : 'PACKER LIST';
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  let bodyHtml = '';
+  BULK_CUSTOMERS.forEach(cid => {
+    const cust = CUSTOMERS.find(c => c.id === cid);
+    if (!cust) return;
+    const custOrders = orders[currentDay][cust.id] || {};
+    const bPoultry = cust.products.filter(p=>!p.flavoured).map(p=>({name:p.name,qty:custOrders[orderKey(p)]||0,note:getNote(currentDay,cust.id,p)})).filter(p=>p.qty>0);
+    const bFlavoured = cust.products.filter(p=>p.flavoured).map(p=>({name:p.name,qty:custOrders[orderKey(p)]||0,note:getNote(currentDay,cust.id,p)})).filter(p=>p.qty>0);
+    const bBeef = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({name:p.name,qty:custOrders[orderKey(p)]||0,unit:p.unit||'UNITS',note:getNote(currentDay,cust.id,p)})).filter(p=>p.qty>0);
+    if (!bPoultry.length && !bFlavoured.length && !bBeef.length) return;
+    const section = (title, items, showUnit) => {
+      if (!items.length) return '';
+      const rows = items.map(p=>`<tr><td style="width:60px;font-weight:bold;text-align:right">${p.qty}</td>${showUnit?`<td style="width:50px;color:#666;font-size:10px">${p.unit||'UNITS'}</td>`:''}<td>${p.name}${p.note?`<div style="font-size:10px;color:#b87a00">📝 ${p.note}</div>`:''}</td><td style="width:30px;text-align:center">☐</td></tr>`).join('');
+      return `<h3 style="font-size:11px;margin:8px 0 3px;color:#555">${title}</h3>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:8px"><thead><tr>
+        <th style="text-align:right;width:60px">QTY</th>${showUnit?'<th style="width:50px">UNIT</th>':''}<th>PRODUCT</th><th style="width:30px">✓</th>
+      </tr></thead><tbody>${rows}</tbody></table>`;
+    };
+    bodyHtml += `<div style="border:2px solid #333;border-radius:4px;padding:10px;margin-bottom:16px;page-break-inside:avoid">
+      <h2 style="font-size:14px;font-weight:bold;border-bottom:1px solid #ccc;padding-bottom:4px;margin-bottom:8px">⚡ ${cust.name.toUpperCase()}</h2>
+      ${section('🐔 Poultry', bPoultry, false)}
+      ${section('🌶 Flavoured', bFlavoured, false)}
+      ${section('🥩 Beef', bBeef, true)}
+    </div>`;
+  });
+  if (!bodyHtml) { alert('No bulk orders entered for ' + currentDay + '.'); return; }
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bulk Orders — ${label}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
+  h1{font-size:18px;font-weight:bold;text-align:center;border-bottom:3px solid #000;padding-bottom:8px;margin-bottom:4px}
+  h2{font-size:14px}h3{font-size:11px}
+  .subtitle{text-align:center;font-size:12px;color:#555;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse}
+  th{background:#eee;padding:4px 8px;text-align:left;font-size:10px;font-weight:bold;border:1px solid #aaa}
+  td{padding:4px 8px;border:1px solid #ddd}tr:nth-child(even){background:#f9f9f9}
+  @page{margin:1.5cm;size:A4 portrait}</style></head>
+  <body>
+  <h1>MH MEATS — ⚡ BULK / CATERER ORDERS — ${label}</h1>
+  <div class="subtitle">${currentDay.toUpperCase()} &nbsp;|&nbsp; ${today}</div>
+  ${bodyHtml}
+  </body></html>`);
+  w.document.close();
+  w.onafterprint = () => w.close();
+  setTimeout(() => w.print(), 400);
 }
 
 function printBulkCustomer(sheet, custId, day) {
