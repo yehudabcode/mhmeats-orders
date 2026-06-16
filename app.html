@@ -1487,7 +1487,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
     {name:"SLICED SHIN",unit:"UNITS",mult:1},
     {name:"LEAN SANDWICH STEAKS",unit:"UNITS",mult:2},
-    {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2},
     {name:"MINUTE STEAKS",unit:"UNITS",mult:2}
   ],
   kayes: [
@@ -1517,7 +1516,6 @@ const BEEF_BY_CUSTOMER = {
     {name:"WHOLE SHIN",unit:"UNITS",mult:1},
     {name:"SLICED SHIN",unit:"UNITS",mult:1},
     {name:"LEAN SANDWICH STEAKS",unit:"UNITS",mult:2},
-    {name:"THIN SLICED GRILLING STEAK",unit:"UNITS",mult:2},
     {name:"MINUTE STEAKS",unit:"UNITS",mult:2}
   ],
   deli: [
@@ -2625,7 +2623,9 @@ function renderButcherSheet(day) {
 
   function beefQty(name) {
     let total = 0;
+    // THIN SLICED GRILLING STEAK (ksmeats only) maps to MINUTE STEAKS on butcher/packer
     const searchNames = [name.trim(), ...(reverseAliases[name.trim()] || [])];
+    if (name.trim() === 'MINUTE STEAKS') searchNames.push('THIN SLICED GRILLING STEAK');
     CUSTOMERS.forEach(cust => {
       if (BULK_CUSTOMERS.includes(cust.id)) return; // bulk handled separately
       const custOrders = orders[day][cust.id] || {};
@@ -2672,7 +2672,6 @@ function renderButcherSheet(day) {
     ]},
     { cat:'RIBEYE', items:[
       {name:'MINUTE STEAKS',              unit:'UNITS',desc:'Thin, pre-freeze 2-3 hours'},
-      {name:'THIN SLICED GRILLING STEAK', unit:'UNITS'},
       {name:'RIB-EYE STEAKS',             unit:'UNITS',desc:'2cm thick'},
       {name:'COTE DE BOUEF',              unit:'UNITS',desc:'Marbled, chine each steak'},
       {name:'LONDON BROIL 500G',          unit:'UNITS'},
@@ -2757,7 +2756,10 @@ function renderButcherSheet(day) {
       note:getNote(day,cust.id,p)
     })).filter(p=>p.qty>0);
     if (!bPoultry.length && !bBeef.length) return '';
-    let html = `<div style="margin-top:4px;padding:4px 0 2px;font-size:11px;font-weight:700;color:${cust.color==='#ffffff'?'#aaa':cust.color};letter-spacing:0.5px">⚡ BULK — ${cust.name.toUpperCase()}</div>`;
+    let html = `<div style="margin-top:4px;padding:4px 0 2px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:11px;font-weight:700;color:${cust.color==='#ffffff'?'#aaa':cust.color};letter-spacing:0.5px">⚡ BULK — ${cust.name.toUpperCase()}</div>
+      <button class="btn btn-ghost no-print" style="font-size:10px;padding:3px 10px" onclick="printBulkCustomer('butcher','${cust.id}','${day}')">🖨 Print ${cust.name}</button>
+    </div>`;
     if (bPoultry.length) html += buildCategoryTable(`🐔 ${cust.name} — POULTRY`, bPoultry, day);
     if (bBeef.length) html += buildCategoryTable(`🥩 ${cust.name} — BEEF`, bBeef, day);
     return html;
@@ -2843,11 +2845,13 @@ function renderPackerSheet(day) {
     });
 
     // Beef products — consolidate by name, show pack quantities
+    // THIN SLICED GRILLING STEAK (ksmeats) rolls into MINUTE STEAKS on packer
     (BEEF_BY_CUSTOMER[cust.id] || []).forEach(p => {
       const qty = custOrders[orderKey(p)] || 0;
       if (qty === 0) return;
-      const k = p.name.trim();
-      if (!beefTotals[k]) beefTotals[k] = { name: p.name, qty: 0, unit: p.unit || 'UNITS', sources: [] };
+      const rawName = p.name.trim();
+      const k = rawName === 'THIN SLICED GRILLING STEAK' ? 'MINUTE STEAKS' : rawName;
+      if (!beefTotals[k]) beefTotals[k] = { name: k, qty: 0, unit: p.unit || 'UNITS', sources: [] };
       beefTotals[k].qty += qty;
       beefTotals[k].sources.push({ name: cust.name, id: cust.id, qty });
     });
@@ -2888,6 +2892,7 @@ function renderPackerSheet(day) {
       <div class="sheet-title-bar">
         <div class="sheet-title">📦 BULK — ${cust.name.toUpperCase()}</div>
         <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${bPoultry.length+bFlavoured.length+bBeef.length} lines</div>
+        <button class="btn btn-ghost no-print" style="font-size:10px;padding:3px 10px;margin-left:8px" onclick="printBulkCustomer('packer','${cust.id}','${day}')">🖨 Print ${cust.name}</button>
       </div>
       <table><thead><tr><th>PRODUCT</th><th style="width:60px;text-align:center">UNIT</th><th style="text-align:right">QTY</th><th>✓</th></tr></thead>
       <tbody>${allRows}</tbody></table>
@@ -2959,6 +2964,40 @@ function buildPackerBeefTable(title, items, day) {
     </tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
+}
+
+function printBulkCustomer(sheet, custId, day) {
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  if (!cust) return;
+  const custOrders = orders[day][cust.id] || {};
+  const bPoultry = cust.products.filter(p=>!p.flavoured).map(p=>({name:p.name,qty:custOrders[orderKey(p)]||0,note:getNote(day,cust.id,p)})).filter(p=>p.qty>0);
+  const bFlavoured = cust.products.filter(p=>p.flavoured).map(p=>({name:p.name,qty:custOrders[orderKey(p)]||0,note:getNote(day,cust.id,p)})).filter(p=>p.qty>0);
+  const bBeef = (BEEF_BY_CUSTOMER[cust.id]||[]).map(p=>({name:p.name,qty:custOrders[orderKey(p)]||0,unit:p.unit||'UNITS',note:getNote(day,cust.id,p)})).filter(p=>p.qty>0);
+  const label = sheet === 'butcher' ? 'BUTCHER LIST' : 'PACKER LIST';
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const section = (title, items, showUnit) => {
+    if (!items.length) return '';
+    const rows = items.map(p=>`<tr><td style="width:60px;font-weight:bold;text-align:right">${p.qty}</td>${showUnit?`<td style="width:50px;color:#666;font-size:10px">${p.unit||'UNITS'}</td>`:''}<td>${p.name}${p.note?`<div style="font-size:10px;color:#b87a00">📝 ${p.note}</div>`:''}</td><td style="width:30px;text-align:center">☐</td></tr>`).join('');
+    return `<h2 style="font-size:13px;margin:12px 0 4px;border-bottom:1px solid #ccc;padding-bottom:4px">${title}</h2>
+    <table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:right;width:60px">QTY</th>${showUnit?'<th style="width:50px">UNIT</th>':''}<th>PRODUCT</th><th style="width:30px">✓</th></tr></thead><tbody>${rows}</tbody></table>`;
+  };
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${cust.name} — ${label}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
+  h1{font-size:16px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:4px}
+  h2{font-size:12px}table{width:100%;border-collapse:collapse;margin-bottom:10px}
+  th{background:#eee;padding:4px 8px;text-align:left;font-size:10px;font-weight:bold;border:1px solid #aaa}
+  td{padding:4px 8px;border:1px solid #ddd}tr:nth-child(even){background:#f9f9f9}
+  @page{margin:1.5cm;size:A4 portrait}</style></head>
+  <body><h1>⚡ ${cust.name.toUpperCase()} — ${label} — ${day.toUpperCase()}</h1>
+  <div style="font-size:10px;color:#666;margin-bottom:10px">${today}</div>
+  ${section('🐔 Poultry', bPoultry, false)}
+  ${section('🌶 Flavoured', bFlavoured, false)}
+  ${section('🥩 Beef', bBeef, true)}
+  </body></html>`);
+  w.document.close();
+  w.onafterprint = () => w.close();
+  setTimeout(() => w.print(), 400);
 }
 
 function printCustomerDispatch(custId) {
