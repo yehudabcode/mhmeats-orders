@@ -2730,14 +2730,14 @@ function renderButcherSheet(day) {
     ]},
   ];
 
-  // Build beef items per category
+  // Build beef items per category — always show full list regardless of qty
   const beefCategoryItems = BEEF_BUTCHER_CATEGORIES.map(cat => ({
     cat: cat.cat,
     items: cat.items.map(item => ({
       ...item,
       qty: beefQty(item.name)
-    })).filter(i => i.qty > 0)
-  })).filter(cat => cat.items.length > 0);
+    }))
+  }));
 
   const beefItems = beefCategoryItems; // used below
 
