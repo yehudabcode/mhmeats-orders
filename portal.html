@@ -796,13 +796,7 @@ function renderForm() {
   const main = document.getElementById('mainArea');
   let html = '';
 
-  // Day selector
-  html += `<div class="day-section">
-    <div class="section-label">📅 Select Day</div>
-    <div class="day-btns">
-      ${DAYS.map(d => `<div class="day-btn${d===currentDay?' active':''}" onclick="selectDay('${d}',this)">${d.slice(0,3).toUpperCase()}</div>`).join('')}
-    </div>
-  </div>`;
+
 
   html += `<div class="last-order-banner" id="lastOrderBanner">
     <span style="color:var(--accent);font-weight:600">📋 Last order found</span> — click <strong style="color:var(--text)">Last Order</strong> below to pre-fill this form, then edit as needed.
@@ -862,12 +856,7 @@ function buildSection(title, products, isBeef) {
   </div>`;
 }
 
-function selectDay(day, btn) {
-  currentDay = day;
-  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  updateFooter();
-}
+
 
 function setQty(key, val, input) {
   const qty = parseInt(val) || 0;
