@@ -802,17 +802,37 @@
 
             <div style="margin-bottom:20px">
               <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Add Product to Customer List</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:end">
-                <div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:end">
+                <div style="flex:1;min-width:140px">
                   <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Customer</label>
-                  <select id="addCustSelect" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                  <select id="addCustSelect" onchange="updateAddCategoryOptions()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
                     <option value="">— select —</option>
                   </select>
                 </div>
-                <div>
+                <div style="flex:1;min-width:150px">
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Category</label>
+                  <select id="addCategorySelect" onchange="toggleAddBeefFields()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                    <option value="">— select customer first —</option>
+                  </select>
+                </div>
+                <div style="flex:2;min-width:180px">
                   <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Product Name</label>
                   <input type="text" id="addProductName" placeholder="e.g. NEW SHNITZEL PACK"
                     style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                </div>
+                <div id="addBeefFields" style="display:none;gap:8px;flex-wrap:wrap">
+                  <div style="width:90px">
+                    <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Unit</label>
+                    <select id="addBeefUnit" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                      <option value="UNITS">UNITS</option>
+                      <option value="KG">KG</option>
+                    </select>
+                  </div>
+                  <div style="width:80px">
+                    <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Multiplier</label>
+                    <input type="number" id="addBeefMult" value="1" step="0.5" min="0"
+                      style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                  </div>
                 </div>
                 <button class="btn btn-primary" onclick="addProduct()" style="align-self:end">Add</button>
               </div>
@@ -837,6 +857,48 @@
                 <button class="btn btn-danger" onclick="removeProduct()">Remove</button>
               </div>
               <div id="removeMsg" style="font-size:12px;margin-top:6px"></div>
+            </div>
+
+            <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border2)">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Edit Product</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:8px">
+                <div style="flex:1;min-width:140px">
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Customer</label>
+                  <select id="editCustSelect" onchange="populateEditList()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                    <option value="">— select —</option>
+                  </select>
+                </div>
+                <div style="flex:1;min-width:180px">
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Product</label>
+                  <select id="editProductSelect" onchange="loadEditFields()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                    <option value="">— select customer first —</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:end">
+                <div style="flex:2;min-width:180px">
+                  <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Name</label>
+                  <input type="text" id="editProductName"
+                    style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                </div>
+                <div id="editBeefFields" style="display:none;gap:8px;flex-wrap:wrap">
+                  <div style="width:90px">
+                    <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Unit</label>
+                    <select id="editBeefUnit" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                      <option value="UNITS">UNITS</option>
+                      <option value="KG">KG</option>
+                    </select>
+                  </div>
+                  <div style="width:80px">
+                    <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Multiplier</label>
+                    <input type="number" id="editBeefMult" step="0.5" min="0"
+                      style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:5px;font-size:12px">
+                  </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveEditProduct()" style="align-self:end">Save Changes</button>
+              </div>
+              <div id="editMsg" style="font-size:12px;margin-top:6px"></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:10px">Refresh the page after adding, editing, or removing products to see the change in Order Input, Butcher, and Packer tabs.</div>
             </div>
 
           </div>
@@ -3702,65 +3764,196 @@ function changePin() {
 }
 
 function populateAdminSelects() {
-  ['addCustSelect','removeCustSelect'].forEach(id => {
+  ['addCustSelect','removeCustSelect','editCustSelect'].forEach(id => {
     const sel = document.getElementById(id);
     sel.innerHTML = '<option value="">— select —</option>';
     CUSTOMERS.forEach(c => {
       sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
     });
   });
+  updateAddCategoryOptions();
+}
+
+function categoryOptionsFor(custId) {
+  if (custId === 'mhchef') {
+    return [['BEEF','Beef'],['CHICKEN','Chicken'],['LAMB','Lamb'],['FLAVOURED','Flavoured']];
+  }
+  return [['BEEF','Beef (unit + multiplier)'],['POULTRY','Poultry'],['FLAVOURED','Flavoured']];
+}
+
+function updateAddCategoryOptions() {
+  const custId = document.getElementById('addCustSelect').value;
+  const sel = document.getElementById('addCategorySelect');
+  if (!custId) { sel.innerHTML = '<option value="">— select customer first —</option>'; toggleAddBeefFields(); return; }
+  sel.innerHTML = categoryOptionsFor(custId).map(([v,l]) => `<option value="${v}">${l}</option>`).join('');
+  toggleAddBeefFields();
+}
+
+function toggleAddBeefFields() {
+  const custId = document.getElementById('addCustSelect').value;
+  const category = document.getElementById('addCategorySelect').value;
+  const show = category === 'BEEF' && custId !== 'mhchef';
+  document.getElementById('addBeefFields').style.display = show ? 'flex' : 'none';
+}
+
+function productOptionsFor(custId) {
+  const cust = CUSTOMERS.find(c => c.id === custId);
+  let opts = cust.products.map((p,i) => {
+    const tag = p.flavoured ? ' [FLAVOURED]' : (p.section ? ` [${p.section}]` : '');
+    return `<option value="p:${i}">${p.name}${tag}</option>`;
+  });
+  const beef = BEEF_BY_CUSTOMER[custId] || [];
+  opts = opts.concat(beef.map((p,i) => `<option value="b:${i}">${p.name} [BEEF]</option>`));
+  return opts.join('');
 }
 
 function populateRemoveList() {
   const custId = document.getElementById('removeCustSelect').value;
   const sel = document.getElementById('removeProductSelect');
   if (!custId) { sel.innerHTML = '<option>— select customer first —</option>'; return; }
-  const cust = CUSTOMERS.find(c => c.id === custId);
-  sel.innerHTML = cust.products.map((p,i) =>
-    `<option value="${i}">${p.name}</option>`
-  ).join('');
+  sel.innerHTML = productOptionsFor(custId);
 }
 
 function addProduct() {
   const custId = document.getElementById('addCustSelect').value;
+  const category = document.getElementById('addCategorySelect').value;
   const name = document.getElementById('addProductName').value.trim().toUpperCase();
   const msg = document.getElementById('addMsg');
 
   if (!custId) { msg.style.color='var(--danger)'; msg.textContent='Select a customer.'; return; }
+  if (!category) { msg.style.color='var(--danger)'; msg.textContent='Select a category.'; return; }
   if (!name) { msg.style.color='var(--danger)'; msg.textContent='Enter a product name.'; return; }
 
   const cust = CUSTOMERS.find(c => c.id === custId);
-  cust.products.push({ name });
+
+  if (category === 'BEEF' && custId !== 'mhchef') {
+    const unit = document.getElementById('addBeefUnit').value;
+    const mult = parseFloat(document.getElementById('addBeefMult').value) || 1;
+    if (!BEEF_BY_CUSTOMER[custId]) BEEF_BY_CUSTOMER[custId] = [];
+    BEEF_BY_CUSTOMER[custId].push({ name, unit, mult });
+  } else if (category === 'BEEF') {
+    cust.products.push({ name, section:'BEEF' });
+  } else if (category === 'CHICKEN') {
+    cust.products.push({ name, section:'CHICKEN' });
+  } else if (category === 'LAMB') {
+    cust.products.push({ name, section:'LAMB' });
+  } else if (category === 'FLAVOURED') {
+    cust.products.push({ name, flavoured:true });
+  } else {
+    cust.products.push({ name });
+  }
+
   saveCustomProducts();
   msg.style.color='var(--success)'; msg.textContent=`✓ "${name}" added to ${cust.name}.`;
   document.getElementById('addProductName').value = '';
-  
+
   showToast('Product added');
 }
 
 function removeProduct() {
   const custId = document.getElementById('removeCustSelect').value;
-  const idx = parseInt(document.getElementById('removeProductSelect').value);
+  const val = document.getElementById('removeProductSelect').value;
   const msg = document.getElementById('removeMsg');
 
   if (!custId) { msg.style.color='var(--danger)'; msg.textContent='Select a customer.'; return; }
+  if (!val) { msg.style.color='var(--danger)'; msg.textContent='Select a product.'; return; }
+  const [src, idxStr] = val.split(':');
+  const idx = parseInt(idxStr);
   const cust = CUSTOMERS.find(c => c.id === custId);
-  const removed = cust.products.splice(idx, 1)[0];
+  let removed;
+  if (src === 'b') {
+    removed = BEEF_BY_CUSTOMER[custId].splice(idx, 1)[0];
+  } else {
+    removed = cust.products.splice(idx, 1)[0];
+  }
   saveCustomProducts();
   populateRemoveList();
   msg.style.color='var(--success)'; msg.textContent=`✓ "${removed.name}" removed.`;
   showToast('Product removed');
 }
 
+function populateEditList() {
+  const custId = document.getElementById('editCustSelect').value;
+  const sel = document.getElementById('editProductSelect');
+  if (!custId) { sel.innerHTML = '<option>— select customer first —</option>'; document.getElementById('editBeefFields').style.display='none'; document.getElementById('editProductName').value=''; return; }
+  sel.innerHTML = productOptionsFor(custId);
+  loadEditFields();
+}
+
+function loadEditFields() {
+  const custId = document.getElementById('editCustSelect').value;
+  const val = document.getElementById('editProductSelect').value;
+  const nameInput = document.getElementById('editProductName');
+  const beefFields = document.getElementById('editBeefFields');
+  if (!custId || !val) { nameInput.value = ''; beefFields.style.display='none'; return; }
+  const [src, idxStr] = val.split(':');
+  const idx = parseInt(idxStr);
+  if (src === 'b') {
+    const item = BEEF_BY_CUSTOMER[custId][idx];
+    nameInput.value = item.name;
+    document.getElementById('editBeefUnit').value = item.unit || 'UNITS';
+    document.getElementById('editBeefMult').value = item.mult != null ? item.mult : 1;
+    beefFields.style.display = 'flex';
+  } else {
+    const cust = CUSTOMERS.find(c => c.id === custId);
+    const item = cust.products[idx];
+    nameInput.value = item.name;
+    beefFields.style.display = 'none';
+  }
+}
+
+function saveEditProduct() {
+  const custId = document.getElementById('editCustSelect').value;
+  const val = document.getElementById('editProductSelect').value;
+  const name = document.getElementById('editProductName').value.trim().toUpperCase();
+  const msg = document.getElementById('editMsg');
+
+  if (!custId || !val) { msg.style.color='var(--danger)'; msg.textContent='Select a customer and product.'; return; }
+  if (!name) { msg.style.color='var(--danger)'; msg.textContent='Enter a product name.'; return; }
+
+  const [src, idxStr] = val.split(':');
+  const idx = parseInt(idxStr);
+
+  if (src === 'b') {
+    const item = BEEF_BY_CUSTOMER[custId][idx];
+    item.name = name;
+    item.unit = document.getElementById('editBeefUnit').value;
+    item.mult = parseFloat(document.getElementById('editBeefMult').value) || 1;
+  } else {
+    const cust = CUSTOMERS.find(c => c.id === custId);
+    cust.products[idx].name = name;
+  }
+
+  saveCustomProducts();
+  populateEditList();
+  populateRemoveList();
+  msg.style.color='var(--success)'; msg.textContent='✓ Saved.';
+  showToast('Product updated');
+}
+
 function saveCustomProducts() {
   try {
     const data = CUSTOMERS.map(c => ({ id: c.id, products: c.products }));
     localStorage.setItem('mhmeats_products', JSON.stringify(data));
+    const full = { customers: data, beef: BEEF_BY_CUSTOMER };
+    localStorage.setItem('mhmeats_data_v2', JSON.stringify(full));
   } catch(e) {}
 }
 
 function loadCustomProducts() {
   try {
+    const v2 = localStorage.getItem('mhmeats_data_v2');
+    if (v2) {
+      const data = JSON.parse(v2);
+      (data.customers || []).forEach(d => {
+        const cust = CUSTOMERS.find(c => c.id === d.id);
+        if (cust) cust.products = d.products;
+      });
+      if (data.beef) {
+        Object.keys(data.beef).forEach(cid => { BEEF_BY_CUSTOMER[cid] = data.beef[cid]; });
+      }
+      return;
+    }
     const saved = localStorage.getItem('mhmeats_products');
     if (!saved) return;
     const data = JSON.parse(saved);
