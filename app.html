@@ -2026,7 +2026,7 @@ function loadFromStorage() {
 // ══════════════════════════════════════════════════════════════════
 function init() {
   // Version-based cache bust — increment when product lists change
-  const PRODUCT_VERSION = '29';
+  const PRODUCT_VERSION = '30';
   try {
     if (localStorage.getItem('mhmeats_product_version') !== PRODUCT_VERSION) {
       localStorage.removeItem('mhmeats_products');
@@ -3097,6 +3097,10 @@ function renderDispatchSheet(day) {
 // ══════════════════════════════════════════════════════════════════
 function getScriptUrl() {
   const BAKED_URL = 'https://script.google.com/macros/s/AKfycbz2cW58L-4CeDFgLZcq3mNQzdBkn0oKM0pX5jFwtk5K1IEokHK0QNIFt5ZGQL0w-7F1/exec';
+  try {
+    const saved = localStorage.getItem('mhmeats_script_url');
+    if (saved) return saved;
+  } catch(e) {}
   try { localStorage.setItem('mhmeats_script_url', BAKED_URL); } catch(e) {}
   return BAKED_URL;
 }
@@ -3230,15 +3234,8 @@ function pullRemoteOrders() {
   status.textContent = 'Pulling orders...';
   results.innerHTML = '';
 
-  // Use no-cors fetch — Apps Script handles CORS via ContentService
-  // For local file:// usage we use a script tag injection (JSONP workaround)
-  const callbackName = 'mhCallback_' + Date.now();
-  const script = document.createElement('script');
-
-  window[callbackName] = function(data) {
-    delete window[callbackName];
-    document.body.removeChild(script);
-
+  // Fetch directly — proven to work against this endpoint (same call testScriptUrl() uses)
+  function handlePulledData(data) {
     if (!data.orders || !data.orders.length) {
       status.style.color = 'var(--muted)';
       status.textContent = `No remote orders found for ${day}.`;
@@ -3493,17 +3490,19 @@ function pullRemoteOrders() {
     }
     showToast(`${loaded} remote orders loaded`);
     if (loaded > 0) playAlertSound();
-  };
+  }
 
-  script.onerror = function() {
-    delete window[callbackName];
-    document.body.removeChild(script);
-    status.style.color = 'var(--danger)';
-    status.textContent = '✗ Failed to connect. Check your Apps Script URL.';
-  };
-
-  script.src = `${scriptUrl}?action=getOrders&callback=${callbackName}`;
-  document.body.appendChild(script);
+  fetch(`${scriptUrl}?action=getOrders`)
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(handlePulledData)
+    .catch(err => {
+      status.style.color = 'var(--danger)';
+      status.textContent = '✗ Failed to connect. Check your Apps Script URL. (' + err.message + ')';
+      console.error('[PULL] fetch error:', err);
+    });
 }
 
 // Legacy code-based loading still works as fallback
