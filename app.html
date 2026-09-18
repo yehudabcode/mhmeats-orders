@@ -2026,7 +2026,7 @@ function loadFromStorage() {
 // ══════════════════════════════════════════════════════════════════
 function init() {
   // Version-based cache bust — increment when product lists change
-  const PRODUCT_VERSION = '30';
+  const PRODUCT_VERSION = '31';
   try {
     if (localStorage.getItem('mhmeats_product_version') !== PRODUCT_VERSION) {
       localStorage.removeItem('mhmeats_products');
@@ -3495,7 +3495,13 @@ function pullRemoteOrders() {
   fetch(`${scriptUrl}?action=getOrders`)
     .then(r => {
       if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
+      return r.text();
+    })
+    .then(text => {
+      // Backend always wraps its response as callback({...}) even with no
+      // callback param requested — strip the JSONP wrapper before parsing.
+      const unwrapped = text.match(/^\s*[\w$]+\(([\s\S]*)\)\s*;?\s*$/);
+      return JSON.parse(unwrapped ? unwrapped[1] : text);
     })
     .then(handlePulledData)
     .catch(err => {
