@@ -910,6 +910,7 @@ const CUSTOMERS = [
     {name:"CHICKEN NECKS (8-PACK)"},
     {name:"CHICKEN PARGIOT"},
     {name:"CUBED CHICKEN"},
+    {name:"DARK TURKEY ROLL"},
     {name:"DOUBLE CARCASS PACK"},
     {name:"DOUBLE SOUP PACK"},
     {name:"LEG QUARTERS 2-PACK"},
@@ -926,6 +927,7 @@ const CUSTOMERS = [
     {name:"ROASTER THIGHS 4-PACK"},
     {name:"SHNITZELS-10-PACK"},
     {name:"SHNITZELS-6-PACK"},
+    {name:"WHITE TURKEY ROLL"},
     {name:"WHOLE ROASTER"},
     {name:"BBQ CHICKEN WINGS",flavoured:true},
     {name:"BBQ DARK SHNITZELS",flavoured:true},
@@ -2026,7 +2028,7 @@ function loadFromStorage() {
 // ══════════════════════════════════════════════════════════════════
 function init() {
   // Version-based cache bust — increment when product lists change
-  const PRODUCT_VERSION = '31';
+  const PRODUCT_VERSION = '32';
   try {
     if (localStorage.getItem('mhmeats_product_version') !== PRODUCT_VERSION) {
       localStorage.removeItem('mhmeats_products');
@@ -2516,6 +2518,8 @@ function renderButcherSheet(day) {
     'PLAIN CHICKEN STIR FRY':     0.5,
     'CHICKEN LIVER':              1,
     'PUPICKS':                    1,
+    'WHITE TURKEY ROLL':          1,
+    'DARK TURKEY ROLL':           1,
     'CHICKEN SHWARMA':            1,
     'CHICKEN DIPPERS':            1,
     // Caterer/wholesale — ordered direct, no pack conversion
@@ -2583,6 +2587,8 @@ function renderButcherSheet(day) {
     {name:'TURKEY DRUMSTICKS', qty:poultryQty('TURKEY DRUMSTICKS'), unit:'KG'},
     {name:'TURKEY WINGS', qty:poultryQty('TURKEY WINGS'), unit:'KG'},
     {name:'TURKEY FILLETS', qty:poultryQty('TURKEY FILLETS')+poultryQty('TURKEY  FILLETS'), unit:'KG'},
+    {name:'WHITE TURKEY ROLL', qty:poultryQty('WHITE TURKEY ROLL'), unit:'UNITS'},
+    {name:'DARK TURKEY ROLL', qty:poultryQty('DARK TURKEY ROLL'), unit:'UNITS'},
   ].filter(i=>i.qty>0);
 
   // beefQty returns BUTCHER AMOUNT — packs × multiplier
